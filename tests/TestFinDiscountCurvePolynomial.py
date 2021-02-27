@@ -5,12 +5,14 @@
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.market.curves.FinDiscountCurvePoly import FinDiscountCurvePoly
 from financepy.finutils.FinDate import FinDate
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##############################################################################
@@ -21,6 +23,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 ##############################################################################
 
 PLOT_GRAPHS = False
+
 
 def test_FinDiscountCurvePolynomial():
 
@@ -34,12 +37,13 @@ def test_FinDiscountCurvePolynomial():
 
     if PLOT_GRAPHS:
         import matplotlib.pyplot as plt
+
         plt.figure(figsize=(6, 4))
         plt.plot(times, zeros, label="Zeros")
         plt.plot(times, fwds, label="Forwards")
-        plt.xlabel('Time (years)')
-        plt.ylabel('Zero Rate')
-        plt.legend(loc='best')
+        plt.xlabel("Time (years)")
+        plt.ylabel("Zero Rate")
+        plt.legend(loc="best")
 
 
 test_FinDiscountCurvePolynomial()

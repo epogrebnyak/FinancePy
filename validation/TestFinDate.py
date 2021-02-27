@@ -6,6 +6,7 @@ import numpy as np
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate, dateRange
@@ -13,17 +14,19 @@ from financepy.finutils.FinDate import FinDateFormatTypes
 from financepy.finutils.FinDate import setDateFormatType
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
 
 setDateFormatType(FinDateFormatTypes.UK_LONGEST)
 
+
 def test_FinDate():
 
     startDate = FinDate(1, 1, 2018)
 
-    assert FinDate(1, 1, 2018) == FinDate.fromString('1-1-2018', '%d-%m-%Y')
+    assert FinDate(1, 1, 2018) == FinDate.fromString("1-1-2018", "%d-%m-%Y")
 
     testCases.header("DATE", "MONTHS", "CDS DATE")
 
@@ -39,6 +42,7 @@ def test_FinDate():
         startDate = startDate.addDays(1)
         nextIMMDate = startDate.nextIMMDate()
         testCases.print(numMonths, str(startDate), str(nextIMMDate))
+
 
 ###############################################################################
 
@@ -78,6 +82,7 @@ def test_FinDateTenors():
     tenor = "20Y"
     testCases.print(tenor, startDate.addTenor(tenor))
 
+
 ###############################################################################
 
 
@@ -105,6 +110,7 @@ def test_FinDateRange():
     case = "startDate before endDate"
     testCases.print(case, dateRange(endDate, startDate))
 
+
 ###############################################################################
 
 
@@ -122,6 +128,7 @@ def test_FinDateAddMonths():
 
     for dt in dates:
         testCases.print("DATE", dt)
+
 
 ###############################################################################
 
@@ -148,12 +155,15 @@ def test_FinDateAddYears():
     for dt in dates3:
         testCases.print("DATES3", dt)
 
-    dt = 1.0/365.0
-    years = np.array([1.5+2.0*dt, 3.5-6*dt, 5.75+3*dt, 7.25+dt, 10.0+dt])
+    dt = 1.0 / 365.0
+    years = np.array(
+        [1.5 + 2.0 * dt, 3.5 - 6 * dt, 5.75 + 3 * dt, 7.25 + dt, 10.0 + dt]
+    )
     dates4 = startDate.addYears(years)
 
     for dt in dates4:
         testCases.print("DATES4", dt)
+
 
 ###############################################################################
 
@@ -181,12 +191,13 @@ def test_FinDateSpeed():
 
 def test_FinDateFormat():
 
-    dt = FinDate(20, 10, 2019)    
+    dt = FinDate(20, 10, 2019)
     testCases.header("FORMAT", "DATE")
 
     for formatType in FinDateFormatTypes:
-        setDateFormatType(formatType) 
+        setDateFormatType(formatType)
         testCases.print(formatType.name, dt)
+
 
 ###############################################################################
 
@@ -224,60 +235,63 @@ def test_IntraDay():
     testCases.print(d1, d2, diff)
     testCases.print(d1._excelDate, d2._excelDate, diff)
 
+
 ###############################################################################
+
 
 def test_FinDateEOM():
 
-    dt = FinDate(29, 2, 2000)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(29, 2, 2000)
+    assert dt.isEOM() == True
 
-    dt = FinDate(28, 2, 2001)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(28, 2, 2001)
+    assert dt.isEOM() == True
 
-    dt = FinDate(29, 2, 2004)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(29, 2, 2004)
+    assert dt.isEOM() == True
 
-    dt = FinDate(28, 2, 2005)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(28, 2, 2005)
+    assert dt.isEOM() == True
 
-    dt = FinDate(31, 3, 2003)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(31, 3, 2003)
+    assert dt.isEOM() == True
 
-    dt = FinDate(30, 4, 2004)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(30, 4, 2004)
+    assert dt.isEOM() == True
 
-    dt = FinDate(31, 5, 2004)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(31, 5, 2004)
+    assert dt.isEOM() == True
 
-    dt = FinDate(31, 12, 2010)    
-    assert(dt.isEOM() == True)
+    dt = FinDate(31, 12, 2010)
+    assert dt.isEOM() == True
 
-    dt = FinDate(2, 2, 2000)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(2, 2, 2000)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(24, 2, 2001)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(24, 2, 2001)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(22, 2, 2004)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(22, 2, 2004)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(1, 2, 2005)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(1, 2, 2005)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(1, 3, 2003)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(1, 3, 2003)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(3, 4, 2004)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(3, 4, 2004)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(5, 5, 2004)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(5, 5, 2004)
+    assert dt.EOM().isEOM() == True
 
-    dt = FinDate(7, 12, 2010)    
-    assert(dt.EOM().isEOM() == True)
+    dt = FinDate(7, 12, 2010)
+    assert dt.EOM().isEOM() == True
+
 
 ###############################################################################
-    
+
 start = time.time()
 
 test_FinDate()

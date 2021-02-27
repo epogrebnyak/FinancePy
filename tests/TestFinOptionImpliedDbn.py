@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 import numpy as np
@@ -23,6 +24,7 @@ from financepy.market.volatility.FinFXVolSurface import FinFXDeltaMethod
 
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -48,7 +50,7 @@ def test_FinOptionImpliedDbn():
         currencyPair = forName + domName
         spotFXRate = 1.3465
 
-        tenors = ['1M', '2M', '3M', '6M', '1Y', '2Y']
+        tenors = ["1M", "2M", "3M", "6M", "1Y", "2Y"]
         atmVols = [21.00, 21.00, 20.750, 19.400, 18.250, 17.677]
         marketStrangle25DeltaVols = [0.65, 0.75, 0.85, 0.90, 0.95, 0.85]
         riskReversal25DeltaVols = [-0.20, -0.25, -0.30, -0.50, -0.60, -0.562]
@@ -58,27 +60,29 @@ def test_FinOptionImpliedDbn():
         atmMethod = FinFXATMMethod.FWD_DELTA_NEUTRAL
         deltaMethod = FinFXDeltaMethod.SPOT_DELTA
 
-        fxMarket = FinFXVolSurface(valueDate,
-                                   spotFXRate,
-                                   currencyPair,
-                                   notionalCurrency,
-                                   domDiscountCurve,
-                                   forDiscountCurve,
-                                   tenors,
-                                   atmVols,
-                                   marketStrangle25DeltaVols,
-                                   riskReversal25DeltaVols,
-                                   atmMethod,
-                                   deltaMethod)
+        fxMarket = FinFXVolSurface(
+            valueDate,
+            spotFXRate,
+            currencyPair,
+            notionalCurrency,
+            domDiscountCurve,
+            forDiscountCurve,
+            tenors,
+            atmVols,
+            marketStrangle25DeltaVols,
+            riskReversal25DeltaVols,
+            atmMethod,
+            deltaMethod,
+        )
 
-#        fxMarket.checkCalibration(True)
+        #        fxMarket.checkCalibration(True)
 
         PLOT_GRAPHS = False
         if PLOT_GRAPHS:
             fxMarket.plotVolCurves()
- 
+
         for iTenor in range(0, len(fxMarket._tenors)):
-            
+
             F = fxMarket._F0T[iTenor]
             texp = fxMarket._texp[iTenor]
 
@@ -86,7 +90,7 @@ def test_FinOptionImpliedDbn():
             endFX = F * 5.0
 
             numSteps = 10000
-            dFX = (endFX - startFX)/ numSteps
+            dFX = (endFX - startFX) / numSteps
 
             domDF = domDiscountCurve._df(texp)
             forDF = forDiscountCurve._df(texp)
@@ -100,16 +104,17 @@ def test_FinOptionImpliedDbn():
             vols = []
 
             for iK in range(0, numSteps):
-                strike = startFX + iK*dFX                
+                strike = startFX + iK * dFX
                 vol = volFunctionClark(params, F, strike, texp)
-                strikes.append(strike) 
+                strikes.append(strike)
                 vols.append(vol)
-            
+
             strikes = np.array(strikes)
             vols = np.array(vols)
 
             dbn = optionImpliedDbn(spotFXRate, texp, rd, rf, strikes, vols)
-            
+
+
 #            print("SUM:", dbn.sum())
 #            plt.figure()
 #            plt.plot(dbn._x, dbn._densitydx)

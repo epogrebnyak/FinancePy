@@ -7,6 +7,7 @@ import time
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinGlobalTypes import FinCapFloorTypes
@@ -43,9 +44,11 @@ from financepy.market.volatility.FinIborCapVolCurve import FinIborCapVolCurve
 from financepy.finutils.FinSchedule import FinSchedule
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##############################################################################
+
 
 def test_FinIborDepositsAndSwaps(valuationDate):
 
@@ -72,9 +75,15 @@ def test_FinIborDepositsAndSwaps(valuationDate):
     fixedLegType = FinSwapTypes.PAY
 
     swapRate = 0.05
-    swap1 = FinIborSwap(settlementDate, "1Y", fixedLegType, swapRate, fixedFreq, fixedBasis)
-    swap2 = FinIborSwap(settlementDate, "3Y", fixedLegType, swapRate, fixedFreq, fixedBasis)
-    swap3 = FinIborSwap(settlementDate, "5Y", fixedLegType, swapRate, fixedFreq, fixedBasis)
+    swap1 = FinIborSwap(
+        settlementDate, "1Y", fixedLegType, swapRate, fixedFreq, fixedBasis
+    )
+    swap2 = FinIborSwap(
+        settlementDate, "3Y", fixedLegType, swapRate, fixedFreq, fixedBasis
+    )
+    swap3 = FinIborSwap(
+        settlementDate, "5Y", fixedLegType, swapRate, fixedFreq, fixedBasis
+    )
 
     swaps.append(swap1)
     swaps.append(swap2)
@@ -83,6 +92,7 @@ def test_FinIborDepositsAndSwaps(valuationDate):
     liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
     return liborCurve
+
 
 ##########################################################################
 
@@ -104,8 +114,9 @@ def test_FinIborCapFloor():
 
     strikes = np.linspace(0.02, 0.08, 5)
 
-    testCases.header("LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR",
-                     "SABR_SHFTD", "HW", "BACH")
+    testCases.header(
+        "LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR", "SABR_SHFTD", "HW", "BACH"
+    )
 
     model1 = FinModelBlack(0.20)
     model2 = FinModelBlackShifted(0.25, 0.0)
@@ -125,8 +136,9 @@ def test_FinIborCapFloor():
         cvalue6 = capfloor.value(valuationDate, liborCurve, model6)
         testCases.print("CAP", k, cvalue1, cvalue2, cvalue3, cvalue4, cvalue5, cvalue6)
 
-    testCases.header("LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR",
-                     "SABR_SHFTD", "HW", "BACH")
+    testCases.header(
+        "LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR", "SABR_SHFTD", "HW", "BACH"
+    )
 
     for k in strikes:
         capFloorType = FinCapFloorTypes.FLOOR
@@ -139,12 +151,13 @@ def test_FinIborCapFloor():
         fvalue6 = capfloor.value(valuationDate, liborCurve, model6)
         testCases.print("FLR", k, fvalue1, fvalue2, fvalue3, fvalue4, fvalue5, fvalue6)
 
-###############################################################################
-# PUT CALL CHECK
-###############################################################################
+    ###############################################################################
+    # PUT CALL CHECK
+    ###############################################################################
 
-    testCases.header("LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR",
-                     "SABR SHFTD", "HW", "BACH")
+    testCases.header(
+        "LABEL", "STRIKE", "BLK", "BLK_SHFTD", "SABR", "SABR SHFTD", "HW", "BACH"
+    )
 
     for k in strikes:
         capFloorType = FinCapFloorTypes.CAP
@@ -172,16 +185,18 @@ def test_FinIborCapFloor():
         pcvalue5 = cvalue5 - fvalue5
         pcvalue6 = cvalue6 - fvalue6
 
-        testCases.print("PUT_CALL", k, pcvalue1, pcvalue2, pcvalue3,
-                        pcvalue4, pcvalue5, pcvalue6)
+        testCases.print(
+            "PUT_CALL", k, pcvalue1, pcvalue2, pcvalue3, pcvalue4, pcvalue5, pcvalue6
+        )
+
 
 ###############################################################################
 
 
 def test_FinIborCapFloorVolCurve():
-    ''' Aim here is to price cap and caplets using cap and caplet vols and to
+    """Aim here is to price cap and caplets using cap and caplet vols and to
     demonstrate they are the same - NOT SURE THAT HULLS BOOKS FORMULA WORKS FOR
-    OPTIONS. '''
+    OPTIONS."""
 
     todayDate = FinDate(20, 6, 2019)
     valuationDate = todayDate
@@ -191,48 +206,51 @@ def test_FinIborCapFloorVolCurve():
 
     k = 0.04
     capFloorType = FinCapFloorTypes.CAP
-    capFloor = FinIborCapFloor(valuationDate,
-                                maturityDate,
-                                capFloorType,
-                                k,
-                                None,
-                                frequency,
-                                dayCountType)
+    capFloor = FinIborCapFloor(
+        valuationDate, maturityDate, capFloorType, k, None, frequency, dayCountType
+    )
 
-    capVolDates = FinSchedule(valuationDate,
-                              valuationDate.addTenor("10Y"),
-                              frequency)._generate()
+    capVolDates = FinSchedule(
+        valuationDate, valuationDate.addTenor("10Y"), frequency
+    )._generate()
 
     flatRate = 0.04
-    liborCurve = FinDiscountCurveFlat(valuationDate,
-                                      flatRate,
-                                      frequency,
-                                      dayCountType)
+    liborCurve = FinDiscountCurveFlat(valuationDate, flatRate, frequency, dayCountType)
 
     flat = False
     if flat is True:
         capVolatilities = [20.0] * 11
         capVolatilities[0] = 0.0
     else:
-        capVolatilities = [0.00, 15.50, 18.25, 17.91, 17.74, 17.27,
-                           16.79, 16.30, 16.01, 15.76, 15.54]
+        capVolatilities = [
+            0.00,
+            15.50,
+            18.25,
+            17.91,
+            17.74,
+            17.27,
+            16.79,
+            16.30,
+            16.01,
+            15.76,
+            15.54,
+        ]
 
-    capVolatilities = np.array(capVolatilities)/100.0
+    capVolatilities = np.array(capVolatilities) / 100.0
     capVolatilities[0] = 0.0
 
-    volCurve = FinIborCapVolCurve(valuationDate,
-                                   capVolDates,
-                                   capVolatilities,
-                                   dayCountType)
+    volCurve = FinIborCapVolCurve(
+        valuationDate, capVolDates, capVolatilities, dayCountType
+    )
 
-#    print(volCurve._capletGammas)
+    #    print(volCurve._capletGammas)
 
     # Value cap using a single flat cap volatility
     tcap = (maturityDate - valuationDate) / gDaysInYear
     vol = volCurve.capVol(maturityDate)
     model = FinModelBlack(vol)
     valueCap = capFloor.value(valuationDate, liborCurve, model)
-#    print("CAP T", tcap, "VOL:", vol, "VALUE OF CAP:", valueCap)
+    #    print("CAP T", tcap, "VOL:", vol, "VALUE OF CAP:", valueCap)
 
     # Value cap by breaking it down into caplets using caplet vols
     vCaplets = 0.0
@@ -242,22 +260,23 @@ def test_FinIborCapFloorVolCurve():
     for capletEndDate in capFloor._capFloorLetDates[2:]:
         vol = volCurve.capletVol(capletEndDate)
         modelCaplet = FinModelBlack(vol)
-        vCaplet = capFloor.valueCapletFloorLet(valuationDate,
-                                               capletStartDate,
-                                               capletEndDate,
-                                               liborCurve,
-                                               modelCaplet)
+        vCaplet = capFloor.valueCapletFloorLet(
+            valuationDate, capletStartDate, capletEndDate, liborCurve, modelCaplet
+        )
 
         vCaplets += vCaplet
-        testCases.print("%12s" % capletStartDate,
-                        "%s" % capletEndDate,
-                        "%9.5f" % (vol*100.0),
-                        "%9.5f" % vCaplet)
+        testCases.print(
+            "%12s" % capletStartDate,
+            "%s" % capletEndDate,
+            "%9.5f" % (vol * 100.0),
+            "%9.5f" % vCaplet,
+        )
 
         capletStartDate = capletEndDate
 
     testCases.header("LABEL", "VALUE")
     testCases.print("CAPLETS->CAP: ", vCaplets)
+
 
 ###############################################################################
 
@@ -268,20 +287,21 @@ def test_FinIborCapletHull():
     todayDate = FinDate(20, 6, 2019)
     valuationDate = todayDate
     maturityDate = valuationDate.addTenor("2Y")
-    liborCurve = FinDiscountCurveFlat(valuationDate,
-                                      0.070,
-                                      FinFrequencyTypes.QUARTERLY,
-                                      FinDayCountTypes.THIRTY_E_360)
+    liborCurve = FinDiscountCurveFlat(
+        valuationDate, 0.070, FinFrequencyTypes.QUARTERLY, FinDayCountTypes.THIRTY_E_360
+    )
 
     k = 0.08
     capFloorType = FinCapFloorTypes.CAP
-    capFloor = FinIborCapFloor(valuationDate,
-                                maturityDate,
-                                capFloorType,
-                                k,
-                                None,
-                                FinFrequencyTypes.QUARTERLY,
-                                FinDayCountTypes.THIRTY_E_360)
+    capFloor = FinIborCapFloor(
+        valuationDate,
+        maturityDate,
+        capFloorType,
+        k,
+        None,
+        FinFrequencyTypes.QUARTERLY,
+        FinDayCountTypes.THIRTY_E_360,
+    )
 
     # Value cap using a single flat cap volatility
     model = FinModelBlack(0.20)
@@ -291,15 +311,14 @@ def test_FinIborCapletHull():
     capletStartDate = valuationDate.addTenor("1Y")
     capletEndDate = capletStartDate.addTenor("3M")
 
-    vCaplet = capFloor.valueCapletFloorLet(valuationDate,
-                                           capletStartDate,
-                                           capletEndDate,
-                                           liborCurve,
-                                           model)
+    vCaplet = capFloor.valueCapletFloorLet(
+        valuationDate, capletStartDate, capletEndDate, liborCurve, model
+    )
 
     # Cannot match Hull due to dates being adjusted
     testCases.header("CORRECT PRICE", "MODEL_PRICE")
     testCases.print(517.29, vCaplet)
+
 
 ###############################################################################
 
@@ -308,25 +327,43 @@ def test_FinIborCapFloorQLExample():
 
     valuationDate = FinDate(14, 6, 2016)
 
-    dates = [FinDate(14, 6, 2016), FinDate(14, 9, 2016),
-             FinDate(14, 12, 2016), FinDate(14, 6, 2017),
-             FinDate(14, 6, 2019), FinDate(14, 6, 2021),
-             FinDate(15, 6, 2026), FinDate(16, 6, 2031),
-             FinDate(16, 6, 2036), FinDate(14, 6, 2046)]
+    dates = [
+        FinDate(14, 6, 2016),
+        FinDate(14, 9, 2016),
+        FinDate(14, 12, 2016),
+        FinDate(14, 6, 2017),
+        FinDate(14, 6, 2019),
+        FinDate(14, 6, 2021),
+        FinDate(15, 6, 2026),
+        FinDate(16, 6, 2031),
+        FinDate(16, 6, 2036),
+        FinDate(14, 6, 2046),
+    ]
 
-    rates = [0.000000, 0.006616, 0.007049, 0.007795,
-             0.009599, 0.011203, 0.015068, 0.017583,
-             0.018998, 0.020080]
+    rates = [
+        0.000000,
+        0.006616,
+        0.007049,
+        0.007795,
+        0.009599,
+        0.011203,
+        0.015068,
+        0.017583,
+        0.018998,
+        0.020080,
+    ]
 
     freqType = FinFrequencyTypes.ANNUAL
     dayCountType = FinDayCountTypes.ACT_ACT_ISDA
 
-    discountCurve = FinDiscountCurveZeros(valuationDate,
-                                          dates,
-                                          rates,
-                                          freqType,
-                                          dayCountType,
-                                          FinInterpTypes.LINEAR_ZERO_RATES)
+    discountCurve = FinDiscountCurveZeros(
+        valuationDate,
+        dates,
+        rates,
+        freqType,
+        dayCountType,
+        FinInterpTypes.LINEAR_ZERO_RATES,
+    )
 
     startDate = FinDate(14, 6, 2016)
     endDate = FinDate(14, 6, 2026)
@@ -340,9 +377,19 @@ def test_FinIborCapFloorQLExample():
     optionType = FinCapFloorTypes.CAP
     strikeRate = 0.02
 
-    cap = FinIborCapFloor(startDate, endDate, optionType, strikeRate,
-                           lastFixing, freqType,  dayCountType, notional,
-                           calendarType, busDayAdjustType, dateGenRuleType)
+    cap = FinIborCapFloor(
+        startDate,
+        endDate,
+        optionType,
+        strikeRate,
+        lastFixing,
+        freqType,
+        dayCountType,
+        notional,
+        calendarType,
+        busDayAdjustType,
+        dateGenRuleType,
+    )
 
     blackVol = 0.547295
     model = FinModelBlack(blackVol)
@@ -354,6 +401,8 @@ def test_FinIborCapFloorQLExample():
 
     end = time.time()
     period = end - start
+
+
 #    print(v, period/numRepeats)
 
 ###############################################################################

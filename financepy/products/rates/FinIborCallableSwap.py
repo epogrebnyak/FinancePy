@@ -188,7 +188,7 @@
 
 #         putTimes = []
 #         for putDate in swap._adjustedFixedDates[1:]:
-#             if putDate <= self._exerciseDate: 
+#             if putDate <= self._exerciseDate:
 #                 putTime = (putDate - settlementDate) / gDaysInYear
 #                 putTimes.append(putTime)
 

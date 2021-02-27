@@ -30,6 +30,7 @@ def isLastDayOfFeb(dt: FinDate):
     else:
         return False
 
+
 ###############################################################################
 
 ###############################################################################
@@ -43,44 +44,47 @@ def isLastDayOfFeb(dt: FinDate):
 #    ACT_360 = 8
 #    ACT_365L = 9  # the 29 Feb is counted if it is in the date range
 ###############################################################################
-        
+
+
 class FinDayCountTypes(Enum):
-    THIRTY_360_BOND = 1  
-    THIRTY_E_360 = 2  
-    THIRTY_E_360_ISDA = 3  
-    THIRTY_E_PLUS_360 = 4  
-    ACT_ACT_ISDA = 5  
-    ACT_ACT_ICMA = 6  
-    ACT_365F = 7  
+    THIRTY_360_BOND = 1
+    THIRTY_E_360 = 2
+    THIRTY_E_360_ISDA = 3
+    THIRTY_E_PLUS_360 = 4
+    ACT_ACT_ISDA = 5
+    ACT_ACT_ICMA = 6
+    ACT_365F = 7
     ACT_360 = 8
     ACT_365L = 9
-    SIMPLE = 10 # actual divided by gDaysInYear
+    SIMPLE = 10  # actual divided by gDaysInYear
+
 
 ###############################################################################
 
 
 class FinDayCount(object):
-    ''' Calculate the fractional day count between two dates according to a
-    specified day count convention. '''
+    """Calculate the fractional day count between two dates according to a
+    specified day count convention."""
 
-    def __init__(self,
-                 dccType: FinDayCountTypes):
-        ''' Create Day Count convention by passing in the Day Count Type. '''
+    def __init__(self, dccType: FinDayCountTypes):
+        """ Create Day Count convention by passing in the Day Count Type. """
 
         if dccType not in FinDayCountTypes:
             raise FinError("Need to pass FinDayCountType")
 
         self._type = dccType
 
-###############################################################################
+    ###############################################################################
 
-    def yearFrac(self,
-                 dt1: FinDate,    # Start of coupon period
-                 dt2: FinDate,    # Settlement (for bonds) or period end(swaps)
-                 dt3: FinDate = None,   # End of coupon period for accrued
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.ANNUAL,
-                 isTerminationDate: bool = False):  # Is dt2 a termination date
-        ''' This method performs two functions:
+    def yearFrac(
+        self,
+        dt1: FinDate,  # Start of coupon period
+        dt2: FinDate,  # Settlement (for bonds) or period end(swaps)
+        dt3: FinDate = None,  # End of coupon period for accrued
+        freqType: FinFrequencyTypes = FinFrequencyTypes.ANNUAL,
+        isTerminationDate: bool = False,
+    ):  # Is dt2 a termination date
+        """This method performs two functions:
 
         1) It calculates the year fraction between dates dt1 and dt2 using the
         specified day count convention which is useful for calculating year
@@ -92,17 +96,17 @@ class FinDayCount(object):
         coupon frequency for some conventions.
 
         Note that if the date is intraday, i.e. hh,mm and ss do not equal zero
-        then that is used in the calculation of the year frac. This avoids 
+        then that is used in the calculation of the year frac. This avoids
         discontinuities for short dated intra day products. It should not
         affect normal dates for which hh=mm=ss=0.
-        
+
         This seems like a useful source:
         https://www.eclipsesoftware.biz/DayCountConventions.html
         Wikipedia also has a decent survey of the conventions
         https://en.wikipedia.org/wiki/Day_count_convention
         and
         http://data.cbonds.info/files/cbondscalc/Calculator.pdf
-        '''
+        """
 
         d1 = dt1._d
         m1 = dt1._m
@@ -123,7 +127,7 @@ class FinDayCount(object):
             if d1 == 31:
                 d1 = 30
 
-            if d2 == 31 and d1 == 30: 
+            if d2 == 31 and d1 == 30:
                 d2 = 30
 
             num = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2 - d1)
@@ -203,7 +207,7 @@ class FinDayCount(object):
                 accFactor = (dt2 - dt1) / denom1
                 return (accFactor, num, den)
             else:
-                daysYear1 = datediff(dt1, FinDate(1, 1, y1+1))
+                daysYear1 = datediff(dt1, FinDate(1, 1, y1 + 1))
                 daysYear2 = datediff(FinDate(1, 1, y2), dt2)
                 accFactor1 = daysYear1 / denom1
                 accFactor2 = daysYear2 / denom2
@@ -274,7 +278,7 @@ class FinDayCount(object):
             return (accFactor, num, den)
 
         elif self._type == FinDayCountTypes.SIMPLE:
-            
+
             num = dt2 - dt1
             den = gDaysInYear
             accFactor = num / den
@@ -282,13 +286,13 @@ class FinDayCount(object):
 
         else:
 
-            raise FinError(str(self._type) +
-                           " is not one of FinDayCountTypes")
+            raise FinError(str(self._type) + " is not one of FinDayCountTypes")
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Returns the calendar type as a string. '''
+        """ Returns the calendar type as a string. """
         return str(self._type)
+
 
 ###############################################################################

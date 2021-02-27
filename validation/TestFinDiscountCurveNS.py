@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate
@@ -13,6 +14,7 @@ from financepy.market.curves.FinDiscountCurveNS import FinDiscountCurveNS
 from financepy.finutils.FinMath import scale
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 PLOT_GRAPHS = False
@@ -41,15 +43,15 @@ def test_FinNelsonSiegelCurve():
 
     if PLOT_GRAPHS:
         plt.figure(figsize=(6, 4))
-        plt.plot(times, scale(factor1loading, 1), label='beta1')
-        plt.plot(times, scale(factor2loading, 1), label='beta2')
-        plt.plot(times, scale(factor3loading, 1), label='beta3')
+        plt.plot(times, scale(factor1loading, 1), label="beta1")
+        plt.plot(times, scale(factor2loading, 1), label="beta2")
+        plt.plot(times, scale(factor3loading, 1), label="beta3")
         plt.ylim((0, 1.05))
 
-        plt.title('Factor Loadings in Nelson-Siegel Model')
-        plt.xlabel('Time (years)')
-        plt.ylabel('Loading')
-        plt.legend(loc='best')
+        plt.title("Factor Loadings in Nelson-Siegel Model")
+        plt.xlabel("Time (years)")
+        plt.ylabel("Loading")
+        plt.legend(loc="best")
 
     ###########################################################################
 
@@ -92,17 +94,17 @@ def test_FinNelsonSiegelCurve():
 
     if PLOT_GRAPHS:
         plt.figure(figsize=(6, 4))
-        plt.plot(times, scale(zeroRates1, 100), label='beta1=3%')
-        plt.plot(times, scale(zeroRates2, 100), label='beta1=4%')
-        plt.plot(times, scale(zeroRates3, 100), label='beta1=5%')
-        plt.plot(times, scale(zeroRates4, 100), label='beta1=6%')
-        plt.plot(times, scale(zeroRates5, 100), label='beta1=7%')
+        plt.plot(times, scale(zeroRates1, 100), label="beta1=3%")
+        plt.plot(times, scale(zeroRates2, 100), label="beta1=4%")
+        plt.plot(times, scale(zeroRates3, 100), label="beta1=5%")
+        plt.plot(times, scale(zeroRates4, 100), label="beta1=6%")
+        plt.plot(times, scale(zeroRates5, 100), label="beta1=7%")
         plt.ylim((0, 7.5))
 
-        plt.title('Nelson-Siegel Zero Rate Curves')
-        plt.xlabel('Time (years)')
-        plt.ylabel('Zero Rate (%)')
-        plt.legend(loc='lower right', frameon=False)
+        plt.title("Nelson-Siegel Zero Rate Curves")
+        plt.xlabel("Time (years)")
+        plt.ylabel("Zero Rate (%)")
+        plt.legend(loc="lower right", frameon=False)
 
     ###########################################################################
 
@@ -143,17 +145,17 @@ def test_FinNelsonSiegelCurve():
 
     if PLOT_GRAPHS:
         plt.figure(figsize=(6, 4))
-        plt.plot(times, scale(zeroRates1, 100), label='beta2=-4%')
-        plt.plot(times, scale(zeroRates2, 100), label='beta2=-2%')
-        plt.plot(times, scale(zeroRates3, 100), label='beta2=0%')
-        plt.plot(times, scale(zeroRates4, 100), label='beta2=2%')
-        plt.plot(times, scale(zeroRates5, 100), label='beta2=4%')
+        plt.plot(times, scale(zeroRates1, 100), label="beta2=-4%")
+        plt.plot(times, scale(zeroRates2, 100), label="beta2=-2%")
+        plt.plot(times, scale(zeroRates3, 100), label="beta2=0%")
+        plt.plot(times, scale(zeroRates4, 100), label="beta2=2%")
+        plt.plot(times, scale(zeroRates5, 100), label="beta2=4%")
         plt.ylim((0, 10))
 
-        plt.title('Nelson-Siegel Zero Rate Curves: Varying beta2')
-        plt.xlabel('Time (years)')
-        plt.ylabel('Zero Rate (%)')
-        plt.legend(loc='lower right', frameon=False)
+        plt.title("Nelson-Siegel Zero Rate Curves: Varying beta2")
+        plt.xlabel("Time (years)")
+        plt.ylabel("Zero Rate (%)")
+        plt.legend(loc="lower right", frameon=False)
 
     beta1 = 0.06
     beta2 = -0.02
@@ -197,17 +199,18 @@ def test_FinNelsonSiegelCurve():
 
     if PLOT_GRAPHS:
         plt.figure(figsize=(6, 4))
-        plt.plot(times, scale(zeroRates1, 100), label='beta3=-2%')
-        plt.plot(times, scale(zeroRates2, 100), label='beta3=0%')
-        plt.plot(times, scale(zeroRates3, 100), label='beta3=2%')
-        plt.plot(times, scale(zeroRates4, 100), label='beta3=4%')
-        plt.plot(times, scale(zeroRates5, 100), label='beta3=6%')
+        plt.plot(times, scale(zeroRates1, 100), label="beta3=-2%")
+        plt.plot(times, scale(zeroRates2, 100), label="beta3=0%")
+        plt.plot(times, scale(zeroRates3, 100), label="beta3=2%")
+        plt.plot(times, scale(zeroRates4, 100), label="beta3=4%")
+        plt.plot(times, scale(zeroRates5, 100), label="beta3=6%")
         plt.ylim((3.5, 7.5))
 
-        plt.title('Nelson-Siegel Zero Rate Curves: Varying beta3')
-        plt.xlabel('Time (years)')
-        plt.ylabel('Zero Rate (%)')
-        plt.legend(loc='lower right', frameon=False)
+        plt.title("Nelson-Siegel Zero Rate Curves: Varying beta3")
+        plt.xlabel("Time (years)")
+        plt.ylabel("Zero Rate (%)")
+        plt.legend(loc="lower right", frameon=False)
+
 
 ###############################################################################
 

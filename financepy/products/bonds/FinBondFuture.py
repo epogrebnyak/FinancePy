@@ -14,15 +14,17 @@ from ...finutils.FinHelperFunctions import labelToString, checkArgumentTypes
 
 
 class FinBondFuture(object):
-    ''' Class for managing futures contracts on government bonds that follows
-    CME conventions and related analytics. '''
+    """Class for managing futures contracts on government bonds that follows
+    CME conventions and related analytics."""
 
-    def __init__(self,
-                 tickerName: str,
-                 firstDeliveryDate: FinDate,
-                 lastDeliveryDate: FinDate,
-                 contractSize: int,
-                 coupon: float):
+    def __init__(
+        self,
+        tickerName: str,
+        firstDeliveryDate: FinDate,
+        lastDeliveryDate: FinDate,
+        contractSize: int,
+        coupon: float,
+    ):
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -32,15 +34,14 @@ class FinBondFuture(object):
         self._contractSize = contractSize
         self._coupon = coupon
 
-###############################################################################
+    ###############################################################################
 
-    def conversionFactor(self,
-                         bond: FinBond):
-        ''' Determine the conversion factor for a specific bond using CME
+    def conversionFactor(self, bond: FinBond):
+        """Determine the conversion factor for a specific bond using CME
         convention. To do this we need to know the contract standard coupon and
         must round the bond maturity (starting its life on the first delivery
         date) to the nearest 3 month multiple and then calculate the bond clean
-        price. '''
+        price."""
 
         # See
         # https://www.cmegroup.com//trading//interest-rates//us-treasury-futures-conversion-factor-lookup-tables.html
@@ -53,38 +54,31 @@ class FinBondFuture(object):
 
         issueDate = FinDate(newMat._d, newMat._m, 2000)
 
-        newBond = FinBond(issueDate,
-                          newMat,
-                          bond._coupon,
-                          bond._freqType,
-                          bond._accrualType,
-                          face)
+        newBond = FinBond(
+            issueDate, newMat, bond._coupon, bond._freqType, bond._accrualType, face
+        )
 
-        p = newBond.cleanPriceFromYTM(self._firstDeliveryDate,
-                                      self._coupon)
+        p = newBond.cleanPriceFromYTM(self._firstDeliveryDate, self._coupon)
 
         # Convention is to round the conversion factor to 4dp
         p = round(p, 4)
         return p
 
-###############################################################################
+    ###############################################################################
 
-    def principalInvoicePrice(self,
-                              bond: FinBond,
-                              futuresPrice: float):
-        ' The principal invoice price as defined by the CME.'''
+    def principalInvoicePrice(self, bond: FinBond, futuresPrice: float):
+        " The principal invoice price as defined by the CME." ""
         cf = self.conversionFactor(bond)
         pip = self._contractSize * (futuresPrice * cf) / 100.0
         pip = round(pip, 2)
         return pip
 
-###############################################################################
+    ###############################################################################
 
-    def totalInvoiceAmount(self,
-                           settlementDate: FinDate,
-                           bond: FinBond,
-                           futuresPrice: float):
-        ' The total invoice amount paid to take delivery of bond. '
+    def totalInvoiceAmount(
+        self, settlementDate: FinDate, bond: FinBond, futuresPrice: float
+    ):
+        " The total invoice amount paid to take delivery of bond. "
 
         if bond._accruedInterest is None:
             bond.calculateFlowDates(settlementDate)
@@ -97,14 +91,13 @@ class FinBondFuture(object):
         tia = round(tia, 2)
         return tia
 
-###############################################################################
+    ###############################################################################
 
-    def cheapestToDeliver(self,
-                          bonds: list,
-                          bondCleanPrices: list,
-                          futuresPrice: float):
-        ''' Determination of CTD as deliverable bond with lowest cost to buy
-        versus what is received when the bond is delivered. '''
+    def cheapestToDeliver(
+        self, bonds: list, bondCleanPrices: list, futuresPrice: float
+    ):
+        """Determination of CTD as deliverable bond with lowest cost to buy
+        versus what is received when the bond is delivered."""
         ctdBond = None
         ctdNet = -self._contractSize * 100
         for bondCleanPrice, bond in zip(bondCleanPrices, bonds):
@@ -117,19 +110,18 @@ class FinBondFuture(object):
 
         return ctdBond
 
-###############################################################################
+    ###############################################################################
 
-    def deliveryGainLoss(self,
-                         bond: FinBond,
-                         bondCleanPrice: float,
-                         futuresPrice: float):
-        ''' Determination of what is received when the bond is delivered. '''
+    def deliveryGainLoss(
+        self, bond: FinBond, bondCleanPrice: float, futuresPrice: float
+    ):
+        """ Determination of what is received when the bond is delivered. """
         receiveOnFuture = self.principalInvoicePrice(bond, futuresPrice)
         payForBond = self._contractSize * bondCleanPrice / 100.0
         net = receiveOnFuture - payForBond
         return net, payForBond, receiveOnFuture
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -140,10 +132,11 @@ class FinBondFuture(object):
         s += labelToString("COUPON", self._coupon)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

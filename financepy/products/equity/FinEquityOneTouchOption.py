@@ -26,25 +26,26 @@ from ...finutils.FinMath import NVect
 
 
 class FinTouchOptionPayoffTypes(Enum):
-    DOWN_AND_IN_CASH_AT_HIT = 1,         # S0>H pays $1 at hit time from above
-    UP_AND_IN_CASH_AT_HIT = 2,           # S0<H pays $1 at hit time from below
-    DOWN_AND_IN_CASH_AT_EXPIRY = 3,      # S0>H pays $1 at T if hit from below
-    UP_AND_IN_CASH_AT_EXPIRY = 4,        # S0<H pays $1 at T if hit from below
-    DOWN_AND_OUT_CASH_OR_NOTHING = 5,    # S0>H pays $1 at T if S>H for all t<T
-    UP_AND_OUT_CASH_OR_NOTHING = 6,      # S0<H pays $1 at T if S<H for all t<T
-    DOWN_AND_IN_ASSET_AT_HIT = 7,        # S0>H pays H at hit time from above
-    UP_AND_IN_ASSET_AT_HIT = 8,          # S0>H pays H at hit time from below
-    DOWN_AND_IN_ASSET_AT_EXPIRY = 9,     # S0>H pays S(T) at T if S<H for t < T
-    UP_AND_IN_ASSET_AT_EXPIRY = 10,      # S0<H pays S(T) at T if S>H for t < T
-    DOWN_AND_OUT_ASSET_OR_NOTHING = 11,  # S0>H pays S(T) at T if S>H for t < T
-    UP_AND_OUT_ASSET_OR_NOTHING = 12     # S0<H pays S(T) at T if S<H for t < T
+    DOWN_AND_IN_CASH_AT_HIT = (1,)  # S0>H pays $1 at hit time from above
+    UP_AND_IN_CASH_AT_HIT = (2,)  # S0<H pays $1 at hit time from below
+    DOWN_AND_IN_CASH_AT_EXPIRY = (3,)  # S0>H pays $1 at T if hit from below
+    UP_AND_IN_CASH_AT_EXPIRY = (4,)  # S0<H pays $1 at T if hit from below
+    DOWN_AND_OUT_CASH_OR_NOTHING = (5,)  # S0>H pays $1 at T if S>H for all t<T
+    UP_AND_OUT_CASH_OR_NOTHING = (6,)  # S0<H pays $1 at T if S<H for all t<T
+    DOWN_AND_IN_ASSET_AT_HIT = (7,)  # S0>H pays H at hit time from above
+    UP_AND_IN_ASSET_AT_HIT = (8,)  # S0>H pays H at hit time from below
+    DOWN_AND_IN_ASSET_AT_EXPIRY = (9,)  # S0>H pays S(T) at T if S<H for t < T
+    UP_AND_IN_ASSET_AT_EXPIRY = (10,)  # S0<H pays S(T) at T if S>H for t < T
+    DOWN_AND_OUT_ASSET_OR_NOTHING = (11,)  # S0>H pays S(T) at T if S>H for t < T
+    UP_AND_OUT_ASSET_OR_NOTHING = 12  # S0<H pays S(T) at T if S<H for t < T
+
 
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def _barrierPayOneAtHitPVDown(s, H, r, dt):
-    ''' Pay $1 if the stock crosses the barrier H from above. PV payment. '''
+    """ Pay $1 if the stock crosses the barrier H from above. PV payment. """
     numPaths, numTimeSteps = s.shape
     pv = 0.0
 
@@ -62,13 +63,14 @@ def _barrierPayOneAtHitPVDown(s, H, r, dt):
 
     pv = pv / numPaths
     return pv
+
 
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def _barrierPayOneAtHitPVUp(s, H, r, dt):
-    ''' Pay $1 if the stock crosses the barrier H from below. PV payment. '''
+    """ Pay $1 if the stock crosses the barrier H from below. PV payment. """
 
     numPaths, numTimeSteps = s.shape
     pv = 0.0
@@ -88,12 +90,13 @@ def _barrierPayOneAtHitPVUp(s, H, r, dt):
     pv = pv / numPaths
     return pv
 
+
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def _barrierPayAssetAtExpiryDownOut(s, H):
-    ''' Pay $1 if the stock crosses the barrier H from above. PV payment. '''
+    """ Pay $1 if the stock crosses the barrier H from above. PV payment. """
     numPaths, numTimeSteps = s.shape
     pv = 0.0
 
@@ -105,17 +108,18 @@ def _barrierPayAssetAtExpiryDownOut(s, H):
                 hitFlag = 0
                 break
 
-        pv = pv + hitFlag * s[ip][numTimeSteps-1]
+        pv = pv + hitFlag * s[ip][numTimeSteps - 1]
 
     pv = pv / numPaths
     return pv
+
 
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def _barrierPayAssetAtExpiryUpOut(s, H):
-    ''' Pay $1 if the stock crosses the barrier H from below. PV payment. '''
+    """ Pay $1 if the stock crosses the barrier H from below. PV payment. """
 
     numPaths, numTimeSteps = s.shape
     pv = 0.0
@@ -128,30 +132,33 @@ def _barrierPayAssetAtExpiryUpOut(s, H):
                 hitFlag = 0
                 break
 
-        pv = pv + hitFlag * s[ip][numTimeSteps-1]
+        pv = pv + hitFlag * s[ip][numTimeSteps - 1]
 
     pv = pv / numPaths
     return pv
+
 
 ###############################################################################
 
 
 class FinEquityOneTouchOption(FinEquityOption):
-    ''' A FinEquityOneTouchOption is an option in which the buyer receives one
+    """A FinEquityOneTouchOption is an option in which the buyer receives one
     unit of cash OR stock if the stock price touches a barrier at any time
     before the option expiry date and zero otherwise. The choice of cash or
     stock is made at trade initiation. The single barrier payoff must define
     whether the option pays or cancels if the barrier is touched and also when
     the payment is made (at hit time or option expiry). All of these variants
-    are all members of the FinTouchOptionTypes enumerated type. '''
+    are all members of the FinTouchOptionTypes enumerated type."""
 
-    def __init__(self,
-                 expiryDate: FinDate,
-                 optionType: FinTouchOptionPayoffTypes,
-                 barrierPrice: float,
-                 paymentSize: float = 1.0):
-        ''' Create the one touch option by defining its expiry date and the
-        barrier level and a payment size if it is a cash . '''
+    def __init__(
+        self,
+        expiryDate: FinDate,
+        optionType: FinTouchOptionPayoffTypes,
+        barrierPrice: float,
+        paymentSize: float = 1.0,
+    ):
+        """Create the one touch option by defining its expiry date and the
+        barrier level and a payment size if it is a cash ."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -160,17 +167,19 @@ class FinEquityOneTouchOption(FinEquityOption):
         self._barrierPrice = float(barrierPrice)
         self._paymentSize = paymentSize
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              valueDate: FinDate,
-              stockPrice: (float, np.ndarray),
-              discountCurve: FinDiscountCurve,
-              dividendCurve: FinDiscountCurve,
-              model):
-        ''' Equity One-Touch Option valuation using the Black-Scholes model
+    def value(
+        self,
+        valueDate: FinDate,
+        stockPrice: (float, np.ndarray),
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+    ):
+        """Equity One-Touch Option valuation using the Black-Scholes model
         assuming a continuous (American) barrier from value date to expiry.
-        Handles both cash-or-nothing and asset-or-nothing options.'''
+        Handles both cash-or-nothing and asset-or-nothing options."""
 
         DEBUG_MODE = False
 
@@ -212,9 +221,11 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Stock price is currently below barrier.")
 
             eta = 1.0
-            z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
-            A5_1 = np.power(H/s0, mu + lam) * NVect(eta * z)
-            A5_2 = np.power(H/s0, mu - lam) * NVect(eta * z - 2.0 * eta * lam * v * sqrtT)
+            z = np.log(H / s0) / v / sqrtT + lam * v * sqrtT
+            A5_1 = np.power(H / s0, mu + lam) * NVect(eta * z)
+            A5_2 = np.power(H / s0, mu - lam) * NVect(
+                eta * z - 2.0 * eta * lam * v * sqrtT
+            )
             v = (A5_1 + A5_2) * K
             return v
 
@@ -225,9 +236,11 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Stock price is currently above barrier.")
 
             eta = -1.0
-            z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
-            A5_1 = np.power(H/s0, mu + lam) * NVect(eta * z)
-            A5_2 = np.power(H/s0, mu - lam) * NVect(eta * z - 2.0 * eta * lam * v * sqrtT)
+            z = np.log(H / s0) / v / sqrtT + lam * v * sqrtT
+            A5_1 = np.power(H / s0, mu + lam) * NVect(eta * z)
+            A5_2 = np.power(H / s0, mu - lam) * NVect(
+                eta * z - 2.0 * eta * lam * v * sqrtT
+            )
             v = (A5_1 + A5_2) * K
             return v
 
@@ -239,9 +252,11 @@ class FinEquityOneTouchOption(FinEquityOption):
 
             eta = 1.0
             K = H
-            z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
-            A5_1 = np.power(H/s0, mu + lam) * NVect(eta * z)
-            A5_2 = np.power(H/s0, mu - lam) * NVect(eta * z - 2.0 * eta * lam * v * sqrtT)
+            z = np.log(H / s0) / v / sqrtT + lam * v * sqrtT
+            A5_1 = np.power(H / s0, mu + lam) * NVect(eta * z)
+            A5_2 = np.power(H / s0, mu - lam) * NVect(
+                eta * z - 2.0 * eta * lam * v * sqrtT
+            )
             v = (A5_1 + A5_2) * K
             return v
 
@@ -253,9 +268,11 @@ class FinEquityOneTouchOption(FinEquityOption):
 
             eta = -1.0
             K = H
-            z = np.log(H/s0) / v / sqrtT + lam * v * sqrtT
-            A5_1 = np.power(H/s0, mu + lam) * NVect(eta * z)
-            A5_2 = np.power(H/s0, mu - lam) * NVect(eta * z - 2.0 * eta * lam * v * sqrtT)
+            z = np.log(H / s0) / v / sqrtT + lam * v * sqrtT
+            A5_1 = np.power(H / s0, mu + lam) * NVect(eta * z)
+            A5_2 = np.power(H / s0, mu - lam) * NVect(
+                eta * z - 2.0 * eta * lam * v * sqrtT
+            )
             v = (A5_1 + A5_2) * K
             return v
 
@@ -267,11 +284,11 @@ class FinEquityOneTouchOption(FinEquityOption):
 
             eta = +1.0
             phi = -1.0
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            B2 = K * df * NVect(phi*x2 - phi*v*sqrtT)
-            B4 = K * df * np.power(H/s0, 2.0 * mu) * NVect(eta*y2-eta*v*sqrtT)
-            v = (B2 + B4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            B2 = K * df * NVect(phi * x2 - phi * v * sqrtT)
+            B4 = K * df * np.power(H / s0, 2.0 * mu) * NVect(eta * y2 - eta * v * sqrtT)
+            v = B2 + B4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_IN_CASH_AT_EXPIRY:
@@ -283,11 +300,11 @@ class FinEquityOneTouchOption(FinEquityOption):
             eta = -1.0
             phi = +1.0
 
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            B2 = K * df * NVect(phi*x2 - phi*v*sqrtT)
-            B4 = K * df * np.power(H/s0, 2.0 * mu) * NVect(eta*y2-eta*v*sqrtT)
-            v = (B2 + B4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            B2 = K * df * NVect(phi * x2 - phi * v * sqrtT)
+            B4 = K * df * np.power(H / s0, 2.0 * mu) * NVect(eta * y2 - eta * v * sqrtT)
+            v = B2 + B4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_IN_ASSET_AT_EXPIRY:
@@ -298,12 +315,12 @@ class FinEquityOneTouchOption(FinEquityOption):
 
             eta = +1.0
             phi = -1.0
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            dq = np.exp(-q*t)
-            A2 = s0 * dq * NVect(phi*x2)
-            A4 = s0 * dq * np.power(H/s0, 2.0*(mu+1.0)) * NVect(eta*y2)
-            v = (A2 + A4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            dq = np.exp(-q * t)
+            A2 = s0 * dq * NVect(phi * x2)
+            A4 = s0 * dq * np.power(H / s0, 2.0 * (mu + 1.0)) * NVect(eta * y2)
+            v = A2 + A4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_IN_ASSET_AT_EXPIRY:
@@ -314,12 +331,12 @@ class FinEquityOneTouchOption(FinEquityOption):
 
             eta = -1.0
             phi = +1.0
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            dq = np.exp(-q*t)
-            A2 = s0 * dq * NVect(phi*x2)
-            A4 = s0 * dq * np.power(H/s0, 2.0*(mu+1.0)) * NVect(eta*y2)
-            v = (A2 + A4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            dq = np.exp(-q * t)
+            A2 = s0 * dq * NVect(phi * x2)
+            A4 = s0 * dq * np.power(H / s0, 2.0 * (mu + 1.0)) * NVect(eta * y2)
+            v = A2 + A4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_OUT_CASH_OR_NOTHING:
@@ -331,11 +348,11 @@ class FinEquityOneTouchOption(FinEquityOption):
             eta = +1.0
             phi = +1.0
 
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            B2 = K * df * NVect(phi*x2 - phi*v*sqrtT)
-            B4 = K * df * np.power(H/s0, 2.0 * mu) * NVect(eta*y2-eta*v*sqrtT)
-            v = (B2 - B4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            B2 = K * df * NVect(phi * x2 - phi * v * sqrtT)
+            B4 = K * df * np.power(H / s0, 2.0 * mu) * NVect(eta * y2 - eta * v * sqrtT)
+            v = B2 - B4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_OUT_CASH_OR_NOTHING:
@@ -347,14 +364,16 @@ class FinEquityOneTouchOption(FinEquityOption):
             eta = -1.0
             phi = -1.0
 
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            B2 = K * df * NVect(phi*x2 - phi*v*sqrtT)
-            B4 = K * df * np.power(H/s0, 2.0 * mu) * NVect(eta*y2-eta*v*sqrtT)
-            v = (B2 - B4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            B2 = K * df * NVect(phi * x2 - phi * v * sqrtT)
+            B4 = K * df * np.power(H / s0, 2.0 * mu) * NVect(eta * y2 - eta * v * sqrtT)
+            v = B2 - B4
             return v
 
-        elif self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_OUT_ASSET_OR_NOTHING:
+        elif (
+            self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_OUT_ASSET_OR_NOTHING
+        ):
             # HAUG 11
 
             if np.any(s0 <= H):
@@ -363,12 +382,12 @@ class FinEquityOneTouchOption(FinEquityOption):
             eta = +1.0
             phi = +1.0
 
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            dq = np.exp(-q*t)
-            A2 = s0 * dq * NVect(phi*x2)
-            A4 = s0 * dq * np.power(H/s0, 2.0*(mu+1.0)) * NVect(eta*y2)
-            v = (A2 - A4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            dq = np.exp(-q * t)
+            A2 = s0 * dq * NVect(phi * x2)
+            A4 = s0 * dq * np.power(H / s0, 2.0 * (mu + 1.0)) * NVect(eta * y2)
+            v = A2 - A4
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_OUT_ASSET_OR_NOTHING:
@@ -380,12 +399,12 @@ class FinEquityOneTouchOption(FinEquityOption):
             eta = -1.0
             phi = -1.0
 
-            x2 = np.log(s0/H) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            y2 = np.log(H/s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
-            dq = np.exp(-q*t)
-            A2 = s0 * dq * NVect(phi*x2)
-            A4 = s0 * dq * np.power(H/s0, 2.0*(mu+1.0)) * NVect(eta*y2)
-            v = (A2 - A4)
+            x2 = np.log(s0 / H) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            y2 = np.log(H / s0) / v / sqrtT + (mu + 1.0) * v * sqrtT
+            dq = np.exp(-q * t)
+            A2 = s0 * dq * NVect(phi * x2)
+            A4 = s0 * dq * np.power(H / s0, 2.0 * (mu + 1.0)) * NVect(eta * y2)
+            v = A2 - A4
             return v
 
         else:
@@ -393,29 +412,31 @@ class FinEquityOneTouchOption(FinEquityOption):
 
         return v
 
-###############################################################################
+    ###############################################################################
 
-    def valueMC(self,
-                valueDate: FinDate,
-                stockPrice: float,
-                discountCurve: FinDiscountCurve,
-                dividendCurve: FinDiscountCurve,
-                model,
-                numPaths: int = 10000,
-                numStepsPerYear: int = 252,
-                seed: int = 4242):
-        ''' Touch Option valuation using the Black-Scholes model and Monte
+    def valueMC(
+        self,
+        valueDate: FinDate,
+        stockPrice: float,
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+        numPaths: int = 10000,
+        numStepsPerYear: int = 252,
+        seed: int = 4242,
+    ):
+        """Touch Option valuation using the Black-Scholes model and Monte
         Carlo simulation. Accuracy is not great when compared to the analytical
         result as we only observe the barrier a finite number of times. The
-        convergence is slow. '''
+        convergence is slow."""
 
         t = (self._expiryDate - valueDate) / gDaysInYear
 
         df = discountCurve.df(self._expiryDate)
-        r = -np.log(df)/t
+        r = -np.log(df) / t
 
         dq = dividendCurve.df(self._expiryDate)
-        q = -np.log(dq)/t
+        q = -np.log(dq) / t
 
         numTimeSteps = int(t * numStepsPerYear) + 1
         dt = t / numTimeSteps
@@ -476,7 +497,7 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Barrier has  ALREADY been crossed.")
 
             v = _barrierPayOneAtHitPVDown(s, H, 0.0, dt)
-            v = v * X * np.exp(-r*t)
+            v = v * X * np.exp(-r * t)
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_IN_CASH_AT_EXPIRY:
@@ -486,7 +507,7 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Barrier has ALREADY been crossed.")
 
             v = _barrierPayOneAtHitPVUp(s, H, 0.0, dt)
-            v = v * X * np.exp(-r*t)
+            v = v * X * np.exp(-r * t)
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_IN_ASSET_AT_EXPIRY:
@@ -514,7 +535,7 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Barrier has ALREADY been crossed.")
 
             v = 1.0 - _barrierPayOneAtHitPVDown(s, H, 0.0, dt)
-            v = v * X * np.exp(-r*t)
+            v = v * X * np.exp(-r * t)
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_OUT_CASH_OR_NOTHING:
@@ -524,17 +545,19 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Barrier has ALREADY been crossed.")
 
             v = 1.0 - _barrierPayOneAtHitPVUp(s, H, 0.0, dt)
-            v = v * X * np.exp(-r*t)
+            v = v * X * np.exp(-r * t)
             return v
 
-        elif self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_OUT_ASSET_OR_NOTHING:
+        elif (
+            self._optionType == FinTouchOptionPayoffTypes.DOWN_AND_OUT_ASSET_OR_NOTHING
+        ):
             # HAUG 11
 
             if s0 <= H:
                 raise FinError("Stock price is currently below barrier.")
 
             v = _barrierPayAssetAtExpiryDownOut(s, H)
-            v = v * np.exp(-r*t)
+            v = v * np.exp(-r * t)
             return v
 
         elif self._optionType == FinTouchOptionPayoffTypes.UP_AND_OUT_ASSET_OR_NOTHING:
@@ -544,14 +567,14 @@ class FinEquityOneTouchOption(FinEquityOption):
                 raise FinError("Stock price is currently below barrier.")
 
             v = _barrierPayAssetAtExpiryUpOut(s, H)
-            v = v * np.exp(-r*t)
+            v = v * np.exp(-r * t)
             return v
         else:
             raise FinError("Unknown option type.")
 
         return v
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -561,10 +584,11 @@ class FinEquityOneTouchOption(FinEquityOption):
         s += labelToString("PAYMENT SIZE", self._paymentSize, "")
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

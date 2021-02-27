@@ -8,23 +8,24 @@ from ...finutils.FinHelperFunctions import labelToString
 
 
 class FinEquityModel(object):
-    ''' This is a parent class for equity models. '''
+    """ This is a parent class for equity models. """
 
     def __init__(self):
         pass
+
 
 ###############################################################################
 
 
 # class FinEquityModelBlackScholes(FinEquityModel):
-#     def __init__(self, 
-#                  volatility: float, 
+#     def __init__(self,
+#                  volatility: float,
 #                  implementation, parameters):
 
 #         checkArgumentTypes(self.__init__, locals())
 
 #         self._volatility = volatility
-#         self._implementation = implementation 
+#         self._implementation = implementation
 #         self._parameters = parameters
 
 #     def __repr__(self):
@@ -50,5 +51,6 @@ class FinEquityModelHeston(FinEquityModel):
         s += labelToString("MEAN REVERSION", self._meanReversion)
         s += labelToString("IMPLEMENTATION", self._implementation)
         return s
+
 
 ###############################################################################

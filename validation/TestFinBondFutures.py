@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.bonds.FinBondFuture import FinBondFuture
@@ -12,6 +13,7 @@ from financepy.finutils.FinDayCount import FinDayCountTypes
 from financepy.finutils.FinDate import FinDate
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 
@@ -44,11 +46,9 @@ def test_FinBondFuture():
     contractSize = 100000
     contractCoupon = 0.06
 
-    bondFutureContract = FinBondFuture("TYH2",
-                                       firstDeliveryDate,
-                                       lastDeliveryDate,
-                                       contractSize,
-                                       contractCoupon)
+    bondFutureContract = FinBondFuture(
+        "TYH2", firstDeliveryDate, lastDeliveryDate, contractSize, contractCoupon
+    )
 
     settlementDate = FinDate(2001, 12, 10)
 
@@ -122,11 +122,9 @@ def test_FinBondFuture():
     contractSize = 100000
     contractCoupon = 0.06
 
-    bondFutureContract = FinBondFuture("TYZ7",
-                                       firstDeliveryDate,
-                                       lastDeliveryDate,
-                                       contractSize,
-                                       contractCoupon)
+    bondFutureContract = FinBondFuture(
+        "TYZ7", firstDeliveryDate, lastDeliveryDate, contractSize, contractCoupon
+    )
 
     testCases.header("BOND MATURITY", "CF")
     for bond in bonds:
@@ -143,16 +141,14 @@ def test_FinBondFuture():
 
     testCases.header("BOND MATURITY", "TOTAL INVOICE AMOUNT")
     for bond in bonds:
-        tia = bondFutureContract.totalInvoiceAmount(
-            settlementDate, bond, futuresPrice)
+        tia = bondFutureContract.totalInvoiceAmount(settlementDate, bond, futuresPrice)
         testCases.print(str(bond._maturityDate), tia)
 
-    ctd = bondFutureContract.cheapestToDeliver(bonds,
-                                               prices,
-                                               futuresPrice)
+    ctd = bondFutureContract.cheapestToDeliver(bonds, prices, futuresPrice)
 
     testCases.header("CTD MATURITY", "CTD COUPON")
     testCases.print(str(ctd._maturityDate), ctd._coupon)
+
 
 ##########################################################################
 

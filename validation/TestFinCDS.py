@@ -6,6 +6,7 @@ import time
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.credit.FinCDS import FinCDS
@@ -26,6 +27,7 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -43,10 +45,9 @@ def test_CDSFastApproximation():
     discountFactors = np.power((1.0 + r), -times)
     dates = valueDate.addYears(times)
 
-    liborCurve = FinDiscountCurve(valueDate,
-                                  dates,
-                                  discountFactors,
-                                  FinInterpTypes.FLAT_FWD_RATES)
+    liborCurve = FinDiscountCurve(
+        valueDate, dates, discountFactors, FinInterpTypes.FLAT_FWD_RATES
+    )
 
     ##########################################################################
 
@@ -69,18 +70,14 @@ def test_CDSFastApproximation():
 
         cdsContracts.append(cdsMkt)
 
-        issuerCurve = FinCDSCurve(valueDate,
-                                  cdsContracts,
-                                  liborCurve,
-                                  recoveryRate)
+        issuerCurve = FinCDSCurve(valueDate, cdsContracts, liborCurve, recoveryRate)
 
         cdsContract = FinCDS(valueDate, maturityDate, contractCoupon)
-        v_exact = cdsContract.value(
-            valueDate, issuerCurve, recoveryRate)['full_pv']
-        v_approx = cdsContract.valueFastApprox(
-            valueDate, r, mktCoupon, recoveryRate)[0]
+        v_exact = cdsContract.value(valueDate, issuerCurve, recoveryRate)["full_pv"]
+        v_approx = cdsContract.valueFastApprox(valueDate, r, mktCoupon, recoveryRate)[0]
         pctdiff = (v_exact - v_approx) / ONE_MILLION * 100.0
         testCases.print(mktCoupon * 10000, v_exact, v_approx, pctdiff)
+
 
 ##########################################################################
 
@@ -95,6 +92,7 @@ def test_CDSCurveRepricing():
     for cds in cdsContracts:
         spd = cds.parSpread(valuationDate, issuerCurve, recoveryRate)
         testCases.print(str(cds._maturityDate), spd * 10000.0)
+
 
 ##########################################################################
 
@@ -113,12 +111,13 @@ def test_CDSCurveBuildTiming():
     duration = (end - start) / numCurves
     testCases.print(str(numCurves) + " Libor curves", duration)
 
+
 ##########################################################################
 
 
 def test_IssuerCurveBuild():
-    ''' Test issuer curve build with simple libor curve to isolate cds
-    curve building time cost. '''
+    """Test issuer curve build with simple libor curve to isolate cds
+    curve building time cost."""
 
     valuationDate = FinDate(20, 6, 2018)
 
@@ -126,10 +125,9 @@ def test_IssuerCurveBuild():
     r = 0.05
     discountFactors = np.power((1.0 + r), -times)
     dates = valuationDate.addYears(times)
-    liborCurve = FinDiscountCurve(valuationDate,
-                                  dates,
-                                  discountFactors,
-                                  FinInterpTypes.FLAT_FWD_RATES)
+    liborCurve = FinDiscountCurve(
+        valuationDate, dates, discountFactors, FinInterpTypes.FLAT_FWD_RATES
+    )
     recoveryRate = 0.40
 
     cdsContracts = []
@@ -164,12 +162,10 @@ def test_IssuerCurveBuild():
     cds = FinCDS(valuationDate, maturityDate, cdsCoupon)
     cdsContracts.append(cds)
 
-    issuerCurve = FinCDSCurve(valuationDate,
-                              cdsContracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(valuationDate, cdsContracts, liborCurve, recoveryRate)
 
     return cdsContracts, issuerCurve
+
 
 ##########################################################################
 
@@ -226,7 +222,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.015910 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap1)
 
     maturityDate = settlementDate.addMonths(36)
@@ -236,7 +233,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.014990 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap2)
 
     maturityDate = settlementDate.addMonths(48)
@@ -246,7 +244,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.014725 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap3)
 
     maturityDate = settlementDate.addMonths(60)
@@ -256,7 +255,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.014640 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap4)
 
     maturityDate = settlementDate.addMonths(72)
@@ -266,7 +266,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.014800 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap5)
 
     maturityDate = settlementDate.addMonths(84)
@@ -276,7 +277,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.014995 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap6)
 
     maturityDate = settlementDate.addMonths(96)
@@ -286,7 +288,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.015180 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap7)
 
     maturityDate = settlementDate.addMonths(108)
@@ -296,7 +299,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.015610 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap8)
 
     maturityDate = settlementDate.addMonths(120)
@@ -306,7 +310,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.015880 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap9)
 
     maturityDate = settlementDate.addMonths(144)
@@ -316,7 +321,8 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.016430 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap10)
 
     liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
@@ -363,12 +369,12 @@ def buildFullIssuerCurve1(mktSpreadBump, irBump):
 
     recoveryRate = 0.40
 
-    issuerCurve = FinCDSCurve(valuationDate,
-                              cdsMarketContracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(
+        valuationDate, cdsMarketContracts, liborCurve, recoveryRate
+    )
 
     return liborCurve, issuerCurve
+
 
 ##########################################################################
 
@@ -390,38 +396,32 @@ def test_fullPriceCDS1():
     valuationDate = tradeDate.addDays(1)
     effectiveDate = valuationDate
 
-    cdsContract = FinCDS(effectiveDate,
-                         maturityDate,
-                         cdsCoupon,
-                         notional,
-                         longProtection)
+    cdsContract = FinCDS(
+        effectiveDate, maturityDate, cdsCoupon, notional, longProtection
+    )
 
     cdsRecovery = 0.40
 
     testCases.header("LABEL", "VALUE")
-    spd = cdsContract.parSpread(
-        valuationDate,
-        issuerCurve,
-        cdsRecovery) * 10000.0
+    spd = cdsContract.parSpread(valuationDate, issuerCurve, cdsRecovery) * 10000.0
     testCases.print("PAR_SPREAD", spd)
 
     v = cdsContract.value(valuationDate, issuerCurve, cdsRecovery)
-    testCases.print("FULL_VALUE", v['full_pv'])
-    testCases.print("CLEAN_VALUE", v['clean_pv'])
+    testCases.print("FULL_VALUE", v["full_pv"])
+    testCases.print("CLEAN_VALUE", v["clean_pv"])
 
     p = cdsContract.cleanPrice(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("CLEAN_PRICE", p)
 
     # MARKIT PRICE IS 168517
-    
+
     accruedDays = cdsContract.accruedDays()
     testCases.print("ACCRUED_DAYS", accruedDays)
 
     accruedInterest = cdsContract.accruedInterest()
     testCases.print("ACCRUED_COUPON", accruedInterest)
 
-    protPV = cdsContract.protectionLegPV(
-        valuationDate, issuerCurve, cdsRecovery)
+    protPV = cdsContract.protectionLegPV(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("PROTECTION_PV", protPV)
 
     premPV = cdsContract.premiumLegPV(valuationDate, issuerCurve, cdsRecovery)
@@ -437,28 +437,26 @@ def test_fullPriceCDS1():
 
     liborCurve, issuerCurve = buildFullIssuerCurve1(bump, 0)
     v_bump = cdsContract.value(valuationDate, issuerCurve, cdsRecovery)
-    dv = v_bump['full_pv'] - v['full_pv']
+    dv = v_bump["full_pv"] - v["full_pv"]
     testCases.print("CREDIT_DV01", dv)
 
     # Interest Rate Bump
     liborCurve, issuerCurve = buildFullIssuerCurve1(0, bump)
     v_bump = cdsContract.value(valuationDate, issuerCurve, cdsRecovery)
-    dv = v_bump['full_pv'] - v['full_pv']
+    dv = v_bump["full_pv"] - v["full_pv"]
     testCases.print("INTEREST_DV01", dv)
 
     t = (maturityDate - valuationDate) / gDaysInYear
     z = liborCurve.df(maturityDate)
     r = -np.log(z) / t
 
-    v_approx = cdsContract.valueFastApprox(valuationDate,
-                                           r,
-                                           mktSpread,
-                                           cdsRecovery)
+    v_approx = cdsContract.valueFastApprox(valuationDate, r, mktSpread, cdsRecovery)
 
     testCases.print("FULL APPROX VALUE", v_approx[0])
     testCases.print("CLEAN APPROX VALUE", v_approx[1])
     testCases.print("APPROX CREDIT DV01", v_approx[2])
     testCases.print("APPROX INTEREST DV01", v_approx[3])
+
 
 ##########################################################################
 
@@ -507,7 +505,8 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.002155 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap1)
 
     maturityDate = settlementDate.addMonths(36)
@@ -517,7 +516,8 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.002305 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap2)
 
     maturityDate = settlementDate.addMonths(48)
@@ -527,7 +527,8 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.002665 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap3)
 
     maturityDate = settlementDate.addMonths(60)
@@ -537,7 +538,8 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
         FinSwapTypes.PAY,
         m * 0.003290 + irBump,
         fixedFreq,
-        dcType)
+        dcType,
+    )
     swaps.append(swap4)
 
     liborCurve = FinIborSingleCurve(valuationDate, depos, [], swaps)
@@ -572,10 +574,9 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
 
     recoveryRate = 0.40
 
-    issuerCurve = FinCDSCurve(settlementDate,
-                              cdsMarketContracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(
+        settlementDate, cdsMarketContracts, liborCurve, recoveryRate
+    )
 
     testCases.header("DATE", "DISCOUNT_FACTOR", "SURV_PROB")
     years = np.linspace(0.0, 10.0, 20)
@@ -586,6 +587,7 @@ def buildFullIssuerCurve2(mktSpreadBump, irBump):
         testCases.print("%16s" % dt, "%12.8f" % df, "%12.8f" % q)
 
     return liborCurve, issuerCurve
+
 
 ##########################################################################
 
@@ -605,24 +607,19 @@ def test_fullPriceCDSModelCheck():
     effectiveDate = FinDate(21, 8, 2020)
     valuationDate = tradeDate
 
-    cdsContract = FinCDS(effectiveDate,
-                         maturityDate,
-                         cdsCoupon,
-                         notional,
-                         longProtection)
+    cdsContract = FinCDS(
+        effectiveDate, maturityDate, cdsCoupon, notional, longProtection
+    )
 
     cdsRecovery = 0.40
 
     testCases.header("LABEL", "VALUE")
-    spd = cdsContract.parSpread(
-        valuationDate,
-        issuerCurve,
-        cdsRecovery) * 10000.0
+    spd = cdsContract.parSpread(valuationDate, issuerCurve, cdsRecovery) * 10000.0
     testCases.print("PAR_SPREAD", spd)
 
     v = cdsContract.value(valuationDate, issuerCurve, cdsRecovery)
-    testCases.print("FULL_VALUE", v['full_pv'])
-    testCases.print("CLEAN_VALUE", v['clean_pv'])
+    testCases.print("FULL_VALUE", v["full_pv"])
+    testCases.print("CLEAN_VALUE", v["clean_pv"])
 
     p = cdsContract.cleanPrice(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("CLEAN_PRICE", p)
@@ -640,8 +637,8 @@ def test_fullPriceCDSModelCheck():
     testCases.print("PREMIUM_PV", premPV)
 
     rpv01 = cdsContract.riskyPV01(valuationDate, issuerCurve)
-    testCases.print("FULL_RPV01", rpv01['full_rpv01'])
-    testCases.print("CLEAN_RPV01", rpv01['clean_rpv01'])
+    testCases.print("FULL_RPV01", rpv01["full_rpv01"])
+    testCases.print("CLEAN_RPV01", rpv01["clean_rpv01"])
 
     creditDV01 = cdsContract.creditDV01(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("CREDIT DV01", creditDV01)
@@ -655,10 +652,7 @@ def test_fullPriceCDSModelCheck():
     r = -np.log(z) / t
 
     mktSpread = 0.01
-    v_approx = cdsContract.valueFastApprox(valuationDate,
-                                           r,
-                                           mktSpread,
-                                           cdsRecovery)
+    v_approx = cdsContract.valueFastApprox(valuationDate, r, mktSpread, cdsRecovery)
 
     testCases.header("FAST VALUATIONS", "VALUE")
 
@@ -666,6 +660,7 @@ def test_fullPriceCDSModelCheck():
     testCases.print("CLEAN APPROX VALUE", v_approx[1])
     testCases.print("APPROX CREDIT DV01", v_approx[2])
     testCases.print("APPROX INTEREST DV01", v_approx[3])
+
 
 ##########################################################################
 
@@ -682,19 +677,19 @@ def test_fullPriceCDSConvergence():
     tradeDate = FinDate(2019, 8, 9)
     valuationDate = tradeDate.addDays(1)
 
-    cdsContract = FinCDS(valuationDate,
-                         maturityDate,
-                         cdsCoupon,
-                         notional,
-                         longProtection)
+    cdsContract = FinCDS(
+        valuationDate, maturityDate, cdsCoupon, notional, longProtection
+    )
 
     cdsRecovery = 0.40
 
     testCases.header("NumSteps", "Value")
     for n in [10, 50, 100, 500, 1000]:
-        v_full = cdsContract.value(
-            valuationDate, issuerCurve, cdsRecovery, 0, 1, n)['full_pv']
+        v_full = cdsContract.value(valuationDate, issuerCurve, cdsRecovery, 0, 1, n)[
+            "full_pv"
+        ]
         testCases.print(n, v_full)
+
 
 ##########################################################################
 
@@ -708,26 +703,30 @@ def test_CDSDateGeneration():
     tradeDate = FinDate(2019, 8, 9)
     valuationDate = tradeDate.addDays(1)
 
-    cdsContract = FinCDS(valuationDate,
-                         maturityDate,
-                         cdsCoupon,
-                         ONE_MILLION,
-                         True,
-                         FinFrequencyTypes.QUARTERLY,
-                         FinDayCountTypes.ACT_360,
-                         FinCalendarTypes.WEEKEND,
-                         FinBusDayAdjustTypes.FOLLOWING,
-                         FinDateGenRuleTypes.BACKWARD)
+    cdsContract = FinCDS(
+        valuationDate,
+        maturityDate,
+        cdsCoupon,
+        ONE_MILLION,
+        True,
+        FinFrequencyTypes.QUARTERLY,
+        FinDayCountTypes.ACT_360,
+        FinCalendarTypes.WEEKEND,
+        FinBusDayAdjustTypes.FOLLOWING,
+        FinDateGenRuleTypes.BACKWARD,
+    )
 
     testCases.header("Flow Date", "AccrualFactor", "Flow")
     numFlows = len(cdsContract._adjustedDates)
     for n in range(0, numFlows):
-        testCases.print(str(
-            cdsContract._adjustedDates[n]), cdsContract._accrualFactors[n],
-            cdsContract._flows[n])
+        testCases.print(
+            str(cdsContract._adjustedDates[n]),
+            cdsContract._accrualFactors[n],
+            cdsContract._flows[n],
+        )
+
 
 ##########################################################################
-
 
 
 test_CDSCurveBuildTiming()

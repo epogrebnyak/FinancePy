@@ -33,19 +33,22 @@ def _f(df, *args):
     objFn = bondDiscountPrice - marketCleanPrice
     return objFn
 
+
 ###############################################################################
 
 
 class FinBondZeroCurve(FinDiscountCurve):
-    ''' Class to do bootstrap exact fitting of the bond zero rate curve. '''
+    """ Class to do bootstrap exact fitting of the bond zero rate curve. """
 
-    def __init__(self,
-                 valuationDate: FinDate,
-                 bonds: list,
-                 cleanPrices: list,
-                 interpType: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES):
-        ''' Fit a discount curve to a set of bond yields using the type of
-        curve specified. '''
+    def __init__(
+        self,
+        valuationDate: FinDate,
+        bonds: list,
+        cleanPrices: list,
+        interpType: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES,
+    ):
+        """Fit a discount curve to a set of bond yields using the type of
+        curve specified."""
 
         if len(bonds) != len(cleanPrices):
             raise FinError("Num bonds does not equal number of prices.")
@@ -59,7 +62,7 @@ class FinBondZeroCurve(FinDiscountCurve):
 
         times = []
         for bond in self._bonds:
-            tmat = (bond._maturityDate - self._settlementDate)/gDaysInYear
+            tmat = (bond._maturityDate - self._settlementDate) / gDaysInYear
             times.append(tmat)
 
         times = np.array(times)
@@ -70,7 +73,7 @@ class FinBondZeroCurve(FinDiscountCurve):
 
         self._bootstrapZeroRates()
 
-###############################################################################
+    ###############################################################################
 
     def _bootstrapZeroRates(self):
 
@@ -87,63 +90,66 @@ class FinBondZeroCurve(FinDiscountCurve):
             self._times = np.append(self._times, tmat)
             self._values = np.append(self._values, df)
 
-            optimize.newton(_f, x0=df, fprime=None, args=argtuple,
-                            tol=1e-8, maxiter=100, fprime2=None)
+            optimize.newton(
+                _f,
+                x0=df,
+                fprime=None,
+                args=argtuple,
+                tol=1e-8,
+                maxiter=100,
+                fprime2=None,
+            )
 
-###############################################################################
+    ###############################################################################
 
-    def zeroRate(self,
-                 dt: FinDate,
-                 frequencyType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS):
-        ''' Calculate the zero rate to maturity date. '''
+    def zeroRate(
+        self,
+        dt: FinDate,
+        frequencyType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
+    ):
+        """ Calculate the zero rate to maturity date. """
         t = inputTime(dt, self)
         f = FinFrequency(frequencyType)
         df = self.df(t)
 
         if f == 0:  # Simple interest
-            zeroRate = (1.0/df-1.0)/t
+            zeroRate = (1.0 / df - 1.0) / t
         if f == -1:  # Continuous
             zeroRate = -np.log(df) / t
         else:
-            zeroRate = (df**(-1.0/t) - 1) * f
+            zeroRate = (df ** (-1.0 / t) - 1) * f
         return zeroRate
 
-###############################################################################
+    ###############################################################################
 
-    def df(self,
-           dt: FinDate):
+    def df(self, dt: FinDate):
         t = inputTime(dt, self)
         z = interpolate(t, self._times, self._values, self._interpType.value)
         return z
 
-###############################################################################
+    ###############################################################################
 
-    def survProb(self,
-                 dt: FinDate):
+    def survProb(self, dt: FinDate):
         t = inputTime(dt, self)
         q = interpolate(t, self._times, self._values, self._interpType.value)
         return q
 
-###############################################################################
+    ###############################################################################
 
-    def fwd(self,
-            dt: FinDate):
-        ''' Calculate the continuous forward rate at the forward date. '''
+    def fwd(self, dt: FinDate):
+        """ Calculate the continuous forward rate at the forward date. """
         t = inputTime(dt, self)
         dt = 0.000001
         df1 = self.df(t)
-        df2 = self.df(t+dt)
-        fwd = np.log(df1/df2)/dt
+        df2 = self.df(t + dt)
+        fwd = np.log(df1 / df2) / dt
         return fwd
 
-###############################################################################
+    ###############################################################################
 
-    def fwdRate(self,
-                date1: FinDate,
-                date2: FinDate,
-                dayCountType: FinDayCountTypes):
-        ''' Calculate the forward rate according to the specified
-        day count convention. '''
+    def fwdRate(self, date1: FinDate, date2: FinDate, dayCountType: FinDayCountTypes):
+        """Calculate the forward rate according to the specified
+        day count convention."""
 
         if date1 < self._valuationDate:
             raise FinError("Date1 before curve value date.")
@@ -158,28 +164,27 @@ class FinBondZeroCurve(FinDiscountCurve):
         fwd = (df1 / df2 - 1.0) / yearFrac
         return fwd
 
-###############################################################################
+    ###############################################################################
 
-    def plot(self,
-             title: str):
-        ''' Display yield curve. '''
+    def plot(self, title: str):
+        """ Display yield curve. """
 
         plt.figure(figsize=(12, 6))
         plt.title(title)
-        plt.xlabel('Time to Maturity (years)')
-        plt.ylabel('Zero Rate (%)')
+        plt.xlabel("Time to Maturity (years)")
+        plt.ylabel("Zero Rate (%)")
 
         tmax = np.max(self._yearsToMaturity)
-        t = np.linspace(0.0, int(tmax+0.5), 100)
+        t = np.linspace(0.0, int(tmax + 0.5), 100)
 
         zeroRate = self.zeroRate(t)
         zeroRate = scale(zeroRate, 100.0)
-        plt.plot(t, zeroRate, label="Zero Rate Bootstrap", marker='o')
-        plt.legend(loc='lower right')
-        plt.ylim((min(zeroRate)-0.3, max(zeroRate)*1.1))
+        plt.plot(t, zeroRate, label="Zero Rate Bootstrap", marker="o")
+        plt.legend(loc="lower right")
+        plt.ylim((min(zeroRate) - 0.3, max(zeroRate) * 1.1))
         plt.grid(True)
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         # TODO
@@ -190,10 +195,11 @@ class FinBondZeroCurve(FinDiscountCurve):
         s += tableToString(header, valueTable, precision)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

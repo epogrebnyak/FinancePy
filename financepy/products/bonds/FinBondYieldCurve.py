@@ -25,21 +25,19 @@ from scipy.interpolate import splrep
 ###############################################################################
 
 
-class FinBondYieldCurve():
-    ''' Class to do fitting of the yield curve and to enable interpolation of
+class FinBondYieldCurve:
+    """Class to do fitting of the yield curve and to enable interpolation of
     yields. Because yields assume a flat term structure for each bond, this
     class does not allow discounting to be done and so does not inherit from
     FinDiscountCurve. It should only be used for visualisation and simple
-    interpolation but not for full term-structure-consistent pricing. '''
+    interpolation but not for full term-structure-consistent pricing."""
 
-    def __init__(self,
-                 settlementDate: FinDate,
-                 bonds: list,
-                 ylds: (np.ndarray, list),
-                 curveFit):
-        ''' Fit the curve to a set of bond yields using the type of curve
+    def __init__(
+        self, settlementDate: FinDate, bonds: list, ylds: (np.ndarray, list), curveFit
+    ):
+        """Fit the curve to a set of bond yields using the type of curve
         specified. Bounds can be provided if you wish to enforce lower and
-        upper limits on the respective model parameters. '''
+        upper limits on the respective model parameters."""
 
         self._settlementDate = settlementDate
         self._bonds = bonds
@@ -51,7 +49,7 @@ class FinBondYieldCurve():
 
         yearsToMaturities = []
         for bond in bonds:
-            maturityYears = (bond._maturityDate-settlementDate)/gDaysInYear
+            maturityYears = (bond._maturityDate - settlementDate) / gDaysInYear
             yearsToMaturities.append(maturityYears)
         self._yearsToMaturity = np.array(yearsToMaturities)
 
@@ -66,8 +64,9 @@ class FinBondYieldCurve():
             xdata = self._yearsToMaturity
             ydata = self._ylds
 
-            popt, pcov = curve_fit(self._curveFit._interpolatedYield,
-                                   xdata, ydata, bounds=fit._bounds)
+            popt, pcov = curve_fit(
+                self._curveFit._interpolatedYield, xdata, ydata, bounds=fit._bounds
+            )
 
             fit._beta1 = popt[0]
             fit._beta2 = popt[1]
@@ -79,8 +78,9 @@ class FinBondYieldCurve():
             xdata = self._yearsToMaturity
             ydata = self._ylds
 
-            popt, pcov = curve_fit(self._curveFit._interpolatedYield,
-                                   xdata, ydata, bounds=fit._bounds)
+            popt, pcov = curve_fit(
+                self._curveFit._interpolatedYield, xdata, ydata, bounds=fit._bounds
+            )
 
             fit._beta1 = popt[0]
             fit._beta2 = popt[1]
@@ -94,17 +94,16 @@ class FinBondYieldCurve():
             xdata = self._yearsToMaturity
             ydata = self._ylds
 
-            ''' Cubic splines as k=3 '''
+            """ Cubic splines as k=3 """
             spline = splrep(xdata, ydata, k=fit._power, t=fit._knots)
             fit._spline = spline
 
         else:
             raise FinError("Unrecognised curve fit type.")
 
-###############################################################################
+    ###############################################################################
 
-    def interpolatedYield(self,
-                          maturityDate: FinDate):
+    def interpolatedYield(self, maturityDate: FinDate):
 
         if type(maturityDate) is FinDate:
             t = (maturityDate - self._settlementDate) / gDaysInYear
@@ -122,50 +121,43 @@ class FinBondYieldCurve():
         if type(fit) == FinCurveFitPolynomial:
             yld = fit._interpolatedYield(t)
         elif type(fit) == FinCurveFitNelsonSiegel:
-            yld = fit._interpolatedYield(t,
-                                         fit._beta1,
-                                         fit._beta2,
-                                         fit._beta3,
-                                         fit._tau)
+            yld = fit._interpolatedYield(
+                t, fit._beta1, fit._beta2, fit._beta3, fit._tau
+            )
 
         elif type(fit) == FinCurveFitNelsonSiegelSvensson:
-            yld = fit._interpolatedYield(t,
-                                         fit._beta1,
-                                         fit._beta2,
-                                         fit._beta3,
-                                         fit._beta4,
-                                         fit._tau1,
-                                         fit._tau2)
+            yld = fit._interpolatedYield(
+                t, fit._beta1, fit._beta2, fit._beta3, fit._beta4, fit._tau1, fit._tau2
+            )
 
         elif type(fit) == FinCurveFitBSpline:
             yld = fit._interpolatedYield(t)
 
         return yld
 
-###############################################################################
+    ###############################################################################
 
-    def plot(self,
-             title):
-        ''' Display yield curve. '''
+    def plot(self, title):
+        """ Display yield curve. """
 
         plt.figure(figsize=(12, 6))
         plt.title(title)
         bond_ylds_scaled = scale(self._ylds, 100.0)
-        plt.plot(self._yearsToMaturity, bond_ylds_scaled, 'o')
-        plt.xlabel('Time to Maturity (years)')
-        plt.ylabel('Yield To Maturity (%)')
+        plt.plot(self._yearsToMaturity, bond_ylds_scaled, "o")
+        plt.xlabel("Time to Maturity (years)")
+        plt.ylabel("Yield To Maturity (%)")
 
         tmax = np.max(self._yearsToMaturity)
-        t = np.linspace(0.0, int(tmax+0.5), 100)
+        t = np.linspace(0.0, int(tmax + 0.5), 100)
 
         yld = self.interpolatedYield(t)
         yld = scale(yld, 100.0)
         plt.plot(t, yld, label=str(self._curveFit))
-        plt.legend(loc='lower right')
-        plt.ylim((min(yld)-0.3, max(yld)*1.1))
+        plt.legend(loc="lower right")
+        plt.ylim((min(yld) - 0.3, max(yld) * 1.1))
         plt.grid(True)
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -175,10 +167,11 @@ class FinBondYieldCurve():
         s += labelToString("CURVE FIT", self._curveFit)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ##############################################################################

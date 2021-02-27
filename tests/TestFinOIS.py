@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinMath import ONE_MILLION
@@ -14,9 +15,11 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
+
 
 def test_FinFixedOIS():
 
@@ -36,36 +39,38 @@ def test_FinFixedOIS():
     floatSpread = 0.0
     notional = ONE_MILLION
     paymentLag = 1
-    
-    ois = FinOIS(effectiveDate,
-                 endDate,
-                 fixedLegType,
-                 oisRate,
-                 fixedFreqType,
-                 fixedDayCount,
-                 notional,
-                 paymentLag,
-                 floatSpread,
-                 floatFreqType,
-                 floatDayCount)
 
-#    print(ois)
+    ois = FinOIS(
+        effectiveDate,
+        endDate,
+        fixedLegType,
+        oisRate,
+        fixedFreqType,
+        fixedDayCount,
+        notional,
+        paymentLag,
+        floatSpread,
+        floatFreqType,
+        floatDayCount,
+    )
+
+    #    print(ois)
 
     valueDate = effectiveDate
     marketRate = 0.05
-    oisCurve = FinDiscountCurveFlat(valueDate, marketRate,
-                                    FinFrequencyTypes.ANNUAL)
+    oisCurve = FinDiscountCurveFlat(valueDate, marketRate, FinFrequencyTypes.ANNUAL)
 
     v = ois.value(effectiveDate, oisCurve)
-    
-#    print(v)
-    
-#    ois._fixedLeg.printValuation()
-#    ois._floatLeg.printValuation()
-    
+
+    #    print(v)
+
+    #    ois._fixedLeg.printValuation()
+    #    ois._floatLeg.printValuation()
+
     testCases.header("LABEL", "VALUE")
     testCases.print("SWAP_VALUE", v)
-    
+
+
 ###############################################################################
 
 test_FinFixedOIS()

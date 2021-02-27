@@ -19,6 +19,7 @@ from ...finutils.FinDate import FinDate
 from ...models.FinModelBlackScholes import bsValue
 
 from scipy.stats import norm
+
 N = norm.cdf
 
 ###############################################################################
@@ -29,9 +30,9 @@ N = norm.cdf
 
 
 def _f(ss, *args):
-    ''' Complex chooser option solve for critical stock price that makes the
+    """Complex chooser option solve for critical stock price that makes the
     forward starting call and put options have the same price on the chooser
-    date. '''
+    date."""
 
     t = args[0]
     tc = args[1]
@@ -43,31 +44,34 @@ def _f(ss, *args):
     v = args[7]
     q = args[8]
 
-    v_call = bsValue(ss, tc-t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value)
-    v_put = bsValue(ss, tp-t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
+    v_call = bsValue(ss, tc - t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value)
+    v_put = bsValue(ss, tp - t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
 
     v = v_call - v_put
     return v
+
 
 ###############################################################################
 
 
 class FinEquityChooserOption(FinEquityOption):
-    ''' A FinEquityChooserOption is an option which allows the holder to
+    """A FinEquityChooserOption is an option which allows the holder to
     either enter into a call or a put option on a later expiry date, with both
     strikes potentially different and both expiry dates potentially different.
     This is known as a complex chooser. All the option details are set at trade
-    initiation. '''
+    initiation."""
 
-    def __init__(self,
-                 chooseDate: FinDate,
-                 callExpiryDate: FinDate,
-                 putExpiryDate: FinDate,
-                 callStrikePrice: float,
-                 putStrikePrice: float):
-        ''' Create the FinEquityChooserOption by passing in the chooser date
+    def __init__(
+        self,
+        chooseDate: FinDate,
+        callExpiryDate: FinDate,
+        putExpiryDate: FinDate,
+        callStrikePrice: float,
+        putStrikePrice: float,
+    ):
+        """Create the FinEquityChooserOption by passing in the chooser date
         and then the put and call expiry dates as well as the corresponding put
-        and call strike prices. '''
+        and call strike prices."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -83,16 +87,18 @@ class FinEquityChooserOption(FinEquityOption):
         self._callStrike = float(callStrikePrice)
         self._putStrike = float(putStrikePrice)
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              valueDate: FinDate,
-              stockPrice: float,
-              discountCurve: FinDiscountCurve,
-              dividendCurve: FinDiscountCurve,
-              model):
-        ''' Value the complex chooser option using an approach by Rubinstein
-        (1991). See also Haug page 129 for complex chooser options. '''
+    def value(
+        self,
+        valueDate: FinDate,
+        stockPrice: float,
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+    ):
+        """Value the complex chooser option using an approach by Rubinstein
+        (1991). See also Haug page 129 for complex chooser options."""
 
         if valueDate > self._chooseDate:
             raise FinError("Value date after choose date.")
@@ -127,28 +133,29 @@ class FinEquityChooserOption(FinEquityOption):
         if DEBUG_MODE:
             print("args", argtuple)
 
-        istar = optimize.newton(_f, x0=s0, args=argtuple, tol=1e-8,
-                                maxiter=50, fprime2=None)
+        istar = optimize.newton(
+            _f, x0=s0, args=argtuple, tol=1e-8, maxiter=50, fprime2=None
+        )
 
         if DEBUG_MODE:
             print("istar", istar)
 
-        d1 = (np.log(s0/istar) + (bt + v*v/2)*t) / v / np.sqrt(t)
+        d1 = (np.log(s0 / istar) + (bt + v * v / 2) * t) / v / np.sqrt(t)
         d2 = d1 - v * np.sqrt(t)
 
         if DEBUG_MODE:
             print("d1", d1)
             print("d2", d2)
 
-        y1 = (np.log(s0/xc) + (btc + v*v/2)*tc) / v / np.sqrt(tc)
-        y2 = (np.log(s0/xp) + (btp + v*v/2)*tp) / v / np.sqrt(tp)
+        y1 = (np.log(s0 / xc) + (btc + v * v / 2) * tc) / v / np.sqrt(tc)
+        y2 = (np.log(s0 / xp) + (btp + v * v / 2) * tp) / v / np.sqrt(tp)
 
         if DEBUG_MODE:
             print("y1", y1)
             print("y2", y2)
 
-        rho1 = np.sqrt(t/tc)
-        rho2 = np.sqrt(t/tp)
+        rho1 = np.sqrt(t / tc)
+        rho2 = np.sqrt(t / tp)
 
         if DEBUG_MODE:
             print("rho1", rho1)
@@ -160,17 +167,19 @@ class FinEquityChooserOption(FinEquityOption):
         w = w + xp * np.exp(-rtp * tp) * M(-d2, -y2 + v * np.sqrt(tp), rho2)
         return w
 
-###############################################################################
+    ###############################################################################
 
-    def valueMC(self,
-                valueDate: FinDate,
-                stockPrice: float,
-                discountCurve: FinDiscountCurve,
-                dividendCurve: FinDiscountCurve,
-                model,
-                numPaths: int = 10000,
-                seed: int = 4242):
-        ''' Value the complex chooser option Monte Carlo. '''
+    def valueMC(
+        self,
+        valueDate: FinDate,
+        stockPrice: float,
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+        numPaths: int = 10000,
+        seed: int = 4242,
+    ):
+        """ Value the complex chooser option Monte Carlo. """
 
         dft = discountCurve.df(self._chooseDate)
         dftc = discountCurve.df(self._callExpiryDate)
@@ -195,7 +204,7 @@ class FinEquityChooserOption(FinEquityOption):
         dq = dividendCurve.df(self._chooseDate)
         q = -np.log(dq) / t
 
-#        q = dividendYield
+        #        q = dividendYield
         kc = self._callStrike
         kp = self._putStrike
 
@@ -204,17 +213,21 @@ class FinEquityChooserOption(FinEquityOption):
 
         # Use Antithetic variables
         g = np.random.normal(0.0, 1.0, size=(1, numPaths))
-        s = stockPrice * np.exp((rt - q - v*v / 2.0) * t)
+        s = stockPrice * np.exp((rt - q - v * v / 2.0) * t)
         m = np.exp(g * sqrtdt * v)
 
         s_1 = s * m
         s_2 = s / m
 
-        v_call_1 = bsValue(s_1, tc-t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value)
-        v_put_1 = bsValue(s_1, tp-t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
+        v_call_1 = bsValue(
+            s_1, tc - t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value
+        )
+        v_put_1 = bsValue(s_1, tp - t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
 
-        v_call_2 = bsValue(s_2, tc-t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value)
-        v_put_2 = bsValue(s_2, tp-t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
+        v_call_2 = bsValue(
+            s_2, tc - t, kc, rtc, q, v, FinOptionTypes.EUROPEAN_CALL.value
+        )
+        v_put_2 = bsValue(s_2, tp - t, kp, rtp, q, v, FinOptionTypes.EUROPEAN_PUT.value)
 
         payoff_1 = np.maximum(v_call_1, v_put_1)
         payoff_2 = np.maximum(v_call_2, v_put_2)
@@ -223,7 +236,7 @@ class FinEquityChooserOption(FinEquityOption):
         v = payoff * dft / 2.0
         return v
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -234,10 +247,11 @@ class FinEquityChooserOption(FinEquityOption):
         s += labelToString("PUT STRIKE PRICE", self._putStrike, "")
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

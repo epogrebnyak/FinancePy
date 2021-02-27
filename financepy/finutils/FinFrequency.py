@@ -18,12 +18,13 @@ class FinFrequencyTypes(Enum):
     MONTHLY = 12
     CONTINUOUS = 99
 
+
 ###############################################################################
 
 
 def FinFrequency(freqType):
-    ''' This is a function that takes in a Frequency Type and returns an
-    integer for the number of times a year a payment occurs.'''
+    """This is a function that takes in a Frequency Type and returns an
+    integer for the number of times a year a payment occurs."""
     if isinstance(freqType, FinFrequencyTypes) is False:
         print("FinFrequency:", freqType)
         raise FinError("Unknown frequency type")
@@ -42,5 +43,6 @@ def FinFrequency(freqType):
         return 4
     elif freqType == FinFrequencyTypes.MONTHLY:
         return 12
+
 
 ###############################################################################

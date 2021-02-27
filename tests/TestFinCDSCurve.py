@@ -5,6 +5,7 @@
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.credit.FinCDS import FinCDS
@@ -17,6 +18,7 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -37,12 +39,9 @@ def test_FinCDSCurve():
     for i in range(1, 11):
 
         maturityDate = curveDate.addMonths(12 * i)
-        swap = FinIborSwap(curveDate,
-                           maturityDate,
-                           FinSwapTypes.PAY,
-                           fixedCoupon,
-                           fixedFreq,
-                           fixedDCC)
+        swap = FinIborSwap(
+            curveDate, maturityDate, FinSwapTypes.PAY, fixedCoupon, fixedFreq, fixedDCC
+        )
         swaps.append(swap)
 
     libor_curve = FinIborSingleCurve(curveDate, depos, fras, swaps)
@@ -54,11 +53,9 @@ def test_FinCDSCurve():
         cds = FinCDS(curveDate, maturityDate, 0.005 + 0.001 * (i - 1))
         cdsContracts.append(cds)
 
-    issuerCurve = FinCDSCurve(curveDate,
-                              cdsContracts,
-                              libor_curve,
-                              recoveryRate=0.40,
-                              useCache=False)
+    issuerCurve = FinCDSCurve(
+        curveDate, cdsContracts, libor_curve, recoveryRate=0.40, useCache=False
+    )
 
     testCases.header("T", "Q")
     n = len(issuerCurve._times)
@@ -90,6 +87,7 @@ def test_FinCDSCurve():
         xx = np.array(x)
         dfs = issuerCurve.df(xx)
         print("===>", dfs)
+
 
 ###############################################################################
 

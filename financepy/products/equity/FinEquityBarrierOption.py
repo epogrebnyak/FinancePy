@@ -31,24 +31,27 @@ class FinEquityBarrierTypes(Enum):
     DOWN_AND_OUT_PUT = 7
     DOWN_AND_IN_PUT = 8
 
+
 ###############################################################################
 
 
 class FinEquityBarrierOption(FinEquityOption):
-    ''' Class to hold details of an Equity Barrier Option. It also
+    """Class to hold details of an Equity Barrier Option. It also
     calculates the option price using Black Scholes for 8 different
-    variants on the Barrier structure in enum FinEquityBarrierTypes. '''
+    variants on the Barrier structure in enum FinEquityBarrierTypes."""
 
-    def __init__(self,
-                 expiryDate: FinDate,
-                 strikePrice: float,
-                 optionType: FinEquityBarrierTypes,
-                 barrierLevel: float,
-                 numObservationsPerYear: (int, float) = 252,
-                 notional: float = 1.0):
-        ''' Create the FinEquityBarrierOption by specifying the expiry date,
+    def __init__(
+        self,
+        expiryDate: FinDate,
+        strikePrice: float,
+        optionType: FinEquityBarrierTypes,
+        barrierLevel: float,
+        numObservationsPerYear: (int, float) = 252,
+        notional: float = 1.0,
+    ):
+        """Create the FinEquityBarrierOption by specifying the expiry date,
         strike price, option type, barrier level, the number of observations
-        per year and the notional. '''
+        per year and the notional."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -63,20 +66,22 @@ class FinEquityBarrierOption(FinEquityOption):
         self._optionType = optionType
         self._notional = notional
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              valueDate: FinDate,
-              stockPrice: (float, np.ndarray),
-              discountCurve: FinDiscountCurve,
-              dividendCurve: FinDiscountCurve,
-              model):
-        ''' This prices an Equity Barrier option using the formulae given in
+    def value(
+        self,
+        valueDate: FinDate,
+        stockPrice: (float, np.ndarray),
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+    ):
+        """This prices an Equity Barrier option using the formulae given in
         the paper by Clewlow, Llanos and Strickland December 1994 which can be
         found at
 
         https://warwick.ac.uk/fac/soc/wbs/subjects/finance/research/wpaperseries/1994/94-54.pdf
-        '''
+        """
 
         if isinstance(stockPrice, int):
             stockPrice = float(stockPrice)
@@ -88,8 +93,7 @@ class FinEquityBarrierOption(FinEquityOption):
 
         values = []
         for s in stockPrices:
-            v = self._valueOne(valueDate, s, discountCurve,
-                               dividendCurve, model)
+            v = self._valueOne(valueDate, s, discountCurve, dividendCurve, model)
             values.append(v)
 
         if isinstance(stockPrice, float):
@@ -97,16 +101,18 @@ class FinEquityBarrierOption(FinEquityOption):
         else:
             return np.array(values)
 
-###############################################################################
+    ###############################################################################
 
-    def _valueOne(self,
-                  valueDate: FinDate,
-                  stockPrice: (float, np.ndarray),
-                  discountCurve: FinDiscountCurve,
-                  dividendCurve: FinDiscountCurve,
-                  model):
-        ''' This values a single option. Because of its structure it cannot
-        easily be vectorised which is why it has been wrapped. '''
+    def _valueOne(
+        self,
+        valueDate: FinDate,
+        stockPrice: (float, np.ndarray),
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        model,
+    ):
+        """This values a single option. Because of its structure it cannot
+        easily be vectorised which is why it has been wrapped."""
 
         texp = (self._expiryDate - valueDate) / gDaysInYear
 
@@ -136,7 +142,7 @@ class FinEquityBarrierOption(FinEquityOption):
 
         c = s * dq * N(d1) - k * df * N(d2)
         p = k * df * N(-d2) - s * dq * N(-d1)
-#        print("CALL:",c,"PUT:",p)
+        #        print("CALL:",c,"PUT:",p)
 
         if self._optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL and s <= h:
             return 0.0
@@ -179,8 +185,7 @@ class FinEquityBarrierOption(FinEquityOption):
         elif self._optionType == FinEquityBarrierTypes.DOWN_AND_IN_PUT:
             h_adj = h * np.exp(-0.5826 * volatility * np.sqrt(t))
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._optionType))
+            raise FinError("Unknown barrier option type." + str(self._optionType))
 
         h = h_adj
 
@@ -195,105 +200,141 @@ class FinEquityBarrierOption(FinEquityOption):
 
         if self._optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL:
             if h >= k:
-                c_do = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                    - s * dq * pow(hOverS, 2.0 * l) * N(y1) \
+                c_do = (
+                    s * dq * N(x1)
+                    - k * df * N(x1 - sigmaRootT)
+                    - s * dq * pow(hOverS, 2.0 * l) * N(y1)
                     + k * df * pow(hOverS, 2.0 * l - 2.0) * N(y1 - sigmaRootT)
+                )
                 price = c_do
             else:
-                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) \
-                    - k * df * pow(hOverS, 2.0 * l - 2.0) * N(y - sigmaRootT)
+                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) - k * df * pow(
+                    hOverS, 2.0 * l - 2.0
+                ) * N(y - sigmaRootT)
                 price = c - c_di
         elif self._optionType == FinEquityBarrierTypes.DOWN_AND_IN_CALL:
             if h <= k:
-                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) \
-                    - k * df * pow(hOverS, 2.0 * l - 2.0) * N(y - sigmaRootT)
+                c_di = s * dq * pow(hOverS, 2.0 * l) * N(y) - k * df * pow(
+                    hOverS, 2.0 * l - 2.0
+                ) * N(y - sigmaRootT)
                 price = c_di
             else:
-                c_do = s * dq * N(x1) \
-                    - k * df * N(x1 - sigmaRootT) \
-                    - s * dq * pow(hOverS, 2.0 * l) * N(y1) \
+                c_do = (
+                    s * dq * N(x1)
+                    - k * df * N(x1 - sigmaRootT)
+                    - s * dq * pow(hOverS, 2.0 * l) * N(y1)
                     + k * df * pow(hOverS, 2.0 * l - 2.0) * N(y1 - sigmaRootT)
+                )
                 price = c - c_do
         elif self._optionType == FinEquityBarrierTypes.UP_AND_IN_CALL:
             if h >= k:
-                c_ui = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                    - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1)) \
-                    + k * df * pow(hOverS, 2.0 * l - 2.0) * (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                c_ui = (
+                    s * dq * N(x1)
+                    - k * df * N(x1 - sigmaRootT)
+                    - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1))
+                    + k
+                    * df
+                    * pow(hOverS, 2.0 * l - 2.0)
+                    * (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                )
                 price = c_ui
             else:
                 price = c
         elif self._optionType == FinEquityBarrierTypes.UP_AND_OUT_CALL:
             if h > k:
-                c_ui = s * dq * N(x1) - k * df * N(x1 - sigmaRootT) \
-                     - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1)) \
-                     + k * df * pow(hOverS, 2.0 * l - 2.0) * (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                c_ui = (
+                    s * dq * N(x1)
+                    - k * df * N(x1 - sigmaRootT)
+                    - s * dq * pow(hOverS, 2.0 * l) * (N(-y) - N(-y1))
+                    + k
+                    * df
+                    * pow(hOverS, 2.0 * l - 2.0)
+                    * (N(-y + sigmaRootT) - N(-y1 + sigmaRootT))
+                )
                 price = c - c_ui
             else:
                 price = 0.0
         elif self._optionType == FinEquityBarrierTypes.UP_AND_IN_PUT:
             if h > k:
-                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) \
-                    + k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y + sigmaRootT)
+                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) + k * df * pow(
+                    hOverS, 2.0 * l - 2.0
+                ) * N(-y + sigmaRootT)
                 price = p_ui
             else:
-                p_uo = -s * dq * N(-x1) \
-                    + k * df * N(-x1 + sigmaRootT) \
-                    + s * dq * pow(hOverS, 2.0 * l) * N(-y1) \
+                p_uo = (
+                    -s * dq * N(-x1)
+                    + k * df * N(-x1 + sigmaRootT)
+                    + s * dq * pow(hOverS, 2.0 * l) * N(-y1)
                     - k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y1 + sigmaRootT)
+                )
                 price = p - p_uo
         elif self._optionType == FinEquityBarrierTypes.UP_AND_OUT_PUT:
             if h >= k:
-                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) \
-                    + k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y + sigmaRootT)
+                p_ui = -s * dq * pow(hOverS, 2.0 * l) * N(-y) + k * df * pow(
+                    hOverS, 2.0 * l - 2.0
+                ) * N(-y + sigmaRootT)
                 price = p - p_ui
             else:
-                p_uo = -s * dq * N(-x1) \
-                    + k * df * N(-x1 + sigmaRootT) \
-                    + s * dq * pow(hOverS, 2.0 * l) * N(-y1) \
+                p_uo = (
+                    -s * dq * N(-x1)
+                    + k * df * N(-x1 + sigmaRootT)
+                    + s * dq * pow(hOverS, 2.0 * l) * N(-y1)
                     - k * df * pow(hOverS, 2.0 * l - 2.0) * N(-y1 + sigmaRootT)
+                )
                 price = p_uo
         elif self._optionType == FinEquityBarrierTypes.DOWN_AND_OUT_PUT:
             if h >= k:
                 price = 0.0
             else:
-                p_di = -s * dq * N(-x1) \
-                    + k * df * N(-x1 + sigmaRootT) \
-                    + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1)) \
-                    - k * df * pow(hOverS, 2.0 * l - 2.0) * (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                p_di = (
+                    -s * dq * N(-x1)
+                    + k * df * N(-x1 + sigmaRootT)
+                    + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1))
+                    - k
+                    * df
+                    * pow(hOverS, 2.0 * l - 2.0)
+                    * (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                )
                 price = p - p_di
         elif self._optionType == FinEquityBarrierTypes.DOWN_AND_IN_PUT:
             if h >= k:
                 price = p
             else:
-                p_di = -s * dq * N(-x1) \
-                    + k * df * N(-x1 + sigmaRootT) \
-                    + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1)) \
-                    - k * df * pow(hOverS, 2.0 * l - 2.0) * (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                p_di = (
+                    -s * dq * N(-x1)
+                    + k * df * N(-x1 + sigmaRootT)
+                    + s * dq * pow(hOverS, 2.0 * l) * (N(y) - N(y1))
+                    - k
+                    * df
+                    * pow(hOverS, 2.0 * l - 2.0)
+                    * (N(y - sigmaRootT) - N(y1 - sigmaRootT))
+                )
                 price = p_di
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._optionType))
+            raise FinError("Unknown barrier option type." + str(self._optionType))
 
         v = price * self._notional
         return v
 
-###############################################################################
+    ###############################################################################
 
-    def valueMC(self,
-                valueDate: FinDate,
-                stockPrice: float,
-                discountCurve: FinDiscountCurve,
-                dividendCurve: FinDiscountCurve,
-                processType,
-                modelParams,
-                numAnnObs: int = 252,
-                numPaths: int = 10000,
-                seed: int = 4242):
-        ''' A Monte-Carlo based valuation of the barrier option which simulates
+    def valueMC(
+        self,
+        valueDate: FinDate,
+        stockPrice: float,
+        discountCurve: FinDiscountCurve,
+        dividendCurve: FinDiscountCurve,
+        processType,
+        modelParams,
+        numAnnObs: int = 252,
+        numPaths: int = 10000,
+        seed: int = 4242,
+    ):
+        """A Monte-Carlo based valuation of the barrier option which simulates
         the evolution of the stock price of at a specified number of annual
         observation times until expiry to examine if the barrier has been
         crossed and the corresponding value of the final payoff, if any. It
-        assumes a GBM model for the stock price. '''
+        assumes a GBM model for the stock price."""
 
         texp = (self._expiryDate - valueDate) / gDaysInYear
         numTimeSteps = int(texp * numAnnObs)
@@ -304,12 +345,12 @@ class FinEquityBarrierOption(FinEquityOption):
         process = FinProcessSimulator()
 
         r = discountCurve.zeroRate(self._expiryDate)
-        
+
         # TODO - NEED TO DECIDE IF THIS IS PART OF MODEL PARAMS OR NOT ??????????????
 
         r = discountCurve.ccRate(self._expiryDate)
         q = dividendCurve.ccRate(self._expiryDate)
-        
+
         #######################################################################
 
         if optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL and stockPrice <= B:
@@ -336,8 +377,7 @@ class FinEquityBarrierOption(FinEquityOption):
             simplePut = True
 
         if simplePut or simpleCall:
-            Sall = process.getProcess(
-                processType, texp, modelParams, 1, numPaths, seed)
+            Sall = process.getProcess(processType, texp, modelParams, 1, numPaths, seed)
 
         if simpleCall:
             c = (np.maximum(Sall[:, -1] - K, 0.0)).mean()
@@ -350,25 +390,30 @@ class FinEquityBarrierOption(FinEquityOption):
             return p
 
         # Get full set of paths
-        Sall = process.getProcess(processType, texp, modelParams, numTimeSteps,
-                                  numPaths, seed)
+        Sall = process.getProcess(
+            processType, texp, modelParams, numTimeSteps, numPaths, seed
+        )
 
         (numPaths, numTimeSteps) = Sall.shape
 
-        if optionType == FinEquityBarrierTypes.DOWN_AND_IN_CALL or \
-           optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL or \
-           optionType == FinEquityBarrierTypes.DOWN_AND_IN_PUT or \
-           optionType == FinEquityBarrierTypes.DOWN_AND_OUT_PUT:
+        if (
+            optionType == FinEquityBarrierTypes.DOWN_AND_IN_CALL
+            or optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL
+            or optionType == FinEquityBarrierTypes.DOWN_AND_IN_PUT
+            or optionType == FinEquityBarrierTypes.DOWN_AND_OUT_PUT
+        ):
 
             barrierCrossedFromAbove = [False] * numPaths
 
             for p in range(0, numPaths):
                 barrierCrossedFromAbove[p] = np.any(Sall[p] <= B)
 
-        if optionType == FinEquityBarrierTypes.UP_AND_IN_CALL or \
-           optionType == FinEquityBarrierTypes.UP_AND_OUT_CALL or \
-           optionType == FinEquityBarrierTypes.UP_AND_IN_PUT or \
-           optionType == FinEquityBarrierTypes.UP_AND_OUT_PUT:
+        if (
+            optionType == FinEquityBarrierTypes.UP_AND_IN_CALL
+            or optionType == FinEquityBarrierTypes.UP_AND_OUT_CALL
+            or optionType == FinEquityBarrierTypes.UP_AND_IN_PUT
+            or optionType == FinEquityBarrierTypes.UP_AND_OUT_PUT
+        ):
 
             barrierCrossedFromBelow = [False] * numPaths
             for p in range(0, numPaths):
@@ -378,34 +423,29 @@ class FinEquityBarrierOption(FinEquityOption):
         ones = np.ones(numPaths)
 
         if optionType == FinEquityBarrierTypes.DOWN_AND_OUT_CALL:
-            payoff = np.maximum(Sall[:, -1] - K, 0.0) * \
-                (ones - barrierCrossedFromAbove)
+            payoff = np.maximum(Sall[:, -1] - K, 0.0) * (ones - barrierCrossedFromAbove)
         elif optionType == FinEquityBarrierTypes.DOWN_AND_IN_CALL:
             payoff = np.maximum(Sall[:, -1] - K, 0.0) * barrierCrossedFromAbove
         elif optionType == FinEquityBarrierTypes.UP_AND_IN_CALL:
             payoff = np.maximum(Sall[:, -1] - K, 0.0) * barrierCrossedFromBelow
         elif optionType == FinEquityBarrierTypes.UP_AND_OUT_CALL:
-            payoff = np.maximum(Sall[:, -1] - K, 0.0) * \
-                (ones - barrierCrossedFromBelow)
+            payoff = np.maximum(Sall[:, -1] - K, 0.0) * (ones - barrierCrossedFromBelow)
         elif optionType == FinEquityBarrierTypes.UP_AND_IN_PUT:
             payoff = np.maximum(K - Sall[:, -1], 0.0) * barrierCrossedFromBelow
         elif optionType == FinEquityBarrierTypes.UP_AND_OUT_PUT:
-            payoff = np.maximum(K - Sall[:, -1], 0.0) * \
-                (ones - barrierCrossedFromBelow)
+            payoff = np.maximum(K - Sall[:, -1], 0.0) * (ones - barrierCrossedFromBelow)
         elif optionType == FinEquityBarrierTypes.DOWN_AND_OUT_PUT:
-            payoff = np.maximum(K - Sall[:, -1], 0.0) * \
-                (ones - barrierCrossedFromAbove)
+            payoff = np.maximum(K - Sall[:, -1], 0.0) * (ones - barrierCrossedFromAbove)
         elif optionType == FinEquityBarrierTypes.DOWN_AND_IN_PUT:
             payoff = np.maximum(K - Sall[:, -1], 0.0) * barrierCrossedFromAbove
         else:
-            raise FinError("Unknown barrier option type." +
-                           str(self._optionType))
+            raise FinError("Unknown barrier option type." + str(self._optionType))
 
-        v = payoff.mean() * np.exp(- r * texp)
+        v = payoff.mean() * np.exp(-r * texp)
 
         return v * self._notional
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -417,10 +457,11 @@ class FinEquityBarrierOption(FinEquityOption):
         s += labelToString("NOTIONAL", self._notional, "")
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

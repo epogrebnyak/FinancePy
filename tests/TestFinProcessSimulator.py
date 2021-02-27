@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.models.FinProcessSimulator import FinVasicekNumericalScheme
@@ -13,6 +14,7 @@ from financepy.models.FinProcessSimulator import FinProcessTypes
 from financepy.models.FinProcessSimulator import FinProcessSimulator
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -30,7 +32,8 @@ def test_FinProcessSimulator():
     printPaths = False
 
     testCases.banner(
-        "######################## GBM NORMAL ###############################")
+        "######################## GBM NORMAL ###############################"
+    )
     sigma = 0.10
     stockPrice = 100.0
     drift = 0.04
@@ -38,12 +41,8 @@ def test_FinProcessSimulator():
     modelParams = (stockPrice, drift, sigma, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.GBM,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.GBM, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.header("PROCESS", "TIME")
@@ -52,7 +51,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "######################## GBM ANTITHETIC ###########################")
+        "######################## GBM ANTITHETIC ###########################"
+    )
     sigma = 0.10
     stockPrice = 100.0
     drift = 0.04
@@ -60,12 +60,8 @@ def test_FinProcessSimulator():
     modelParams = (stockPrice, drift, sigma, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.GBM,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.GBM, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("GBM ANTITHETIC", elapsed)
@@ -73,7 +69,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "###################### HESTON EULER ###############################")
+        "###################### HESTON EULER ###############################"
+    )
     stockPrice = 100.0
     v0 = 0.05
     kappa = 0.50
@@ -84,12 +81,8 @@ def test_FinProcessSimulator():
     modelParams = (stockPrice, drift, v0, kappa, theta, sigma, rho, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.HESTON,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.HESTON, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("HESTON EULER", elapsed)
@@ -97,7 +90,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "###################### HESTON EULERLOG ############################")
+        "###################### HESTON EULERLOG ############################"
+    )
     stockPrice = 100.0
     v0 = 0.05
     kappa = 0.50
@@ -108,12 +102,8 @@ def test_FinProcessSimulator():
     modelParams = (stockPrice, drift, v0, kappa, theta, sigma, rho, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.HESTON,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.HESTON, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("HESTON EULERLOG", elapsed)
@@ -121,7 +111,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "###################### HESTON QUADEXP #############################")
+        "###################### HESTON QUADEXP #############################"
+    )
     stockPrice = 100.0
     v0 = 0.05
     kappa = 0.50
@@ -132,12 +123,8 @@ def test_FinProcessSimulator():
     modelParams = (stockPrice, drift, v0, kappa, theta, sigma, rho, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.HESTON,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.HESTON, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("HESTON QUADEXP", elapsed)
@@ -145,7 +132,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "######################## VASICEK NORMAL ###########################")
+        "######################## VASICEK NORMAL ###########################"
+    )
     r0 = 0.05
     kappa = 0.50
     theta = 0.05
@@ -154,12 +142,8 @@ def test_FinProcessSimulator():
     modelParams = (r0, kappa, theta, sigma, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.VASICEK,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.VASICEK, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("VASICEK_NORMAL", elapsed)
@@ -167,7 +151,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "####################### VASICEK ANTITHETIC ########################")
+        "####################### VASICEK ANTITHETIC ########################"
+    )
     r0 = 0.05
     kappa = 0.50
     theta = 0.05
@@ -176,12 +161,8 @@ def test_FinProcessSimulator():
     modelParams = (r0, kappa, theta, sigma, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.VASICEK,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.VASICEK, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("VASICEK_NORMAL ANTI", elapsed)
@@ -189,7 +170,8 @@ def test_FinProcessSimulator():
         print(paths)
 
     testCases.banner(
-        "############################# CIR #################################")
+        "############################# CIR #################################"
+    )
     r0 = 0.05
     kappa = 0.50
     theta = 0.05
@@ -198,17 +180,14 @@ def test_FinProcessSimulator():
     modelParams = (r0, kappa, theta, sigma, scheme)
     start = time.time()
     paths = modelSim.getProcess(
-        FinProcessTypes.CIR,
-        t,
-        modelParams,
-        numAnnSteps,
-        numPaths,
-        seed)
+        FinProcessTypes.CIR, t, modelParams, numAnnSteps, numPaths, seed
+    )
     end = time.time()
     elapsed = end - start
     testCases.print("CIR", elapsed)
     if printPaths:
         print(paths)
+
 
 ###############################################################################
 

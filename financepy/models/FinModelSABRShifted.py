@@ -18,16 +18,18 @@ from ..finutils.FinHelperFunctions import labelToString
 ###############################################################################
 ###############################################################################
 
+
 @njit
 def _x(rho, z):
-    '''Return function x used in Hagan's 2002 SABR lognormal vol expansion.'''
-    a = (1.0 - 2.0*rho*z + z**2)**.5 + z - rho
+    """Return function x used in Hagan's 2002 SABR lognormal vol expansion."""
+    a = (1.0 - 2.0 * rho * z + z ** 2) ** 0.5 + z - rho
     b = 1.0 - rho
     return np.log(a / b)
 
+
 @njit
 def volFunctionShiftedSABR(params, f, k, t):
-    ''' Black volatility implied by SABR model. '''
+    """ Black volatility implied by SABR model. """
 
     alpha = params[0]
     beta = params[1]
@@ -50,14 +52,14 @@ def volFunctionShiftedSABR(params, f, k, t):
 
     logfk = np.log(f / k)
     b = 1.0 - beta
-    fkb = (f*k)**b
-    a = b**2 * alpha**2 / (24.0 * fkb)
-    b = 0.25 * rho * beta * nu * alpha / fkb**0.5
-    c = (2.0 - 3.0*rho**2.0) * nu**2.0 / 24
-    d = fkb**0.5
-    v = b**2 * logfk**2 / 24.0
-    w = b**4 * logfk**4 / 1920.0
-    z = nu * fkb**0.5 * logfk / alpha
+    fkb = (f * k) ** b
+    a = b ** 2 * alpha ** 2 / (24.0 * fkb)
+    b = 0.25 * rho * beta * nu * alpha / fkb ** 0.5
+    c = (2.0 - 3.0 * rho ** 2.0) * nu ** 2.0 / 24
+    d = fkb ** 0.5
+    v = b ** 2 * logfk ** 2 / 24.0
+    w = b ** 4 * logfk ** 4 / 1920.0
+    z = nu * fkb ** 0.5 * logfk / alpha
 
     eps = 1e-07
 
@@ -68,20 +70,21 @@ def volFunctionShiftedSABR(params, f, k, t):
         v0 = alpha * (1.0 + (a + b + c) * t) / (d * (1.0 + v + w))
         return v0
 
+
 ###############################################################################
 
 
-class FinModelSABRShifted():
-    ''' SABR - Shifted Stochastic alpha beta rho model by Hagan et al. is a 
+class FinModelSABRShifted:
+    """SABR - Shifted Stochastic alpha beta rho model by Hagan et al. is a
     stochastic volatility model where alpha controls the implied volatility,
     beta is the exponent on the the underlying asset's process so beta = 0
-    is normal and beta = 1 is lognormal, rho is the correlation between the 
-    underlying and the volatility process. The shift allows negative rates.'''
+    is normal and beta = 1 is lognormal, rho is the correlation between the
+    underlying and the volatility process. The shift allows negative rates."""
 
     def __init__(self, alpha, beta, rho, nu, shift):
-        ''' Create FinModelSABRShifted with all of the model parameters. We 
-        also provide functions below to assist with the calibration of the 
-        value of alpha. '''
+        """Create FinModelSABRShifted with all of the model parameters. We
+        also provide functions below to assist with the calibration of the
+        value of alpha."""
 
         self._alpha = alpha
         self._beta = beta
@@ -89,13 +92,12 @@ class FinModelSABRShifted():
         self._nu = nu
         self._shift = shift
 
-###############################################################################
+    ###############################################################################
 
     def blackVol(self, f, k, t):
-        ''' Black volatility from SABR model using Hagan et al. approx. '''
+        """ Black volatility from SABR model using Hagan et al. approx. """
 
-        params = np.array([self._alpha, self._beta, self._rho, 
-                           self._nu, self._shift])
+        params = np.array([self._alpha, self._beta, self._rho, self._nu, self._shift])
 
         # I wish to enable vectorisations
         if isinstance(f, np.ndarray):
@@ -121,7 +123,7 @@ class FinModelSABRShifted():
             v = volFunctionShiftedSABR(params, f, k, t)
             return v
 
-###############################################################################
+    ###############################################################################
 
     def blackVolWithAlpha(self, alpha, f, k, t):
 
@@ -129,16 +131,18 @@ class FinModelSABRShifted():
         blackVol = self.blackVol(f, k, t)
         return blackVol
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              forwardRate,   # Forward rate F
-              strikeRate,    # Strike Rate K
-              timeToExpiry,  # Time to Expiry (years)
-              df,            # Discount Factor to expiry date
-              callOrPut):    # Call or put
-        ''' Price an option using Black's model which values in the forward
-        measure following a change of measure. '''
+    def value(
+        self,
+        forwardRate,  # Forward rate F
+        strikeRate,  # Strike Rate K
+        timeToExpiry,  # Time to Expiry (years)
+        df,  # Discount Factor to expiry date
+        callOrPut,
+    ):  # Call or put
+        """Price an option using Black's model which values in the forward
+        measure following a change of measure."""
 
         f = forwardRate
         t = timeToExpiry
@@ -146,8 +150,8 @@ class FinModelSABRShifted():
         sqrtT = np.sqrt(t)
         vol = self.blackVol(f, k, t)
 
-        d1 = (np.log((f)/(k)) + vol * vol * t / 2) / (vol * sqrtT)
-        d2 = d1 - vol*sqrtT
+        d1 = (np.log((f) / (k)) + vol * vol * t / 2) / (vol * sqrtT)
+        d2 = d1 - vol * sqrtT
 
         if callOrPut == FinOptionTypes.EUROPEAN_CALL:
             return df * (f * N(d1) - k * N(d2))
@@ -156,12 +160,12 @@ class FinModelSABRShifted():
         else:
             raise Exception("Option type must be a European Call(C) or Put(P)")
 
-###############################################################################
+    ###############################################################################
 
     def setAlphaFromBlackVol(self, blackVol, forward, strike, timeToExpiry):
-        ''' Estimate the value of the alpha coefficient of the SABR model
+        """Estimate the value of the alpha coefficient of the SABR model
         by solving for the value of alpha that makes the SABR black vol equal
-        to the input black vol. This uses a numerical 1D solver. '''
+        to the input black vol. This uses a numerical 1D solver."""
 
         texp = timeToExpiry
         f = forward
@@ -174,24 +178,26 @@ class FinModelSABRShifted():
 
         if initAlpha != blackVol:
             # Objective function
-            fn = lambda x: np.sqrt((blackVol - self.blackVolWithAlpha(x, f, K, texp))**2)
+            fn = lambda x: np.sqrt(
+                (blackVol - self.blackVolWithAlpha(x, f, K, texp)) ** 2
+            )
             bnds = ((0.0, None),)
             x0 = initAlpha
             results = minimize(fn, x0, method="L-BFGS-B", bounds=bnds, tol=1e-8)
             alpha = results.x[0]
         else:
             alpha = initAlpha
-        
+
         self._alpha = alpha
 
-###############################################################################
+    ###############################################################################
 
     def setAlphaFromATMBlackVol(self, blackVol, atmStrike, timeToExpiry):
-        ''' We solve cubic equation for the unknown variable alpha for the 
-        special ATM case of the strike equalling the forward following Hagan 
+        """We solve cubic equation for the unknown variable alpha for the
+        special ATM case of the strike equalling the forward following Hagan
         and al. equation (3.3). We take the smallest real root as the preferred
         solution. This is useful for calibrating the model when beta has been
-        chosen.''' 
+        chosen."""
 
         # For shifted SABR
         atmStrike = atmStrike + self._shift
@@ -202,10 +208,10 @@ class FinModelSABRShifted():
         texp = timeToExpiry
         K = atmStrike
 
-        coeff0 = -blackVol * (K**(1.0 - self._beta))
-        coeff1 = 1.0 + ((2.0 - 3.0 * rho**2) / 24.0) * (nu**2) * texp
-        coeff2 = (rho * beta * nu * texp) / (4.0 * (K**(1.0 - beta)))
-        coeff3 = (((1.0 - beta)**2) * texp) / (24.0 * (K**(2.0 - 2.0 * beta)))
+        coeff0 = -blackVol * (K ** (1.0 - self._beta))
+        coeff1 = 1.0 + ((2.0 - 3.0 * rho ** 2) / 24.0) * (nu ** 2) * texp
+        coeff2 = (rho * beta * nu * texp) / (4.0 * (K ** (1.0 - beta)))
+        coeff3 = (((1.0 - beta) ** 2) * texp) / (24.0 * (K ** (2.0 - 2.0 * beta)))
         coeffs = [coeff3, coeff2, coeff1, coeff0]
         roots = np.roots(coeffs)
 
@@ -213,10 +219,10 @@ class FinModelSABRShifted():
         alpha = np.min([coeff.real for coeff in roots if coeff.real > 0])
         self._alpha = alpha
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Return string with class details. '''
+        """ Return string with class details. """
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("Alpha", self._alpha)
@@ -225,5 +231,6 @@ class FinModelSABRShifted():
         s += labelToString("Rho", self._rho)
         s += labelToString("Shift", self._shift)
         return s
+
 
 ###############################################################################

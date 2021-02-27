@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.credit.FinCDS import FinCDS
@@ -16,6 +17,7 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -41,57 +43,38 @@ def buildIborCurve(tradeDate):
 
     maturityDate = settlementDate.addMonths(12)
     swap1 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap1)
 
     maturityDate = settlementDate.addMonths(24)
     swap2 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap2)
 
     maturityDate = settlementDate.addMonths(36)
     swap3 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap3)
 
     maturityDate = settlementDate.addMonths(48)
     swap4 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap4)
 
     maturityDate = settlementDate.addMonths(60)
     swap5 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap5)
 
     liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
     return liborCurve
+
 
 ##########################################################################
 
@@ -109,11 +92,11 @@ def buildIssuerCurve(tradeDate, liborCurve):
 
     recoveryRate = 0.40
 
-    issuerCurve = FinCDSCurve(valuationDate,
-                              cdsMarketContracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(
+        valuationDate, cdsMarketContracts, liborCurve, recoveryRate
+    )
     return issuerCurve
+
 
 ##########################################################################
 
@@ -133,23 +116,20 @@ def test_valueCDSIndex():
     longProtection = True
     indexCoupon = 0.004
 
-    cdsIndexContract = FinCDS(stepInDate,
-                              maturityDate,
-                              indexCoupon,
-                              notional,
-                              longProtection)
+    cdsIndexContract = FinCDS(
+        stepInDate, maturityDate, indexCoupon, notional, longProtection
+    )
 
-#    cdsIndexContract.print(valuationDate)
+    #    cdsIndexContract.print(valuationDate)
 
     testCases.header("LABEL", "VALUE")
 
-    spd = cdsIndexContract.parSpread(
-        valuationDate, issuerCurve, cdsRecovery) * 10000.0
+    spd = cdsIndexContract.parSpread(valuationDate, issuerCurve, cdsRecovery) * 10000.0
     testCases.print("PAR SPREAD", spd)
 
     v = cdsIndexContract.value(valuationDate, issuerCurve, cdsRecovery)
-    testCases.print("FULL VALUE", v['full_pv'])
-    testCases.print("CLEAN VALUE", v['clean_pv'])
+    testCases.print("FULL VALUE", v["full_pv"])
+    testCases.print("CLEAN VALUE", v["clean_pv"])
 
     p = cdsIndexContract.cleanPrice(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("CLEAN PRICE", p)
@@ -160,18 +140,16 @@ def test_valueCDSIndex():
     accruedInterest = cdsIndexContract.accruedInterest()
     testCases.print("ACCRUED COUPON", accruedInterest)
 
-    protPV = cdsIndexContract.protectionLegPV(
-        valuationDate, issuerCurve, cdsRecovery)
+    protPV = cdsIndexContract.protectionLegPV(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("PROTECTION LEG PV", protPV)
 
-    premPV = cdsIndexContract.premiumLegPV(
-        valuationDate, issuerCurve, cdsRecovery)
+    premPV = cdsIndexContract.premiumLegPV(valuationDate, issuerCurve, cdsRecovery)
     testCases.print("PREMIUM LEG PV", premPV)
 
-    fullRPV01, cleanRPV01 = cdsIndexContract.riskyPV01(
-        valuationDate, issuerCurve)
+    fullRPV01, cleanRPV01 = cdsIndexContract.riskyPV01(valuationDate, issuerCurve)
     testCases.print("FULL  RPV01", fullRPV01)
     testCases.print("CLEAN RPV01", cleanRPV01)
+
 
 #    cdsIndexContract.printFlows(issuerCurve)
 

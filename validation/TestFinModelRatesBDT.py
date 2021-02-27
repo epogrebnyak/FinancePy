@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate
@@ -24,11 +25,13 @@ from financepy.finutils.FinHelperFunctions import printTree
 from financepy.finutils.FinGlobalTypes import FinExerciseTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 PLOT_GRAPHS = False
 
 ###############################################################################
+
 
 def testBlackModelCheck():
 
@@ -37,8 +40,9 @@ def testBlackModelCheck():
     # Expect a price around 122 cents which is what I find.
 
     valuationDate = FinDate(1, 1, 2020)
-    liborCurve = FinDiscountCurveFlat(valuationDate, 0.06,
-                                      FinFrequencyTypes.SEMI_ANNUAL)
+    liborCurve = FinDiscountCurveFlat(
+        valuationDate, 0.06, FinFrequencyTypes.SEMI_ANNUAL
+    )
 
     settlementDate = FinDate(1, 1, 2020)
     exerciseDate = FinDate(1, 1, 2021)
@@ -51,19 +55,22 @@ def testBlackModelCheck():
 
     # Pricing a PAY
     swaptionType = FinSwapTypes.PAY
-    swaption = FinIborSwaption(settlementDate,
-                                exerciseDate,
-                                maturityDate,
-                                swaptionType,
-                                fixedCoupon,
-                                fixedFrequencyType,
-                                fixedDayCountType,
-                                notional)
+    swaption = FinIborSwaption(
+        settlementDate,
+        exerciseDate,
+        maturityDate,
+        swaptionType,
+        fixedCoupon,
+        fixedFrequencyType,
+        fixedDayCountType,
+        notional,
+    )
 
     model = FinModelBlack(0.20)
     v = swaption.value(valuationDate, liborCurve, model)
     testCases.header("LABEL", "VALUE")
-    testCases.print("BLACK'S MODEL PRICE:", v*100)
+    testCases.print("BLACK'S MODEL PRICE:", v * 100)
+
 
 ###############################################################################
 
@@ -83,10 +90,9 @@ def test_BDTExampleOne():
     testCases.header("RATES")
     testCases.print(zeroRates)
 
-    curve = FinDiscountCurveZeros(valuationDate,
-                                  zeroDates,
-                                  zeroRates,
-                                  FinFrequencyTypes.ANNUAL)
+    curve = FinDiscountCurveZeros(
+        valuationDate, zeroDates, zeroRates, FinFrequencyTypes.ANNUAL
+    )
 
     yieldVol = 0.16
 
@@ -102,6 +108,7 @@ def test_BDTExampleOne():
 
     model = FinModelRatesBDT(yieldVol, numTimeSteps)
     model.buildTree(tmat, years, dfs)
+
 
 ###############################################################################
 
@@ -124,11 +131,11 @@ def test_BDTExampleTwo():
 
     couponTimes = []
     couponFlows = []
-    cpn = bond._coupon/bond._frequency
+    cpn = bond._coupon / bond._frequency
     numFlows = len(bond._flowDates)
 
     for i in range(1, numFlows):
-        pcd = bond._flowDates[i-1]
+        pcd = bond._flowDates[i - 1]
         ncd = bond._flowDates[i]
         if pcd < settlementDate and ncd > settlementDate:
             flowTime = (pcd - settlementDate) / gDaysInYear
@@ -151,7 +158,7 @@ def test_BDTExampleTwo():
     texp = (expiryDate - settlementDate) / gDaysInYear
     times = np.linspace(0, tmat, 11)
     dates = settlementDate.addYears(times)
-    dfs = np.exp(-0.05*times)
+    dfs = np.exp(-0.05 * times)
 
     testCases.header("LABEL", "VALUES")
     testCases.print("TIMES:", times)
@@ -164,7 +171,7 @@ def test_BDTExampleTwo():
     sigma = 0.20
 
     # Test convergence
-    numStepsList = [5] #[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+    numStepsList = [5]  # [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     exerciseType = FinExerciseTypes.AMERICAN
 
     testCases.header("Values")
@@ -172,11 +179,12 @@ def test_BDTExampleTwo():
     for numTimeSteps in numStepsList:
         model = FinModelRatesBDT(sigma, numTimeSteps)
         model.buildTree(tmat, times, dfs)
-        v = model.bondOption(texp, strikePrice,
-                             face, couponTimes, couponFlows, exerciseType)
+        v = model.bondOption(
+            texp, strikePrice, face, couponTimes, couponFlows, exerciseType
+        )
 
         testCases.print(v)
-        treeVector.append(v['call'])
+        treeVector.append(v["call"])
 
     if PLOT_GRAPHS:
         plt.plot(numStepsList, treeVector)
@@ -188,6 +196,7 @@ def test_BDTExampleTwo():
         printTree(model._rt, 5)
         print("Q")
         printTree(model._Q, 5)
+
 
 ###############################################################################
 
@@ -205,7 +214,7 @@ def test_BDTExampleThree():
     times = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])
     dates = settlementDate.addYears(times)
     rate = 0.06
-    dfs = 1.0 / (1.0 + rate/2.0)**(2.0*times)
+    dfs = 1.0 / (1.0 + rate / 2.0) ** (2.0 * times)
     curve = FinDiscountCurve(settlementDate, dates, dfs)
 
     coupon = 0.06
@@ -216,11 +225,11 @@ def test_BDTExampleThree():
     # Andersen paper
     numTimeSteps = 200
 
-    testCases.header("ExerciseType", "Sigma", "NumSteps", "Texp", "Tmat", 
-                     "V_Fixed", "V_pay", "V_rec")
+    testCases.header(
+        "ExerciseType", "Sigma", "NumSteps", "Texp", "Tmat", "V_Fixed", "V_pay", "V_rec"
+    )
 
-    for exerciseType in [FinExerciseTypes.EUROPEAN,
-                         FinExerciseTypes.BERMUDAN]:
+    for exerciseType in [FinExerciseTypes.EUROPEAN, FinExerciseTypes.BERMUDAN]:
 
         for maturityYears in [4.0, 5.0, 10.0, 20.0]:
 
@@ -234,7 +243,7 @@ def test_BDTExampleThree():
             elif maturityYears == 20.0:
                 sigma = 0.1035
 
-            for expiryYears in range(int(maturityYears/2)-1, int(maturityYears)):
+            for expiryYears in range(int(maturityYears / 2) - 1, int(maturityYears)):
 
                 expiryDate = settlementDate.addYears(expiryYears)
 
@@ -245,7 +254,7 @@ def test_BDTExampleThree():
 
                 couponTimes = []
                 couponFlows = []
-                cpn = bond._coupon/bond._frequency
+                cpn = bond._coupon / bond._frequency
                 for flowDate in bond._flowDates:
                     if flowDate > expiryDate:
                         flowTime = (flowDate - settlementDate) / gDaysInYear
@@ -260,22 +269,27 @@ def test_BDTExampleThree():
                 model = FinModelRatesBDT(sigma, numTimeSteps)
                 model.buildTree(tmat, times, dfs)
 
-                v = model.bermudanSwaption(texp,
-                                           tmat,
-                                           strikePrice,
-                                           face,
-                                           couponTimes,
-                                           couponFlows,
-                                           exerciseType)
+                v = model.bermudanSwaption(
+                    texp,
+                    tmat,
+                    strikePrice,
+                    face,
+                    couponTimes,
+                    couponFlows,
+                    exerciseType,
+                )
 
-                testCases.print("%s" % exerciseType,
-                                "%9.5f" % sigma,
-                                "%9.5f" % numTimeSteps,
-                                "%9.5f" % expiryYears,
-                                "%9.5f" % maturityYears,
-                                "%9.5f" % price,
-                                "%9.2f" % (v['pay']*100.0),
-                                "%9.2f" % (v['rec']*100.0))
+                testCases.print(
+                    "%s" % exerciseType,
+                    "%9.5f" % sigma,
+                    "%9.5f" % numTimeSteps,
+                    "%9.5f" % expiryYears,
+                    "%9.5f" % maturityYears,
+                    "%9.5f" % price,
+                    "%9.2f" % (v["pay"] * 100.0),
+                    "%9.2f" % (v["rec"] * 100.0),
+                )
+
 
 ###############################################################################
 # This has broken and needs to be repaired!!!!

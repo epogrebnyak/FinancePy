@@ -12,18 +12,26 @@ bump = 1e-4
 ###############################################################################
 ###############################################################################
 
-@njit(float64[:](float64, float64, float64, float64, int64, float64, int64,
-                 float64, int64), fastmath=True, cache=True)
-def crrTreeVal(stockPrice,
-               ccInterestRate,  # continuously compounded
-               ccDividendRate,  # continuously compounded
-               volatility,  # Black scholes volatility
-               numStepsPerYear,
-               timeToExpiry,
-               optionType,
-               strikePrice,
-               isEven):
-    ''' Value an American option using a Binomial Treee '''
+
+@njit(
+    float64[:](
+        float64, float64, float64, float64, int64, float64, int64, float64, int64
+    ),
+    fastmath=True,
+    cache=True,
+)
+def crrTreeVal(
+    stockPrice,
+    ccInterestRate,  # continuously compounded
+    ccDividendRate,  # continuously compounded
+    volatility,  # Black scholes volatility
+    numStepsPerYear,
+    timeToExpiry,
+    optionType,
+    strikePrice,
+    isEven,
+):
+    """ Value an American option using a Binomial Treee """
 
     numSteps = int(numStepsPerYear * timeToExpiry)
 
@@ -39,7 +47,7 @@ def crrTreeVal(stockPrice,
     elif numSteps % 2 == 1 and isEven == 1:
         numSteps += 1
 
-#    print(numSteps)
+    #    print(numSteps)
     # this is the size of the step
     dt = timeToExpiry / numSteps
     r = ccInterestRate
@@ -130,53 +138,58 @@ def crrTreeVal(stockPrice,
 
     # We calculate all of the important Greeks in one go
     price = optionValues[0]
-    delta = (optionValues[2] - optionValues[1]) / \
-        (stockValues[2] - stockValues[1])
-    deltaUp = (optionValues[5] - optionValues[4]) / \
-        (stockValues[5] - stockValues[4])
-    deltaDn = (optionValues[4] - optionValues[3]) / \
-        (stockValues[4] - stockValues[3])
+    delta = (optionValues[2] - optionValues[1]) / (stockValues[2] - stockValues[1])
+    deltaUp = (optionValues[5] - optionValues[4]) / (stockValues[5] - stockValues[4])
+    deltaDn = (optionValues[4] - optionValues[3]) / (stockValues[4] - stockValues[3])
     gamma = (deltaUp - deltaDn) / (stockValues[2] - stockValues[1])
     theta = (optionValues[4] - optionValues[0]) / (2.0 * dt)
     results = np.array([price, delta, gamma, theta])
     return results
 
+
 ###############################################################################
 
 
-def crrTreeValAvg(stockPrice,
-                  ccInterestRate,  # continuously compounded
-                  ccDividendRate,  # continuously compounded
-                  volatility,  # Black scholes volatility
-                  numStepsPerYear,
-                  timeToExpiry,
-                  optionType,
-                  strikePrice):
-    ''' Calculate the average values off the tree using an even and an odd
-    number of time steps. '''
+def crrTreeValAvg(
+    stockPrice,
+    ccInterestRate,  # continuously compounded
+    ccDividendRate,  # continuously compounded
+    volatility,  # Black scholes volatility
+    numStepsPerYear,
+    timeToExpiry,
+    optionType,
+    strikePrice,
+):
+    """Calculate the average values off the tree using an even and an odd
+    number of time steps."""
 
-    value1 = crrTreeVal(stockPrice,
-                        ccInterestRate,
-                        ccDividendRate,
-                        volatility,
-                        numStepsPerYear,
-                        timeToExpiry,
-                        optionType,
-                        strikePrice,
-                        1)  # even
+    value1 = crrTreeVal(
+        stockPrice,
+        ccInterestRate,
+        ccDividendRate,
+        volatility,
+        numStepsPerYear,
+        timeToExpiry,
+        optionType,
+        strikePrice,
+        1,
+    )  # even
 
-    value2 = crrTreeVal(stockPrice,
-                        ccInterestRate,
-                        ccDividendRate,
-                        volatility,
-                        numStepsPerYear,
-                        timeToExpiry,
-                        optionType,
-                        strikePrice,
-                        0)  # odd
+    value2 = crrTreeVal(
+        stockPrice,
+        ccInterestRate,
+        ccDividendRate,
+        volatility,
+        numStepsPerYear,
+        timeToExpiry,
+        optionType,
+        strikePrice,
+        0,
+    )  # odd
 
     v = (value1 + value2) / 2.0
-    res = {'value': v[0], 'delta': v[1], 'gamma': v[2], 'theta': v[3]}
+    res = {"value": v[0], "delta": v[1], "gamma": v[2], "theta": v[3]}
     return res
+
 
 ###############################################################################

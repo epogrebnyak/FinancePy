@@ -15,13 +15,19 @@ ipython = get_ipython()
 
 ###############################################################################
 
-def _hide_traceback(exc_tuple=None, filename=None, tb_offset=None,
-                    exception_only=False, running_compiled_code=False):
+
+def _hide_traceback(
+    exc_tuple=None,
+    filename=None,
+    tb_offset=None,
+    exception_only=False,
+    running_compiled_code=False,
+):
     etype, value, _ = sys.exc_info()
 
-    msg = ipython._showtraceback(etype, value,
-                                 ipython.InteractiveTB.get_exception_only(
-                                     etype, value))
+    msg = ipython._showtraceback(
+        etype, value, ipython.InteractiveTB.get_exception_only(etype, value)
+    )
 
     return msg
 
@@ -31,25 +37,26 @@ def func_name():
 
 
 def suppressTraceback():
-#    print(sys.tracebacklimit)
-#    print(ipython.showtrackeback)
+    #    print(sys.tracebacklimit)
+    #    print(ipython.showtrackeback)
 
     sys.tracebacklimit = 0
     ipython.showtraceback = _hide_traceback
+
 
 ###############################################################################
 
 
 class FinError(Exception):
-    ''' Simple error class specific to FinPy. Need to decide how to handle
-    FinancePy errors. Work in progress. '''
+    """Simple error class specific to FinPy. Need to decide how to handle
+    FinancePy errors. Work in progress."""
 
-    def __init__(self,
-                 message: str):
-        ''' Create FinError object by passing a message string. '''
+    def __init__(self, message: str):
+        """ Create FinError object by passing a message string. """
         self._message = message
 
     def _print(self):
         print("FinError:", self._message)
+
 
 ###############################################################################

@@ -18,20 +18,22 @@ from ...finutils.FinHelperFunctions import timesFromDates
 
 
 class FinDiscountCurvePoly(FinDiscountCurve):
-    ''' Zero Rate Curve of a specified frequency parametrised using a cubic
+    """Zero Rate Curve of a specified frequency parametrised using a cubic
     polynomial. The zero rate is assumed to be continuously compounded but
     this can be amended by providing a frequency when extracting zero rates.
     We also need to specify a Day count convention for time calculations.
-    The class inherits all of the methods from FinDiscountCurve. '''
+    The class inherits all of the methods from FinDiscountCurve."""
 
-    def __init__(self,
-                 valuationDate: FinDate,
-                 coefficients: (list, np.ndarray),
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
-                 dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_ACT_ISDA):
-        ''' Create zero rate curve parametrised using a cubic curve from
+    def __init__(
+        self,
+        valuationDate: FinDate,
+        coefficients: (list, np.ndarray),
+        freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
+        dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_ACT_ISDA,
+    ):
+        """Create zero rate curve parametrised using a cubic curve from
         coefficients and specifying a compounding frequency type and day count
-        convention. '''
+        convention."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -41,19 +43,21 @@ class FinDiscountCurvePoly(FinDiscountCurve):
         self._freqType = freqType
         self._dayCountType = dayCountType
 
-###############################################################################
+    ###############################################################################
 
-    def zeroRate(self,
-                 dts: (list, FinDate),
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
-                 dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_360):
-        ''' Calculation of zero rates with specified frequency according to
+    def zeroRate(
+        self,
+        dts: (list, FinDate),
+        freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
+        dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_360,
+    ):
+        """Calculation of zero rates with specified frequency according to
         polynomial parametrisation. This method overrides FinDiscountCurve.
         The parametrisation is not strictly in terms of continuously compounded
         zero rates, this function allows other compounding and day counts.
         This function returns a single or vector of zero rates given a vector
         of dates so must use Numpy functions. The default frequency is a
-        continuously compounded rate and ACT ACT day counting. '''
+        continuously compounded rate and ACT ACT day counting."""
 
         if isinstance(freqType, FinFrequencyTypes) is False:
             raise FinError("Invalid Frequency type.")
@@ -68,24 +72,21 @@ class FinDiscountCurvePoly(FinDiscountCurve):
         zeroRates = self._zeroRate(dcTimes)
 
         # Now get the discount factors using curve conventions
-        dfs = self._zeroToDf(self._valuationDate,
-                             zeroRates,
-                             dcTimes,
-                             self._freqType,
-                             self._dayCountType)
+        dfs = self._zeroToDf(
+            self._valuationDate, zeroRates, dcTimes, self._freqType, self._dayCountType
+        )
 
         # Convert these to zero rates in the required frequency and day count
         zeroRates = self._dfToZero(dfs, dts, freqType, dayCountType)
         return zeroRates
 
-###############################################################################
+    ###############################################################################
 
-    def _zeroRate(self,
-                  times: (float, np.ndarray)):
-        ''' Calculate the zero rate to maturity date but with times as inputs.
+    def _zeroRate(self, times: (float, np.ndarray)):
+        """Calculate the zero rate to maturity date but with times as inputs.
         This function is used internally and should be discouraged for external
         use. The compounding frequency defaults to that specified in the
-        constructor of the curve object. Which may be annual to continuous. '''
+        constructor of the curve object. Which may be annual to continuous."""
 
         t = np.maximum(times, gSmall)
 
@@ -95,36 +96,31 @@ class FinDiscountCurvePoly(FinDiscountCurve):
 
         return zeroRate
 
-###############################################################################
+    ###############################################################################
 
-    def df(self,
-           dates: (list, FinDate)):
-        ''' Calculate the fwd rate to maturity date but with times as inputs.
+    def df(self, dates: (list, FinDate)):
+        """Calculate the fwd rate to maturity date but with times as inputs.
         This function is used internally and should be discouraged for external
         use. The compounding frequency defaults to that specified in the
-        constructor of the curve object. '''
+        constructor of the curve object."""
 
         # Get day count times to use with curve day count convention
-        dcTimes = timesFromDates(dates,
-                                 self._valuationDate,
-                                 self._dayCountType)
+        dcTimes = timesFromDates(dates, self._valuationDate, self._dayCountType)
 
         # We now get the discount factors using these times
         zeroRates = self._zeroRate(dcTimes)
 
         # Now get the discount factors using curve conventions
-        dfs = self._zeroToDf(self._valuationDate,
-                             zeroRates,
-                             dcTimes,
-                             self._freqType,
-                             self._dayCountType)
+        dfs = self._zeroToDf(
+            self._valuationDate, zeroRates, dcTimes, self._freqType, self._dayCountType
+        )
 
         return dfs
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Display internal parameters of curve. '''
+        """ Display internal parameters of curve. """
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("POWER", "COEFFICIENT")
@@ -134,10 +130,11 @@ class FinDiscountCurvePoly(FinDiscountCurve):
 
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

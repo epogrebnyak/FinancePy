@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.equity.FinEquityChooserOption import FinEquityChooserOption
@@ -11,13 +12,14 @@ from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
 from financepy.finutils.FinDate import FinDate
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##############################################################################
 
 
 def test_FinEquityChooserOptionHaug():
-    ''' Following example in Haug Page 130 '''
+    """ Following example in Haug Page 130 """
 
     valueDate = FinDate(1, 1, 2015)
     chooseDate = FinDate(2, 4, 2015)
@@ -34,33 +36,26 @@ def test_FinEquityChooserOptionHaug():
     discountCurve = FinDiscountCurveFlat(valueDate, interestRate)
     dividendCurve = FinDiscountCurveFlat(valueDate, dividendYield)
 
-    chooserOption = FinEquityChooserOption(chooseDate,
-                                           callExpiryDate,
-                                           putExpiryDate,
-                                           callStrike,
-                                           putStrike)
+    chooserOption = FinEquityChooserOption(
+        chooseDate, callExpiryDate, putExpiryDate, callStrike, putStrike
+    )
 
-    v = chooserOption.value(valueDate,
-                            stockPrice,
-                            discountCurve,
-                            dividendCurve,
-                            model)
+    v = chooserOption.value(valueDate, stockPrice, discountCurve, dividendCurve, model)
 
-    v_mc = chooserOption.valueMC(valueDate,
-                                 stockPrice,
-                                 discountCurve,
-                                 dividendCurve,
-                                 model, 20000)
+    v_mc = chooserOption.valueMC(
+        valueDate, stockPrice, discountCurve, dividendCurve, model, 20000
+    )
 
     v_haug = 6.0508
     testCases.header("", "", "", "", "", "")
     testCases.print("FINANCEPY", v, "HAUG", v_haug, "MC", v_mc)
 
+
 ##########################################################################
 
 
 def test_FinEquityChooserOptionMatlab():
-    '''https://fr.mathworks.com/help/fininst/chooserbybls.html '''
+    """https://fr.mathworks.com/help/fininst/chooserbybls.html """
 
     valueDate = FinDate(1, 6, 2007)
     chooseDate = FinDate(31, 8, 2007)
@@ -78,33 +73,26 @@ def test_FinEquityChooserOptionMatlab():
     discountCurve = FinDiscountCurveFlat(valueDate, interestRate)
     dividendCurve = FinDiscountCurveFlat(valueDate, dividendYield)
 
-    chooserOption = FinEquityChooserOption(chooseDate,
-                                           callExpiryDate,
-                                           putExpiryDate,
-                                           callStrike,
-                                           putStrike)
+    chooserOption = FinEquityChooserOption(
+        chooseDate, callExpiryDate, putExpiryDate, callStrike, putStrike
+    )
 
-    v = chooserOption.value(valueDate,
-                            stockPrice,
-                            discountCurve,
-                            dividendCurve,
-                            model)
+    v = chooserOption.value(valueDate, stockPrice, discountCurve, dividendCurve, model)
 
-    v_mc = chooserOption.valueMC(valueDate,
-                                 stockPrice,
-                                 discountCurve,
-                                 dividendCurve,
-                                 model, 20000)
+    v_mc = chooserOption.valueMC(
+        valueDate, stockPrice, discountCurve, dividendCurve, model, 20000
+    )
 
     v_matlab = 8.9308
     testCases.header("", "", "", "", "", "")
     testCases.print("FINANCEPY", v, "MATLAB", v_matlab, "MC", v_mc)
 
+
 ##########################################################################
 
 
 def test_FinEquityChooserOptionDerivicom():
-    '''http://derivicom.com/support/finoptionsxl/index.html?complex_chooser.htm '''
+    """http://derivicom.com/support/finoptionsxl/index.html?complex_chooser.htm """
 
     valueDate = FinDate(1, 1, 2007)
     chooseDate = FinDate(1, 2, 2007)
@@ -121,27 +109,20 @@ def test_FinEquityChooserOptionDerivicom():
     discountCurve = FinDiscountCurveFlat(valueDate, interestRate)
     dividendCurve = FinDiscountCurveFlat(valueDate, dividendYield)
 
-    chooserOption = FinEquityChooserOption(chooseDate,
-                                           callExpiryDate,
-                                           putExpiryDate,
-                                           callStrike,
-                                           putStrike)
+    chooserOption = FinEquityChooserOption(
+        chooseDate, callExpiryDate, putExpiryDate, callStrike, putStrike
+    )
 
-    v = chooserOption.value(valueDate,
-                            stockPrice,
-                            discountCurve,
-                            dividendCurve,
-                            model)
+    v = chooserOption.value(valueDate, stockPrice, discountCurve, dividendCurve, model)
 
-    v_mc = chooserOption.valueMC(valueDate,
-                                 stockPrice,
-                                 discountCurve,
-                                 dividendCurve,
-                                 model, 20000)
+    v_mc = chooserOption.valueMC(
+        valueDate, stockPrice, discountCurve, dividendCurve, model, 20000
+    )
 
     v_derivicom = 1.0989
     testCases.header("", "", "", "", "", "")
     testCases.print("FINANCEPY", v, "DERIVICOM", v_derivicom, "MC", v_mc)
+
 
 ##########################################################################
 

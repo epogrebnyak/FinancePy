@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate
@@ -24,6 +25,7 @@ from financepy.finutils.FinGlobalTypes import FinSwapTypes
 from financepy.models.FinModelRatesBK import FinModelRatesBK
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 plotGraphs = False
@@ -78,10 +80,17 @@ def test_FinBondEmbeddedOptionMATLAB():
     sigma = 0.01  # This volatility is very small for a BK process
     a = 0.1
 
-    puttableBond = FinBondEmbeddedOption(issueDate, maturityDate, coupon,
-                                         freqType, accrualType,
-                                         callDates, callPrices,
-                                         putDates, putPrices)
+    puttableBond = FinBondEmbeddedOption(
+        issueDate,
+        maturityDate,
+        coupon,
+        freqType,
+        accrualType,
+        callDates,
+        callPrices,
+        putDates,
+        putPrices,
+    )
 
     testCases.header("TIME", "NumTimeSteps", "BondWithOption", "BondPure")
 
@@ -93,14 +102,14 @@ def test_FinBondEmbeddedOptionMATLAB():
         v = puttableBond.value(settlementDate, discountCurve, model)
         end = time.time()
         period = end - start
-        testCases.print(period, numTimeSteps, v['bondwithoption'],
-                        v['bondpure'])
+        testCases.print(period, numTimeSteps, v["bondwithoption"], v["bondpure"])
 
-        values.append(v['bondwithoption'])
+        values.append(v["bondwithoption"])
 
     if plotGraphs:
         plt.figure()
         plt.plot(timeSteps, values)
+
 
 ###############################################################################
 
@@ -118,8 +127,9 @@ def test_FinBondEmbeddedOptionQUANTLIB():
 
     ###########################################################################
 
-    discountCurve = FinDiscountCurveFlat(valuationDate, 0.035,
-                                         FinFrequencyTypes.SEMI_ANNUAL)
+    discountCurve = FinDiscountCurveFlat(
+        valuationDate, 0.035, FinFrequencyTypes.SEMI_ANNUAL
+    )
 
     ###########################################################################
 
@@ -147,13 +157,20 @@ def test_FinBondEmbeddedOptionQUANTLIB():
     putPrices = []
 
     # the value used in blog of 12% bp vol is unrealistic
-    sigma = 0.12/0.035  # basis point volatility
+    sigma = 0.12 / 0.035  # basis point volatility
     a = 0.03
 
-    puttableBond = FinBondEmbeddedOption(issueDate, maturityDate, coupon,
-                                         freqType, accrualType,
-                                         callDates, callPrices,
-                                         putDates, putPrices)
+    puttableBond = FinBondEmbeddedOption(
+        issueDate,
+        maturityDate,
+        coupon,
+        freqType,
+        accrualType,
+        callDates,
+        callPrices,
+        putDates,
+        putPrices,
+    )
 
     testCases.header("BOND PRICE", "PRICE")
     v = bond.cleanPriceFromDiscountCurve(settlementDate, discountCurve)
@@ -168,14 +185,14 @@ def test_FinBondEmbeddedOptionQUANTLIB():
         v = puttableBond.value(settlementDate, discountCurve, model)
         end = time.time()
         period = end - start
-        testCases.print(period, numTimeSteps, v['bondwithoption'],
-                        v['bondpure'])
-        values.append(v['bondwithoption'])
+        testCases.print(period, numTimeSteps, v["bondwithoption"], v["bondpure"])
+        values.append(v["bondwithoption"])
 
     if plotGraphs:
         plt.figure()
         plt.title("Puttable Bond Price Convergence")
         plt.plot(timeSteps, values)
+
 
 ###############################################################################
 

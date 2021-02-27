@@ -19,18 +19,20 @@ from ...market.curves.FinDiscountCurve import FinDiscountCurve
 
 
 class FinDiscountCurvePWL(FinDiscountCurve):
-    ''' Curve is made up of a series of sections assumed to each have a
+    """Curve is made up of a series of sections assumed to each have a
     piece-wise linear zero rate. The zero rate has a specified frequency
     which defaults to continuous. This curve inherits all of the extra methods
-    from FinDiscountCurve. '''
+    from FinDiscountCurve."""
 
-    def __init__(self,
-                 valuationDate: FinDate,
-                 zeroDates: list,
-                 zeroRates: (list, np.ndarray),
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
-                 dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_ACT_ISDA):
-        ''' Curve is defined by a vector of increasing times and zero rates.'''
+    def __init__(
+        self,
+        valuationDate: FinDate,
+        zeroDates: list,
+        zeroRates: (list, np.ndarray),
+        freqType: FinFrequencyTypes = FinFrequencyTypes.CONTINUOUS,
+        dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_ACT_ISDA,
+    ):
+        """ Curve is defined by a vector of increasing times and zero rates."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -47,22 +49,19 @@ class FinDiscountCurvePWL(FinDiscountCurve):
         self._freqType = freqType
         self._dayCountType = dayCountType
 
-        dcTimes = timesFromDates(zeroDates,
-                                 self._valuationDate,
-                                 self._dayCountType)
+        dcTimes = timesFromDates(zeroDates, self._valuationDate, self._dayCountType)
 
         self._times = np.array(dcTimes)
 
         if testMonotonicity(self._times) is False:
             raise FinError("Times are not sorted in increasing order")
 
-###############################################################################
+    ###############################################################################
 
-    def _zeroRate(self,
-                  times: (list, np.ndarray)):
-        ''' Calculate the piecewise linear zero rate. This is taken from the
+    def _zeroRate(self, times: (list, np.ndarray)):
+        """Calculate the piecewise linear zero rate. This is taken from the
         initial inputs. A simple linear interpolation scheme is used. If the
-        user supplies a frequency type then a conversion is done. '''
+        user supplies a frequency type then a conversion is done."""
 
         if isinstance(times, float):
             times = np.array([times])
@@ -87,11 +86,11 @@ class FinDiscountCurvePWL(FinDiscountCurve):
 
             t0 = self._times[l_index]
             r0 = self._zeroRates[l_index]
-            t1 = self._times[l_index+1]
-            r1 = self._zeroRates[l_index+1]
+            t1 = self._times[l_index + 1]
+            r1 = self._zeroRates[l_index + 1]
 
             if found == 1:
-                zeroRate = ((t1 - t) * r0 + (t - t0) * r1)/(t1 - t0)
+                zeroRate = ((t1 - t) * r0 + (t - t0) * r1) / (t1 - t0)
             else:
                 zeroRate = self._zeroRates[-1]
 
@@ -99,32 +98,27 @@ class FinDiscountCurvePWL(FinDiscountCurve):
 
         return np.array(zeroRates)
 
-###############################################################################
+    ###############################################################################
 
-    def df(self,
-           dates: (FinDate, list)):
-        ''' Return discount factors given a single or vector of dates. The
+    def df(self, dates: (FinDate, list)):
+        """Return discount factors given a single or vector of dates. The
         discount factor depends on the rate and this in turn depends on its
         compounding frequency and it defaults to continuous compounding. It
         also depends on the day count convention. This was set in the
-        construction of the curve to be ACT_ACT_ISDA. '''
+        construction of the curve to be ACT_ACT_ISDA."""
 
         # Get day count times to use with curve day count convention
-        dcTimes = timesFromDates(dates,
-                                 self._valuationDate,
-                                 self._dayCountType)
+        dcTimes = timesFromDates(dates, self._valuationDate, self._dayCountType)
 
         zeroRates = self._zeroRate(dcTimes)
 
-        df = self._zeroToDf(self._valuationDate,
-                            zeroRates,
-                            dcTimes,
-                            self._freqType,
-                            self._dayCountType)
+        df = self._zeroToDf(
+            self._valuationDate, zeroRates, dcTimes, self._freqType, self._dayCountType
+        )
 
         return df
 
-###############################################################################
+    ###############################################################################
 
     # def _df(self,
     #         t: (float, np.ndarray)):
@@ -135,7 +129,7 @@ class FinDiscountCurvePWL(FinDiscountCurve):
     #     df = zeroToDf(r, t, self._freqType)
     #     return df
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
 
@@ -146,10 +140,11 @@ class FinDiscountCurvePWL(FinDiscountCurve):
         s += labelToString("FREQUENCY", (self._freqType))
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

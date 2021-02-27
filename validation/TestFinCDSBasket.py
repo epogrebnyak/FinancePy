@@ -7,6 +7,7 @@ import numpy as np
 from os.path import dirname, join
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.credit.FinCDSIndexPortfolio import FinCDSIndexPortfolio
@@ -23,6 +24,7 @@ from financepy.models.FinGBMProcess import getPathsAssets
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -45,68 +47,51 @@ def buildIborCurve(tradeDate):
 
     maturityDate = settlementDate.addMonths(12)
     swap1 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap1)
 
     maturityDate = settlementDate.addMonths(24)
     swap2 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap2)
 
     maturityDate = settlementDate.addMonths(36)
     swap3 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap3)
 
     maturityDate = settlementDate.addMonths(48)
     swap4 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap4)
 
     maturityDate = settlementDate.addMonths(60)
     swap5 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap5)
 
     liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
     return liborCurve
 
+
 ##########################################################################
 
 
-def loadHomogeneousSpreadCurves(valuationDate,
-                                liborCurve,
-                                cdsSpread3Y,
-                                cdsSpread5Y,
-                                cdsSpread7Y,
-                                cdsSpread10Y,
-                                numCredits):
+def loadHomogeneousSpreadCurves(
+    valuationDate,
+    liborCurve,
+    cdsSpread3Y,
+    cdsSpread5Y,
+    cdsSpread7Y,
+    cdsSpread10Y,
+    numCredits,
+):
 
     maturity3Y = valuationDate.nextCDSDate(36)
     maturity5Y = valuationDate.nextCDSDate(60)
@@ -122,16 +107,14 @@ def loadHomogeneousSpreadCurves(valuationDate,
 
     contracts = [cds3Y, cds5Y, cds7Y, cds10Y]
 
-    issuerCurve = FinCDSCurve(valuationDate,
-                              contracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(valuationDate, contracts, liborCurve, recoveryRate)
 
     issuerCurves = []
     for _ in range(0, numCredits):
         issuerCurves.append(issuerCurve)
 
     return issuerCurves
+
 
 ##########################################################################
 
@@ -146,7 +129,7 @@ def loadHeterogeneousSpreadCurves(valuationDate, liborCurve):
     path = dirname(__file__)
     filename = "CDX_NA_IG_S7_SPREADS.csv"
     full_filename_path = join(path, "data", filename)
-    f = open(full_filename_path, 'r')
+    f = open(full_filename_path, "r")
 
     data = f.readlines()
     issuerCurves = []
@@ -166,14 +149,12 @@ def loadHeterogeneousSpreadCurves(valuationDate, liborCurve):
         cds10Y = FinCDS(valuationDate, maturity10Y, spd10Y)
         cdsContracts = [cds3Y, cds5Y, cds7Y, cds10Y]
 
-        issuerCurve = FinCDSCurve(valuationDate,
-                                  cdsContracts,
-                                  liborCurve,
-                                  recoveryRate)
+        issuerCurve = FinCDSCurve(valuationDate, cdsContracts, liborCurve, recoveryRate)
 
         issuerCurves.append(issuerCurve)
 
     return issuerCurves
+
 
 ##########################################################################
 
@@ -190,14 +171,17 @@ def test_FinCDSBasket():
 
     cdsIndex = FinCDSIndexPortfolio()
 
-##########################################################################
+    ##########################################################################
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "====================== INHOMOGENEOUS CURVE ==========================")
+        "====================== INHOMOGENEOUS CURVE =========================="
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
 
     numCredits = 5
     spd3Y = 0.0012
@@ -208,55 +192,55 @@ def test_FinCDSBasket():
     testCases.header("LABELS", "VALUE")
 
     if 1 == 0:
-        issuerCurves = loadHomogeneousSpreadCurves(valuationDate,
-                                                   liborCurve,
-                                                   spd3Y,
-                                                   spd5Y,
-                                                   spd7Y,
-                                                   spd10Y,
-                                                   numCredits)
+        issuerCurves = loadHomogeneousSpreadCurves(
+            valuationDate, liborCurve, spd3Y, spd5Y, spd7Y, spd10Y, numCredits
+        )
     else:
         issuerCurves = loadHeterogeneousSpreadCurves(valuationDate, liborCurve)
         issuerCurves = issuerCurves[0:numCredits]
 
-    intrinsicSpd = cdsIndex.intrinsicSpread(valuationDate,
-                                            stepInDate,
-                                            basketMaturity,
-                                            issuerCurves) * 10000.0
+    intrinsicSpd = (
+        cdsIndex.intrinsicSpread(
+            valuationDate, stepInDate, basketMaturity, issuerCurves
+        )
+        * 10000.0
+    )
 
     testCases.print("INTRINSIC SPD BASKET MATURITY", intrinsicSpd)
 
-    totalSpd = cdsIndex.totalSpread(valuationDate,
-                                    stepInDate,
-                                    basketMaturity,
-                                    issuerCurves) * 10000.0
+    totalSpd = (
+        cdsIndex.totalSpread(valuationDate, stepInDate, basketMaturity, issuerCurves)
+        * 10000.0
+    )
 
     testCases.print("SUMMED UP SPD BASKET MATURITY", totalSpd)
 
-    minSpd = cdsIndex.minSpread(valuationDate,
-                                stepInDate,
-                                basketMaturity,
-                                issuerCurves) * 10000.0
+    minSpd = (
+        cdsIndex.minSpread(valuationDate, stepInDate, basketMaturity, issuerCurves)
+        * 10000.0
+    )
 
     testCases.print("MINIMUM SPD BASKET MATURITY", minSpd)
 
-    maxSpd = cdsIndex.maxSpread(valuationDate,
-                                stepInDate,
-                                basketMaturity,
-                                issuerCurves) * 10000.0
+    maxSpd = (
+        cdsIndex.maxSpread(valuationDate, stepInDate, basketMaturity, issuerCurves)
+        * 10000.0
+    )
 
     testCases.print("MAXIMUM SPD BASKET MATURITY", maxSpd)
 
     seed = 1967
-    basket = FinCDSBasket(valuationDate,
-                          basketMaturity)
+    basket = FinCDSBasket(valuationDate, basketMaturity)
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "======================= GAUSSIAN COPULA ===========================")
+        "======================= GAUSSIAN COPULA ==========================="
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
 
     testCases.header("TIME", "Trials", "RHO", "NTD", "SPRD", "SPRD_HOMO")
 
@@ -268,36 +252,35 @@ def test_FinCDSBasket():
             for numTrials in [1000]:  # [1000,5000,10000,20000,50000,100000]:
                 start = time.time()
 
-                v1 = basket.valueGaussian_MC(valuationDate,
-                                             ntd,
-                                             issuerCurves,
-                                             corrMatrix,
-                                             liborCurve,
-                                             numTrials,
-                                             seed)
+                v1 = basket.valueGaussian_MC(
+                    valuationDate,
+                    ntd,
+                    issuerCurves,
+                    corrMatrix,
+                    liborCurve,
+                    numTrials,
+                    seed,
+                )
 
-                v2 = basket.value1FGaussian_Homo(valuationDate,
-                                                 ntd,
-                                                 issuerCurves,
-                                                 betaVector,
-                                                 liborCurve)
+                v2 = basket.value1FGaussian_Homo(
+                    valuationDate, ntd, issuerCurves, betaVector, liborCurve
+                )
 
                 end = time.time()
-                period = (end - start)
+                period = end - start
                 testCases.print(
-                    period,
-                    numTrials,
-                    rho,
-                    ntd,
-                    v1[2] * 10000,
-                    v2[3] * 10000)
+                    period, numTrials, rho, ntd, v1[2] * 10000, v2[3] * 10000
+                )
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "==================== STUDENT'S-T CONVERGENCE ======================")
+        "==================== STUDENT'S-T CONVERGENCE ======================"
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
 
     testCases.header("TIME", "TRIALS", "RHO", "DOF", "NTD", "SPRD")
 
@@ -308,17 +291,19 @@ def test_FinCDSBasket():
             for doF in [3, 6]:
                 start = time.time()
 
-                v = basket.valueStudentT_MC(valuationDate,
-                                            ntd,
-                                            issuerCurves,
-                                            corrMatrix,
-                                            doF,
-                                            liborCurve,
-                                            numTrials,
-                                            seed)
+                v = basket.valueStudentT_MC(
+                    valuationDate,
+                    ntd,
+                    issuerCurves,
+                    corrMatrix,
+                    doF,
+                    liborCurve,
+                    numTrials,
+                    seed,
+                )
 
                 end = time.time()
-                period = (end - start)
+                period = end - start
                 testCases.print(period, numTrials, rho, doF, ntd, v[2] * 10000)
 
             start = time.time()
@@ -329,18 +314,22 @@ def test_FinCDSBasket():
                 corrMatrix,
                 liborCurve,
                 numTrials,
-                seed)
+                seed,
+            )
             end = time.time()
-            period = (end - start)
+            period = end - start
 
             testCases.print(period, numTrials, rho, "GC", ntd, v[2] * 10000)
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "=================== STUDENT'S T WITH DOF = 5 ======================")
+        "=================== STUDENT'S T WITH DOF = 5 ======================"
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     doF = 5
     testCases.header("TIME", "NUMTRIALS", "RHO", "NTD", "SPD")
     for beta in [0.0, 0.5]:
@@ -350,17 +339,20 @@ def test_FinCDSBasket():
             for numTrials in [1000]:
                 start = time.time()
 
-                v = basket.valueStudentT_MC(valuationDate,
-                                            ntd,
-                                            issuerCurves,
-                                            corrMatrix,
-                                            doF,
-                                            liborCurve,
-                                            numTrials,
-                                            seed)
+                v = basket.valueStudentT_MC(
+                    valuationDate,
+                    ntd,
+                    issuerCurves,
+                    corrMatrix,
+                    doF,
+                    liborCurve,
+                    numTrials,
+                    seed,
+                )
                 end = time.time()
-                period = (end - start)
+                period = end - start
                 testCases.print(period, numTrials, rho, ntd, v[2] * 10000)
+
 
 ###############################################################################
 
@@ -378,9 +370,18 @@ def testFinGBMProcess():
     corrMatrix = corrMatrixGenerator(rho, numAssets)
     seed = 1912
 
-    _ = getPathsAssets(numAssets, numPaths, numTimeSteps, t,
-                       mus, stockPrices, volatilities,
-                       corrMatrix, seed)
+    _ = getPathsAssets(
+        numAssets,
+        numPaths,
+        numTimeSteps,
+        t,
+        mus,
+        stockPrices,
+        volatilities,
+        corrMatrix,
+        seed,
+    )
+
 
 ###############################################################################
 

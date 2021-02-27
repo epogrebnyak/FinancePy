@@ -8,12 +8,12 @@ from ..finutils.FinMath import cholesky
 
 ###############################################################################
 
-class FinModel():
-    
-    def __init__(implementationType,
-                 parameterDict: dict):
- 
+
+class FinModel:
+    def __init__(implementationType, parameterDict: dict):
+
         self._implementationType = implementationType
         self._parameterDist = parameterDict
+
 
 ###############################################################################

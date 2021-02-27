@@ -17,26 +17,28 @@ from ...finutils.FinDayCount import FinDayCount, FinDayCountTypes
 ##########################################################################
 
 
-class FinIborCapVolCurve():
-    ''' Class to manage a term structure of cap (flat) volatilities and to
+class FinIborCapVolCurve:
+    """Class to manage a term structure of cap (flat) volatilities and to
     do the conversion to caplet (spot) volatilities. This does not manage a
     strike dependency, only a term structure. The cap and caplet volatilies
     are keyed off the cap and caplet maturity dates. However this volatility
     only applies to the evolution of the Ibor rate out to the caplet start
-    dates. Note also that this class also handles floor vols.'''
+    dates. Note also that this class also handles floor vols."""
 
-    def __init__(self,
-                 curveDate,  # Valuation date for cap volatility
-                 capMaturityDates,  # curve date + maturity dates for caps
-                 capSigmas,  # Flat cap volatility for cap maturity dates
-                 dayCountType):
-        ''' Create a cap/floor volatility curve given a curve date, a list of
+    def __init__(
+        self,
+        curveDate,  # Valuation date for cap volatility
+        capMaturityDates,  # curve date + maturity dates for caps
+        capSigmas,  # Flat cap volatility for cap maturity dates
+        dayCountType,
+    ):
+        """Create a cap/floor volatility curve given a curve date, a list of
         cap maturity dates and a vector of cap volatilities. To avoid confusion
         first date of the capDates must be equal to the curve date and first
         cap volatility for this date must equal zero. The internal times are
         calculated according to the provided day count convention. Note cap and
         floor volatilities are the same for the same strike and tenor, I just
-        refer to cap volatilities in the code for code simplicity. '''
+        refer to cap volatilities in the code for code simplicity."""
 
         numTimes = len(capMaturityDates)
         numVols = len(capSigmas)
@@ -78,12 +80,12 @@ class FinIborCapVolCurve():
 
         self.generateCapletVols()
 
-###############################################################################
+    ###############################################################################
 
     def generateCapletVols(self):
-        ''' Bootstrap caplet volatilities from cap volatilities using similar
+        """Bootstrap caplet volatilities from cap volatilities using similar
         notation to Hull's book (page 32.11). The first volatility in the
-        vector of caplet vols is zero. '''
+        vector of caplet vols is zero."""
 
         self._times = []
         self._taus = []
@@ -102,7 +104,7 @@ class FinIborCapVolCurve():
         fwdRateVol = self._capSigmas[0]
         self._capletGammas = np.zeros(numCaps)
         self._capletGammas[0] = 0.0
-        cumIbor2Tau = (fwdRateVol**2) * self._taus[0]
+        cumIbor2Tau = (fwdRateVol ** 2) * self._taus[0]
 
         sumTau = 0.0
         for i in range(1, len(self._capMaturityDates)):
@@ -110,7 +112,7 @@ class FinIborCapVolCurve():
             tau = self._taus[i]
             sumTau += tau
             volCap = self._capSigmas[i]
-            volIbor2 = ((volCap**2) * sumTau - cumIbor2Tau) / tau
+            volIbor2 = ((volCap ** 2) * sumTau - cumIbor2Tau) / tau
 
             if volIbor2 < 0.0:
                 raise FinError("Error due to negative caplet variance.")
@@ -119,13 +121,13 @@ class FinIborCapVolCurve():
             self._capletGammas[i] = volIbor
             cumIbor2Tau += volIbor2 * self._taus[i]
 
-###############################################################################
+    ###############################################################################
 
     def capletVol(self, dt):
-        ''' Return the forward rate caplet/floorlet volatility for a specific
+        """Return the forward rate caplet/floorlet volatility for a specific
         forward caplet expiry date. The period of the volatility is the
         the intercaplet spacing period used when creating the class object.
-        The volatility interpolation is piecewise flat. '''
+        The volatility interpolation is piecewise flat."""
 
         if isinstance(dt, FinDate):
             t = (dt - self._curveDate) / gDaysInYear
@@ -150,12 +152,12 @@ class FinIborCapVolCurve():
 
         return self._capletGammas[-1]
 
-###############################################################################
+    ###############################################################################
 
     def capVol(self, dt):
-        ''' Return the cap flat volatility for a specific cap maturity date for
+        """Return the cap flat volatility for a specific cap maturity date for
         the last caplet/floorlet in the cap/floor. The volatility interpolation
-        is piecewise flat. '''
+        is piecewise flat."""
 
         if isinstance(dt, FinDate):
             t = (dt - self._curveDate) / gDaysInYear
@@ -177,10 +179,10 @@ class FinIborCapVolCurve():
 
         return self._capSigmas[-1]
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Output the contents of the FinCapVolCurve class object. '''
+        """ Output the contents of the FinCapVolCurve class object. """
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         numTimes = len(self._times)
@@ -190,9 +192,12 @@ class FinIborCapVolCurve():
             tau = self._taus[i]
             volCap = self._capSigmas[i]
             fwdIborVol = self._capletVols[i]
-            s += labelToString("%7.4f  %6.4f  %9.4f  %9.4f"
-                               % (t, tau, volCap*100.0, fwdIborVol*100.0))
+            s += labelToString(
+                "%7.4f  %6.4f  %9.4f  %9.4f"
+                % (t, tau, volCap * 100.0, fwdIborVol * 100.0)
+            )
 
         return s
+
 
 ###############################################################################

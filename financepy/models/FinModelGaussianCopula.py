@@ -14,12 +14,9 @@ from ..finutils.FinHelperFunctions import uniformToDefaultTime
 ###############################################################################
 
 
-def defaultTimesGC(issuerCurves,
-                   correlationMatrix,
-                   numTrials,
-                   seed):
-    ''' Generate a matrix of default times by credit and trial using a
-    Gaussian copula model using a full rank correlation matrix. '''
+def defaultTimesGC(issuerCurves, correlationMatrix, numTrials, seed):
+    """Generate a matrix of default times by credit and trial using a
+    Gaussian copula model using a full rank correlation matrix."""
 
     np.random.seed(seed)
     numCredits = len(issuerCurves)
@@ -43,5 +40,6 @@ def defaultTimesGC(issuerCurves,
             corrTimes[iCredit, numTrials + iTrial] = t2
 
     return corrTimes
+
 
 ##########################################################################

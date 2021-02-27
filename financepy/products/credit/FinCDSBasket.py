@@ -37,19 +37,21 @@ from ...finutils.FinHelperFunctions import labelToString
 
 class FinCDSBasket(object):
 
-    ''' Class to deal with n-to-default CDS baskets. '''
+    """ Class to deal with n-to-default CDS baskets. """
 
-    def __init__(self,
-                 stepInDate: FinDate,
-                 maturityDate: FinDate,
-                 notional: float = ONE_MILLION,
-                 runningCoupon: float = 0.0,
-                 longProtection: bool = True,
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.QUARTERLY,
-                 dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_360,
-                 calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
-                 busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
-                 dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD):
+    def __init__(
+        self,
+        stepInDate: FinDate,
+        maturityDate: FinDate,
+        notional: float = ONE_MILLION,
+        runningCoupon: float = 0.0,
+        longProtection: bool = True,
+        freqType: FinFrequencyTypes = FinFrequencyTypes.QUARTERLY,
+        dayCountType: FinDayCountTypes = FinDayCountTypes.ACT_360,
+        calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
+        busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
+        dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
+    ):
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -64,27 +66,26 @@ class FinCDSBasket(object):
         self._freqType = freqType
         self._busDayAdjustType = busDayAdjustType
 
-        self._cdsContract = FinCDS(self._stepInDate,
-                                   self._maturityDate,
-                                   self._runningCoupon,
-                                   1.0,
-                                   self._longProtection,
-                                   self._freqType,
-                                   self._dayCountType,
-                                   self._calendarType,
-                                   self._busDayAdjustType,
-                                   self._dateGenRuleType)
+        self._cdsContract = FinCDS(
+            self._stepInDate,
+            self._maturityDate,
+            self._runningCoupon,
+            1.0,
+            self._longProtection,
+            self._freqType,
+            self._dayCountType,
+            self._calendarType,
+            self._busDayAdjustType,
+            self._dateGenRuleType,
+        )
 
-###############################################################################
+    ###############################################################################
 
-    def valueLegs_MC(self,
-                     valuationDate,
-                     nToDefault,
-                     defaultTimes,
-                     issuerCurves,
-                     liborCurve):
-        ''' Value the legs of the default basket using Monte Carlo. The default
-        times are an input so this valuation is not model dependent. '''
+    def valueLegs_MC(
+        self, valuationDate, nToDefault, defaultTimes, issuerCurves, liborCurve
+    ):
+        """Value the legs of the default basket using Monte Carlo. The default
+        times are an input so this valuation is not model dependent."""
 
         numCredits = defaultTimes.shape[0]
         numTrials = defaultTimes.shape[1]
@@ -102,8 +103,9 @@ class FinCDSBasket(object):
             dt1 = adjustedDates[iTime]
             accrualFactor = dayCount.yearFrac(dt0, dt1)[0]
             averageAccrualFactor += accrualFactor
-            rpv01ToTimes[iTime] = rpv01ToTimes[iTime - 1] + \
-                accrualFactor * liborCurve._df(t)
+            rpv01ToTimes[iTime] = rpv01ToTimes[
+                iTime - 1
+            ] + accrualFactor * liborCurve._df(t)
 
         averageAccrualFactor /= numFlows
 
@@ -127,8 +129,7 @@ class FinCDSBasket(object):
             if minTau < tmat:
                 numPaymentsIndex = int(minTau / averageAccrualFactor)
                 rpv01Trial = rpv01ToTimes[numPaymentsIndex]
-                rpv01Trial += (minTau - numPaymentsIndex *
-                               averageAccrualFactor)
+                rpv01Trial += minTau - numPaymentsIndex * averageAccrualFactor
 
                 # DETERMINE IDENTITY OF N-TO-DEFAULT CREDIT IF BASKET NOT HOMO
                 assetIndex = 0
@@ -137,7 +138,7 @@ class FinCDSBasket(object):
                         assetIndex = iCredit
                         break
 
-                protTrial = (1.0 - issuerCurves[assetIndex]._recoveryRate)
+                protTrial = 1.0 - issuerCurves[assetIndex]._recoveryRate
                 protTrial *= liborCurve._df(minTau)
 
             else:
@@ -153,34 +154,31 @@ class FinCDSBasket(object):
         prot = prot / numTrials
         return (rpv01, prot)
 
-###############################################################################
+    ###############################################################################
 
-    def valueGaussian_MC(self,
-                         valuationDate,
-                         nToDefault,
-                         issuerCurves,
-                         correlationMatrix,
-                         liborCurve,
-                         numTrials,
-                         seed):
-        ''' Value the default basket using a Gaussian copula model. This
-        depends on the issuer curves and correlation matrix. '''
+    def valueGaussian_MC(
+        self,
+        valuationDate,
+        nToDefault,
+        issuerCurves,
+        correlationMatrix,
+        liborCurve,
+        numTrials,
+        seed,
+    ):
+        """Value the default basket using a Gaussian copula model. This
+        depends on the issuer curves and correlation matrix."""
 
         numCredits = len(issuerCurves)
 
         if nToDefault > numCredits or nToDefault < 1:
             raise FinError("nToDefault must be 1 to numCredits")
 
-        defaultTimes = defaultTimesGC(issuerCurves,
-                                      correlationMatrix,
-                                      numTrials,
-                                      seed)
+        defaultTimes = defaultTimesGC(issuerCurves, correlationMatrix, numTrials, seed)
 
-        rpv01, protPV = self.valueLegs_MC(valuationDate,
-                                          nToDefault,
-                                          defaultTimes,
-                                          issuerCurves,
-                                          liborCurve)
+        rpv01, protPV = self.valueLegs_MC(
+            valuationDate, nToDefault, defaultTimes, issuerCurves, liborCurve
+        )
 
         spd = protPV / rpv01
         value = self._notional * (protPV - self._runningCoupon * rpv01)
@@ -190,18 +188,20 @@ class FinCDSBasket(object):
 
         return (value, rpv01, spd)
 
-###############################################################################
+    ###############################################################################
 
-    def valueStudentT_MC(self,
-                         valuationDate,
-                         nToDefault,
-                         issuerCurves,
-                         correlationMatrix,
-                         degreesOfFreedom,
-                         liborCurve,
-                         numTrials,
-                         seed):
-        ''' Value the default basket using the Student-T copula. '''
+    def valueStudentT_MC(
+        self,
+        valuationDate,
+        nToDefault,
+        issuerCurves,
+        correlationMatrix,
+        degreesOfFreedom,
+        liborCurve,
+        numTrials,
+        seed,
+    ):
+        """ Value the default basket using the Student-T copula. """
 
         numCredits = len(issuerCurves)
 
@@ -210,17 +210,13 @@ class FinCDSBasket(object):
 
         model = FinModelStudentTCopula()
 
-        defaultTimes = model.defaultTimes(issuerCurves,
-                                          correlationMatrix,
-                                          degreesOfFreedom,
-                                          numTrials,
-                                          seed)
+        defaultTimes = model.defaultTimes(
+            issuerCurves, correlationMatrix, degreesOfFreedom, numTrials, seed
+        )
 
-        rpv01, protPV = self.valueLegs_MC(valuationDate,
-                                          nToDefault,
-                                          defaultTimes,
-                                          issuerCurves,
-                                          liborCurve)
+        rpv01, protPV = self.valueLegs_MC(
+            valuationDate, nToDefault, defaultTimes, issuerCurves, liborCurve
+        )
 
         spd = protPV / rpv01
         value = self._notional * (protPV - self._runningCoupon * rpv01)
@@ -230,17 +226,19 @@ class FinCDSBasket(object):
 
         return (value, rpv01, spd)
 
-###############################################################################
+    ###############################################################################
 
-    def value1FGaussian_Homo(self,
-                             valuationDate,
-                             nToDefault,
-                             issuerCurves,
-                             betaVector,
-                             liborCurve,
-                             numPoints=50):
-        ''' Value default basket using 1 factor Gaussian copula and analytical
-        approach which is only exact when all recovery rates are the same. '''
+    def value1FGaussian_Homo(
+        self,
+        valuationDate,
+        nToDefault,
+        issuerCurves,
+        betaVector,
+        liborCurve,
+        numPoints=50,
+    ):
+        """Value default basket using 1 factor Gaussian copula and analytical
+        approach which is only exact when all recovery rates are the same."""
 
         numCredits = len(issuerCurves)
 
@@ -274,13 +272,15 @@ class FinCDSBasket(object):
                 issuerCurve = issuerCurves[iCredit]
                 recoveryRates[iCredit] = issuerCurve._recoveryRate
                 issuerSurvivalProbabilities[iCredit] = interpolate(
-                    t, issuerCurve._times, issuerCurve._values,
-                    FinInterpTypes.FLAT_FWD_RATES.value)
+                    t,
+                    issuerCurve._times,
+                    issuerCurve._values,
+                    FinInterpTypes.FLAT_FWD_RATES.value,
+                )
 
-            lossDbn = homogeneousBasketLossDbn(issuerSurvivalProbabilities,
-                                               recoveryRates,
-                                               betaVector,
-                                               numPoints)
+            lossDbn = homogeneousBasketLossDbn(
+                issuerSurvivalProbabilities, recoveryRates, betaVector, numPoints
+            )
 
             basketSurvivalCurve[iTime] = 1.0
             for iToDefault in range(nToDefault, numCredits + 1):
@@ -295,8 +295,11 @@ class FinCDSBasket(object):
         basketCurve._values = basketSurvivalCurve
 
         protLegPV = self._cdsContract.protectionLegPV(
-            valuationDate, basketCurve, curveRecovery)
-        riskyPV01 = self._cdsContract.riskyPV01(valuationDate, basketCurve)['clean_rpv01']
+            valuationDate, basketCurve, curveRecovery
+        )
+        riskyPV01 = self._cdsContract.riskyPV01(valuationDate, basketCurve)[
+            "clean_rpv01"
+        ]
 
         # Long protection
         mtm = self._notional * (protLegPV - riskyPV01 * self._runningCoupon)
@@ -312,27 +315,28 @@ class FinCDSBasket(object):
 
         return basketOutput
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' print out details of the CDS contract and all of the calculated
-        cashflows '''
+        """print out details of the CDS contract and all of the calculated
+        cashflows"""
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("STEP-IN DATE", self._stepInDate)
         s += labelToString("MATURITY", self._maturityDate)
         s += labelToString("NOTIONAL", self._notional)
-        s += labelToString("RUNNING COUPON", self._runningCoupon*10000, "bp\n")
+        s += labelToString("RUNNING COUPON", self._runningCoupon * 10000, "bp\n")
         s += labelToString("DAYCOUNT", self._dayCountType)
         s += labelToString("FREQUENCY", self._freqType)
         s += labelToString("CALENDAR", self._calendarType)
         s += labelToString("BUSDAYRULE", self._busDayAdjustType)
         s += labelToString("DATEGENRULE", self._dateGenRuleType)
 
-#        header = "PAYMENT_DATE, YEAR_FRAC, FLOW"
-#        valueTable = [self._adjustedDates, self._accrualFactors, self._flows]
-#        precision = "12.6f"
-#        s += tableToString(header, valueTable, precision)
+        #        header = "PAYMENT_DATE, YEAR_FRAC, FLOW"
+        #        valueTable = [self._adjustedDates, self._accrualFactors, self._flows]
+        #        precision = "12.6f"
+        #        s += tableToString(header, valueTable, precision)
 
         return s
+
 
 ###############################################################################

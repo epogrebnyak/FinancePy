@@ -27,30 +27,32 @@ from ...models.FinModelRatesHW import FinModelRatesHW
 
 
 class FinIborBermudanSwaption(object):
-    ''' This is the class for the Bermudan-style swaption, an option to enter
+    """This is the class for the Bermudan-style swaption, an option to enter
     into a swap (payer or receiver of the fixed coupon), that starts in the
     future and with a fixed maturity, at a swap rate fixed today. This swaption
     can be exercised on any of the fixed coupon payment dates after the first
-    exercise date. '''
+    exercise date."""
 
-    def __init__(self,
-                 settlementDate: FinDate,
-                 exerciseDate: FinDate,
-                 maturityDate: FinDate,
-                 fixedLegType: FinSwapTypes,
-                 exerciseType: FinExerciseTypes,
-                 fixedCoupon: float,
-                 fixedFrequencyType: FinFrequencyTypes,
-                 fixedDayCountType: FinDayCountTypes,
-                 notional=ONE_MILLION,
-                 floatFrequencyType=FinFrequencyTypes.QUARTERLY,
-                 floatDayCountType=FinDayCountTypes.THIRTY_E_360,
-                 calendarType=FinCalendarTypes.WEEKEND,
-                 busDayAdjustType=FinBusDayAdjustTypes.FOLLOWING,
-                 dateGenRuleType=FinDateGenRuleTypes.BACKWARD):
-        ''' Create a Bermudan swaption contract. This is an option to enter
+    def __init__(
+        self,
+        settlementDate: FinDate,
+        exerciseDate: FinDate,
+        maturityDate: FinDate,
+        fixedLegType: FinSwapTypes,
+        exerciseType: FinExerciseTypes,
+        fixedCoupon: float,
+        fixedFrequencyType: FinFrequencyTypes,
+        fixedDayCountType: FinDayCountTypes,
+        notional=ONE_MILLION,
+        floatFrequencyType=FinFrequencyTypes.QUARTERLY,
+        floatDayCountType=FinDayCountTypes.THIRTY_E_360,
+        calendarType=FinCalendarTypes.WEEKEND,
+        busDayAdjustType=FinBusDayAdjustTypes.FOLLOWING,
+        dateGenRuleType=FinDateGenRuleTypes.BACKWARD,
+    ):
+        """Create a Bermudan swaption contract. This is an option to enter
         into a payer or receiver swap at a fixed coupon on all of the fixed
-        # leg coupon dates until the exercise date inclusive. '''
+        # leg coupon dates until the exercise date inclusive."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -86,33 +88,32 @@ class FinIborBermudanSwaption(object):
         self._underlyingSwap = None
         self._cpnTimes = None
         self._cpnFlows = None
-        
-###############################################################################
 
-    def value(self,
-              valuationDate,
-              discountCurve,
-              model):
-        ''' Value the Bermudan swaption using the specified model and a
-        discount curve. The choices of model are the Hull-White model, the 
-        Black-Karasinski model and the Black-Derman-Toy model. '''
+    ###############################################################################
+
+    def value(self, valuationDate, discountCurve, model):
+        """Value the Bermudan swaption using the specified model and a
+        discount curve. The choices of model are the Hull-White model, the
+        Black-Karasinski model and the Black-Derman-Toy model."""
 
         floatSpread = 0.0
 
         # The underlying is a swap in which we pay the fixed amount
-        self._underlyingSwap = FinIborSwap(self._exerciseDate,
-                                           self._maturityDate,
-                                           self._fixedLegType,
-                                           self._fixedCoupon,
-                                           self._fixedFrequencyType,
-                                           self._fixedDayCountType,
-                                           self._notional,
-                                           floatSpread,
-                                           self._floatFrequencyType,
-                                           self._floatDayCountType,
-                                           self._calendarType,
-                                           self._busDayAdjustType,
-                                           self._dateGenRuleType)
+        self._underlyingSwap = FinIborSwap(
+            self._exerciseDate,
+            self._maturityDate,
+            self._fixedLegType,
+            self._fixedCoupon,
+            self._fixedFrequencyType,
+            self._fixedDayCountType,
+            self._notional,
+            floatSpread,
+            self._floatFrequencyType,
+            self._floatDayCountType,
+            self._calendarType,
+            self._busDayAdjustType,
+            self._dateGenRuleType,
+        )
 
         #  I need to do this to generate the fixed leg flows
         self._pv01 = self._underlyingSwap.pv01(valuationDate, discountCurve)
@@ -138,7 +139,7 @@ class FinIborBermudanSwaption(object):
 
             if flowDate > self._exerciseDate:
                 cpnTime = (flowDate - valuationDate) / gDaysInYear
-                cpnFlow = swap._fixedLeg._payments[iFlow-1] / self._notional
+                cpnFlow = swap._fixedLeg._payments[iFlow - 1] / self._notional
                 cpnTimes.append(cpnTime)
                 cpnFlows.append(cpnFlow)
 
@@ -155,53 +156,59 @@ class FinIborBermudanSwaption(object):
         dfValues = discountCurve._dfs
 
         faceAmount = 1.0
-        strikePrice = 1.0 # Floating leg is assumed to price at par
+        strikePrice = 1.0  # Floating leg is assumed to price at par
 
         #######################################################################
         # For both models, the tree needs to extend out to maturity because of
         # the multi-callable nature of the Bermudan Swaption
         #######################################################################
 
-        if isinstance(model, FinModelRatesBDT) or isinstance(model, FinModelRatesBK) or isinstance(model, FinModelRatesHW):
+        if (
+            isinstance(model, FinModelRatesBDT)
+            or isinstance(model, FinModelRatesBK)
+            or isinstance(model, FinModelRatesHW)
+        ):
 
             model.buildTree(tmat, dfTimes, dfValues)
 
-            v = model.bermudanSwaption(texp,
-                                       tmat,
-                                       strikePrice,
-                                       faceAmount,
-                                       cpnTimes,
-                                       cpnFlows,
-                                       self._exerciseType)
+            v = model.bermudanSwaption(
+                texp,
+                tmat,
+                strikePrice,
+                faceAmount,
+                cpnTimes,
+                cpnFlows,
+                self._exerciseType,
+            )
         else:
 
             raise FinError("Invalid model choice for Bermudan Swaption")
 
         if self._fixedLegType == FinSwapTypes.RECEIVE:
-            v = self._notional * v['rec']
+            v = self._notional * v["rec"]
         elif self._fixedLegType == FinSwapTypes.PAY:
-            v = self._notional * v['pay']
+            v = self._notional * v["pay"]
 
         return v
 
-###############################################################################
+    ###############################################################################
 
     def printSwaptionValue(self):
 
         print("SWAP PV01:", self._pv01)
-        
+
         n = len(self._cpnTimes)
-        
-        for i in range(0,n):
+
+        for i in range(0, n):
             print("CPN TIME: ", self._cpnTimes[i], "FLOW", self._cpnFlows[i])
 
         n = len(self._callTimes)
 
-        for i in range(0,n):
+        for i in range(0, n):
             print("CALL TIME: ", self._callTimes[i])
 
-###############################################################################
-        
+    ###############################################################################
+
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("EXERCISE DATE", self._exerciseDate)
@@ -216,9 +223,10 @@ class FinIborBermudanSwaption(object):
         s += labelToString("NOTIONAL", self._notional)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
         print(self)
+
 
 ###############################################################################

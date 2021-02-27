@@ -6,6 +6,7 @@ import os
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.credit.FinCDSTranche import FinLossDistributionBuilder
@@ -21,6 +22,7 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -29,6 +31,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 
 
 ##########################################################################
+
 
 def buildIborCurve(tradeDate):
 
@@ -45,66 +48,50 @@ def buildIborCurve(tradeDate):
 
     maturityDate = settlementDate.addMonths(12)
     swap1 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap1)
 
     maturityDate = settlementDate.addMonths(24)
     swap2 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap2)
 
     maturityDate = settlementDate.addMonths(36)
     swap3 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap3)
 
     maturityDate = settlementDate.addMonths(48)
     swap4 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0502,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0502, fixedFreq, dcType
+    )
     swaps.append(swap4)
 
     maturityDate = settlementDate.addMonths(60)
     swap5 = FinIborSwap(
-        settlementDate,
-        maturityDate,
-        FinSwapTypes.PAY,
-        0.0501,
-        fixedFreq,
-        dcType)
+        settlementDate, maturityDate, FinSwapTypes.PAY, 0.0501, fixedFreq, dcType
+    )
     swaps.append(swap5)
 
     liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
     return liborCurve
 
+
 ##############################################################################
 
-def loadHomogeneousCDSCurves(valuationDate,
-                             liborCurve,
-                             cdsSpread3Y,
-                             cdsSpread5Y,
-                             cdsSpread7Y,
-                             cdsSpread10Y,
-                             numCredits):
+
+def loadHomogeneousCDSCurves(
+    valuationDate,
+    liborCurve,
+    cdsSpread3Y,
+    cdsSpread5Y,
+    cdsSpread7Y,
+    cdsSpread10Y,
+    numCredits,
+):
 
     maturity3Y = valuationDate.nextCDSDate(36)
     maturity5Y = valuationDate.nextCDSDate(60)
@@ -120,16 +107,14 @@ def loadHomogeneousCDSCurves(valuationDate,
 
     contracts = [cds3Y, cds5Y, cds7Y, cds10Y]
 
-    issuerCurve = FinCDSCurve(valuationDate,
-                              contracts,
-                              liborCurve,
-                              recoveryRate)
+    issuerCurve = FinCDSCurve(valuationDate, contracts, liborCurve, recoveryRate)
 
     issuerCurves = []
     for _ in range(0, numCredits):
         issuerCurves.append(issuerCurve)
 
     return issuerCurves
+
 
 ##########################################################################
 
@@ -140,8 +125,8 @@ def loadHeterogeneousSpreadCurves(valuationDate, liborCurve):
     maturity5Y = valuationDate.nextCDSDate(60)
     maturity7Y = valuationDate.nextCDSDate(84)
     maturity10Y = valuationDate.nextCDSDate(120)
-    path = os.path.join(os.path.dirname(__file__), './/data//CDX_NA_IG_S7_SPREADS.csv')
-    f = open(path, 'r')
+    path = os.path.join(os.path.dirname(__file__), ".//data//CDX_NA_IG_S7_SPREADS.csv")
+    f = open(path, "r")
     data = f.readlines()
     f.close()
     issuerCurves = []
@@ -161,14 +146,12 @@ def loadHeterogeneousSpreadCurves(valuationDate, liborCurve):
         cds10Y = FinCDS(valuationDate, maturity10Y, spd10Y)
         cdsContracts = [cds3Y, cds5Y, cds7Y, cds10Y]
 
-        issuerCurve = FinCDSCurve(valuationDate,
-                                  cdsContracts,
-                                  liborCurve,
-                                  recoveryRate)
+        issuerCurve = FinCDSCurve(valuationDate, cdsContracts, liborCurve, recoveryRate)
 
         issuerCurves.append(issuerCurve)
 
     return issuerCurves
+
 
 ##########################################################################
 
@@ -194,14 +177,7 @@ def test_FinCDSTranche():
     tranche5 = FinCDSTranche(valuationDate, trancheMaturity, 0.12, 0.22)
     tranche6 = FinCDSTranche(valuationDate, trancheMaturity, 0.22, 0.60)
     tranche7 = FinCDSTranche(valuationDate, trancheMaturity, 0.00, 0.60)
-    tranches = [
-        tranche1,
-        tranche2,
-        tranche3,
-        tranche4,
-        tranche5,
-        tranche6,
-        tranche7]
+    tranches = [tranche1, tranche2, tranche3, tranche4, tranche5, tranche6, tranche7]
 
     corr1 = 0.30
     corr2 = 0.35
@@ -210,32 +186,33 @@ def test_FinCDSTranche():
 
     cdsIndex = FinCDSIndexPortfolio()
 
-##########################################################################
+    ##########################################################################
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "====================== HOMOGENEOUS CURVE ==========================")
+        "====================== HOMOGENEOUS CURVE =========================="
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     numCredits = 125
     spd3Y = 0.0012
     spd5Y = 0.0025
     spd7Y = 0.0034
     spd10Y = 0.0046
 
-    issuerCurves = loadHomogeneousCDSCurves(valuationDate,
-                                            liborCurve,
-                                            spd3Y,
-                                            spd5Y,
-                                            spd7Y,
-                                            spd10Y,
-                                            numCredits)
+    issuerCurves = loadHomogeneousCDSCurves(
+        valuationDate, liborCurve, spd3Y, spd5Y, spd7Y, spd10Y, numCredits
+    )
 
-    intrinsicSpd = cdsIndex.intrinsicSpread(valuationDate,
-                                            stepInDate,
-                                            trancheMaturity,
-                                            issuerCurves) * 10000.0
+    intrinsicSpd = (
+        cdsIndex.intrinsicSpread(
+            valuationDate, stepInDate, trancheMaturity, issuerCurves
+        )
+        * 10000.0
+    )
 
     testCases.header("LABEL", "VALUE")
     testCases.print("INTRINSIC SPD TRANCHE MATURITY", intrinsicSpd)
@@ -256,33 +233,34 @@ def test_FinCDSTranche():
                     corr1,
                     corr2,
                     numPoints,
-                    method)
-                end = time.time()
-                period = (end - start)
-                testCases.print(
                     method,
-                    period,
-                    numPoints,
-                    tranche._k1,
-                    tranche._k2,
-                    v[3] * 10000)
+                )
+                end = time.time()
+                period = end - start
+                testCases.print(
+                    method, period, numPoints, tranche._k1, tranche._k2, v[3] * 10000
+                )
 
-##########################################################################
+    ##########################################################################
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
     testCases.banner(
-        "=================== HETEROGENEOUS CURVES ==========================")
+        "=================== HETEROGENEOUS CURVES =========================="
+    )
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
 
-    issuerCurves = loadHeterogeneousSpreadCurves(valuationDate,
-                                                 liborCurve)
+    issuerCurves = loadHeterogeneousSpreadCurves(valuationDate, liborCurve)
 
-    intrinsicSpd = cdsIndex.intrinsicSpread(valuationDate,
-                                            stepInDate,
-                                            trancheMaturity,
-                                            issuerCurves) * 10000.0
+    intrinsicSpd = (
+        cdsIndex.intrinsicSpread(
+            valuationDate, stepInDate, trancheMaturity, issuerCurves
+        )
+        * 10000.0
+    )
 
     testCases.header("LABEL", "VALUE")
     testCases.print("INTRINSIC SPD TRANCHE MATURITY", intrinsicSpd)
@@ -303,19 +281,18 @@ def test_FinCDSTranche():
                     corr1,
                     corr2,
                     numPoints,
-                    method)
-                end = time.time()
-                period = (end - start)
-                testCases.print(
                     method,
-                    period,
-                    numPoints,
-                    tranche._k1,
-                    tranche._k2,
-                    v[3] * 10000)
+                )
+                end = time.time()
+                period = end - start
+                testCases.print(
+                    method, period, numPoints, tranche._k1, tranche._k2, v[3] * 10000
+                )
 
     testCases.banner(
-        "===================================================================")
+        "==================================================================="
+    )
+
 
 ##########################################################################
 

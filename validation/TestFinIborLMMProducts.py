@@ -5,6 +5,7 @@
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.market.volatility.FinIborCapVolCurve import FinIborCapVolCurve
@@ -20,6 +21,7 @@ from financepy.products.rates.FinIborLMMProducts import FinIborLMMProducts
 from financepy.products.rates.FinIborCapFloor import FinIborCapFloor
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 # This is in progress and needs to be completed
@@ -131,7 +133,7 @@ testCases = FinTestCases(__file__, globalTestCaseMode)
 #         blackSwaptionPrice = swaption.value(valuationDate, liborCurve, model)
 
 #         testCases.print("K:%6.5f texp:%8.2f FwdVol:%9.5f SimVol1F:%9.5f " +
-#                         " SimVolNF:%9.5f RebVol:%9.5f SimPx1F:%9.5f SimPxNF:%9.5f Black Px:%9.5f" 
+#                         " SimVolNF:%9.5f RebVol:%9.5f SimPx1F:%9.5f SimPxNF:%9.5f Black Px:%9.5f"
 #               % (strike, texp, fwdRateVol, swapVolSim1F, swapVolSimNF,
 #                  swaptionVol, swaptionPrice1F, swaptionPriceNF,
 #                  blackSwaptionPrice))

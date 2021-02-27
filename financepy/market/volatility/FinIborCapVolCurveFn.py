@@ -13,16 +13,11 @@ from ...finutils.FinGlobalVariables import gDaysInYear
 ##########################################################################
 
 
-class FinIborCapVolCurveFn():
-    ''' Class to manage a term structure of caplet volatilities using the
-    parametric form suggested by Rebonato (1999). '''
+class FinIborCapVolCurveFn:
+    """Class to manage a term structure of caplet volatilities using the
+    parametric form suggested by Rebonato (1999)."""
 
-    def __init__(self,
-                 curveDate,
-                 a,
-                 b,
-                 c,
-                 d):
+    def __init__(self, curveDate, a, b, c, d):
 
         self._curveDate = curveDate
         self._a = a
@@ -30,18 +25,19 @@ class FinIborCapVolCurveFn():
         self._c = c
         self._d = d
 
-###############################################################################
+    ###############################################################################
 
     def capFloorletVol(self, dt):
-        ''' Return the caplet volatility. '''
+        """ Return the caplet volatility. """
 
         if isinstance(dt, FinDate):
             t = (dt - self._curveDate) / gDaysInYear
-            vol = (self._a + self._b*t) * np.exp(-self._c*t) + self._d
+            vol = (self._a + self._b * t) * np.exp(-self._c * t) + self._d
 
         if vol < 0.0:
             raise FinError("Negative volatility. Not permitted.")
 
         return vol
+
 
 ###############################################################################

@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
@@ -10,9 +11,11 @@ from financepy.finutils.FinDate import FinDate
 from financepy.finutils.FinFrequency import FinFrequencyTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##############################################################################
+
 
 def test_FinFlatCurve():
 
@@ -45,6 +48,7 @@ def test_FinFlatCurve():
     flatCurve = FinDiscountCurveFlat(curveDate, 0.05, compounding)
     dfs = flatCurve.df(dates)
     testCases.print(compounding, dfs)
+
 
 ###############################################################################
 

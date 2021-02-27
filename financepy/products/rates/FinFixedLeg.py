@@ -7,7 +7,7 @@ from ...finutils.FinDate import FinDate
 from ...finutils.FinMath import ONE_MILLION
 from ...finutils.FinDayCount import FinDayCount, FinDayCountTypes
 from ...finutils.FinFrequency import FinFrequencyTypes
-from ...finutils.FinCalendar import FinCalendarTypes,  FinDateGenRuleTypes
+from ...finutils.FinCalendar import FinCalendarTypes, FinDateGenRuleTypes
 from ...finutils.FinCalendar import FinCalendar, FinBusDayAdjustTypes
 from ...finutils.FinSchedule import FinSchedule
 from ...finutils.FinHelperFunctions import labelToString, checkArgumentTypes
@@ -16,27 +16,30 @@ from ...market.curves.FinDiscountCurve import FinDiscountCurve
 
 ##########################################################################
 
+
 class FinFixedLeg(object):
-    ''' Class for managing the fixed leg of a swap. A fixed leg is a leg with
-    a sequence of flows calculated according to an ISDA schedule and with a 
-    coupon that is fixed over the life of the swap. '''
-    
-    def __init__(self,
-                 effectiveDate: FinDate,  # Date interest starts to accrue
-                 endDate: (FinDate, str),  # Date contract ends
-                 legType: FinSwapTypes,
-                 coupon: (float),
-                 freqType: FinFrequencyTypes,
-                 dayCountType: FinDayCountTypes,
-                 notional: float = ONE_MILLION,
-                 principal: float = 0.0,
-                 paymentLag: int = 0,
-                 calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
-                 busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
-                 dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD):
-        ''' Create the fixed leg of a swap contract giving the contract start
+    """Class for managing the fixed leg of a swap. A fixed leg is a leg with
+    a sequence of flows calculated according to an ISDA schedule and with a
+    coupon that is fixed over the life of the swap."""
+
+    def __init__(
+        self,
+        effectiveDate: FinDate,  # Date interest starts to accrue
+        endDate: (FinDate, str),  # Date contract ends
+        legType: FinSwapTypes,
+        coupon: (float),
+        freqType: FinFrequencyTypes,
+        dayCountType: FinDayCountTypes,
+        notional: float = ONE_MILLION,
+        principal: float = 0.0,
+        paymentLag: int = 0,
+        calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
+        busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
+        dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
+    ):
+        """Create the fixed leg of a swap contract giving the contract start
         date, its maturity, fixed coupon, fixed leg frequency, fixed leg day
-        count convention and notional.  '''
+        count convention and notional."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -47,8 +50,7 @@ class FinFixedLeg(object):
 
         calendar = FinCalendar(calendarType)
 
-        self._maturityDate = calendar.adjust(self._terminationDate,
-                                             busDayAdjustType)
+        self._maturityDate = calendar.adjust(self._terminationDate, busDayAdjustType)
 
         if effectiveDate > self._maturityDate:
             raise FinError("Effective date after maturity date")
@@ -77,7 +79,7 @@ class FinFixedLeg(object):
 
         self.generatePayments()
 
-###############################################################################
+    ###############################################################################
 
     def generatePayments(self):
         # These are generated immediately as they are for the entire
@@ -87,12 +89,14 @@ class FinFixedLeg(object):
         # Nothing is paid on the swap effective date and so the first payment
         # date is the first actual payment date
 
-        schedule = FinSchedule(self._effectiveDate,
-                               self._terminationDate,
-                               self._freqType,
-                               self._calendarType,
-                               self._busDayAdjustType,
-                               self._dateGenRuleType)
+        schedule = FinSchedule(
+            self._effectiveDate,
+            self._terminationDate,
+            self._freqType,
+            self._calendarType,
+            self._busDayAdjustType,
+            self._dateGenRuleType,
+        )
 
         scheduleDates = schedule._adjustedDates
 
@@ -106,8 +110,8 @@ class FinFixedLeg(object):
         self._accruedDays = []
         self._rates = []
 
-        prevDt = scheduleDates[0] 
-        
+        prevDt = scheduleDates[0]
+
         dayCounter = FinDayCount(self._dayCountType)
         calendar = FinCalendar(self._calendarType)
 
@@ -119,13 +123,11 @@ class FinFixedLeg(object):
             if self._paymentLag == 0:
                 paymentDate = nextDt
             else:
-                paymentDate = calendar.addBusinessDays(nextDt, 
-                                                       self._paymentLag)
+                paymentDate = calendar.addBusinessDays(nextDt, self._paymentLag)
 
             self._paymentDates.append(paymentDate)
 
-            (yearFrac, num, den) = dayCounter.yearFrac(prevDt,
-                                                       nextDt)
+            (yearFrac, num, den) = dayCounter.yearFrac(prevDt, nextDt)
 
             self._rates.append(self._coupon)
 
@@ -137,16 +139,14 @@ class FinFixedLeg(object):
 
             prevDt = nextDt
 
-###############################################################################
+    ###############################################################################
 
-    def value(self, 
-              valuationDate: FinDate,
-              discountCurve: FinDiscountCurve):
+    def value(self, valuationDate: FinDate, discountCurve: FinDiscountCurve):
 
         self._paymentDfs = []
         self._paymentPVs = []
         self._cumulativePVs = []
-                
+
         notional = self._notional
         dfValue = discountCurve.df(valuationDate)
         legPV = 0.0
@@ -155,23 +155,23 @@ class FinFixedLeg(object):
         dfPmnt = 0.0
 
         for iPmnt in range(0, numPayments):
- 
+
             pmntDate = self._paymentDates[iPmnt]
-            pmntAmount= self._payments[iPmnt]
+            pmntAmount = self._payments[iPmnt]
 
             if pmntDate > valuationDate:
 
                 dfPmnt = discountCurve.df(pmntDate) / dfValue
                 pmntPV = pmntAmount * dfPmnt
                 legPV += pmntPV
-                
-                self._paymentDfs.append(dfPmnt)            
-                self._paymentPVs.append(pmntAmount*dfPmnt)
+
+                self._paymentDfs.append(dfPmnt)
+                self._paymentPVs.append(pmntAmount * dfPmnt)
                 self._cumulativePVs.append(legPV)
 
             else:
 
-                self._paymentDfs.append(0.0)            
+                self._paymentDfs.append(0.0)
                 self._paymentPVs.append(0.0)
                 self._cumulativePVs.append(0.0)
 
@@ -186,12 +186,12 @@ class FinFixedLeg(object):
 
         return legPV
 
-##########################################################################
+    ##########################################################################
 
     def printPayments(self):
-        ''' Prints the fixed leg dates, accrual factors, discount factors,
+        """Prints the fixed leg dates, accrual factors, discount factors,
         cash amounts, their present value and their cumulative PV using the
-        last valuation performed. '''
+        last valuation performed."""
 
         print("START DATE:", self._effectiveDate)
         print("MATURITY DATE:", self._maturityDate)
@@ -207,24 +207,28 @@ class FinFixedLeg(object):
         header += "    RATE      PAYMENT "
         print(header)
 
-        numFlows = len(self._paymentDates) 
-        
-        for iFlow in range(0, numFlows):
-            print("%11s  %11s  %11s  %4d  %8.6f  %8.6f  %11.2f" %
-                  (self._paymentDates[iFlow],
-                   self._startAccruedDates[iFlow],
-                   self._endAccruedDates[iFlow],
-                   self._accruedDays[iFlow],
-                   self._yearFracs[iFlow],
-                   self._rates[iFlow] * 100.0,
-                   self._payments[iFlow]))
+        numFlows = len(self._paymentDates)
 
-###############################################################################
+        for iFlow in range(0, numFlows):
+            print(
+                "%11s  %11s  %11s  %4d  %8.6f  %8.6f  %11.2f"
+                % (
+                    self._paymentDates[iFlow],
+                    self._startAccruedDates[iFlow],
+                    self._endAccruedDates[iFlow],
+                    self._accruedDays[iFlow],
+                    self._yearFracs[iFlow],
+                    self._rates[iFlow] * 100.0,
+                    self._payments[iFlow],
+                )
+            )
+
+    ###############################################################################
 
     def printValuation(self):
-        ''' Prints the fixed leg dates, accrual factors, discount factors,
+        """Prints the fixed leg dates, accrual factors, discount factors,
         cash amounts, their present value and their cumulative PV using the
-        last valuation performed. '''
+        last valuation performed."""
 
         print("START DATE:", self._effectiveDate)
         print("MATURITY DATE:", self._maturityDate)
@@ -240,22 +244,26 @@ class FinFixedLeg(object):
         header += "    RATE      PAYMENT       DF          PV        CUM PV"
         print(header)
 
-        numFlows = len(self._paymentDates) 
-        
-        for iFlow in range(0, numFlows):
-            print("%11s  %11s  %11s  %4d  %8.6f  %8.5f  % 11.2f  %10.8f  % 11.2f  % 11.2f" %
-                  (self._paymentDates[iFlow],
-                   self._startAccruedDates[iFlow],
-                   self._endAccruedDates[iFlow],
-                   self._accruedDays[iFlow],
-                   self._yearFracs[iFlow],
-                   self._rates[iFlow] * 100.0,
-                   self._payments[iFlow], 
-                   self._paymentDfs[iFlow],
-                   self._paymentPVs[iFlow],
-                   self._cumulativePVs[iFlow]))
+        numFlows = len(self._paymentDates)
 
-##########################################################################
+        for iFlow in range(0, numFlows):
+            print(
+                "%11s  %11s  %11s  %4d  %8.6f  %8.5f  % 11.2f  %10.8f  % 11.2f  % 11.2f"
+                % (
+                    self._paymentDates[iFlow],
+                    self._startAccruedDates[iFlow],
+                    self._endAccruedDates[iFlow],
+                    self._accruedDays[iFlow],
+                    self._yearFracs[iFlow],
+                    self._rates[iFlow] * 100.0,
+                    self._payments[iFlow],
+                    self._paymentDfs[iFlow],
+                    self._paymentPVs[iFlow],
+                    self._cumulativePVs[iFlow],
+                )
+            )
+
+    ##########################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -273,11 +281,12 @@ class FinFixedLeg(object):
         s += labelToString("DATE GEN TYPE", self._dateGenRuleType)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Print a list of the unadjusted coupon payment dates used in
-        analytic calculations for the bond. '''
+        """Print a list of the unadjusted coupon payment dates used in
+        analytic calculations for the bond."""
         print(self)
+
 
 ###############################################################################

@@ -18,20 +18,24 @@ from .FinModelBlackScholesAnalytical import bsValue
 
 from enum import Enum
 
+
 class FinModelBlackScholesTypes(Enum):
-        DEFAULT = 0
-        ANALYTICAL = 1
-        CRR_TREE = 2
-        BARONE_ADESI = 3
+    DEFAULT = 0
+    ANALYTICAL = 1
+    CRR_TREE = 2
+    BARONE_ADESI = 3
+
 
 ###############################################################################
 
+
 class FinModelBlackScholes(FinModel):
-    
-    def __init__(self,
-                 volatility: (float, np.ndarray), 
-                 implementationType: FinModelBlackScholesTypes = FinModelBlackScholesTypes.DEFAULT,
-                 numStepsPerYear: int = 100):
+    def __init__(
+        self,
+        volatility: (float, np.ndarray),
+        implementationType: FinModelBlackScholesTypes = FinModelBlackScholesTypes.DEFAULT,
+        numStepsPerYear: int = 100,
+    ):
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -39,43 +43,61 @@ class FinModelBlackScholes(FinModel):
         self._implementationType = implementationType
         self._numStepsPerYear = numStepsPerYear
 
-    def value(self, 
-              spotPrice: float, 
-              timeToExpiry: float, 
-              strikePrice: float, 
-              riskFreeRate: float, 
-              dividendRate: float, 
-              optionType: FinOptionTypes):
+    def value(
+        self,
+        spotPrice: float,
+        timeToExpiry: float,
+        strikePrice: float,
+        riskFreeRate: float,
+        dividendRate: float,
+        optionType: FinOptionTypes,
+    ):
 
-        if optionType == FinOptionTypes.EUROPEAN_CALL \
-            or optionType == FinOptionTypes.EUROPEAN_PUT:
+        if (
+            optionType == FinOptionTypes.EUROPEAN_CALL
+            or optionType == FinOptionTypes.EUROPEAN_PUT
+        ):
 
             if self._implementationType is FinModelBlackScholesTypes.DEFAULT:
                 self._implementationType = FinModelBlackScholesTypes.ANALYTICAL
 
             if self._implementationType == FinModelBlackScholesTypes.ANALYTICAL:
 
-                v =  bsValue(spotPrice, timeToExpiry, strikePrice, 
-                             riskFreeRate, dividendRate, self._volatility,
-                             optionType.value)
+                v = bsValue(
+                    spotPrice,
+                    timeToExpiry,
+                    strikePrice,
+                    riskFreeRate,
+                    dividendRate,
+                    self._volatility,
+                    optionType.value,
+                )
 
                 return v
 
             elif self._implementationType == FinModelBlackScholesTypes.CRR_TREE:
-                
-                v = crrTreeValAvg(spotPrice, riskFreeRate, dividendRate, 
-                                  self._volatility, self._numStepsPerYear,
-                                  timeToExpiry, optionType.value, 
-                                  strikePrice)['value']
+
+                v = crrTreeValAvg(
+                    spotPrice,
+                    riskFreeRate,
+                    dividendRate,
+                    self._volatility,
+                    self._numStepsPerYear,
+                    timeToExpiry,
+                    optionType.value,
+                    strikePrice,
+                )["value"]
 
                 return v
 
             else:
-                
+
                 raise FinError("Implementation not available for this product")
 
-        elif optionType == FinOptionTypes.AMERICAN_CALL \
-            or optionType == FinOptionTypes.AMERICAN_PUT:
+        elif (
+            optionType == FinOptionTypes.AMERICAN_CALL
+            or optionType == FinOptionTypes.AMERICAN_PUT
+        ):
 
             if self._implementationType is FinModelBlackScholesTypes.DEFAULT:
                 self._implementationType = FinModelBlackScholesTypes.CRR_TREE
@@ -87,28 +109,40 @@ class FinModelBlackScholes(FinModel):
                 elif optionType == FinOptionTypes.AMERICAN_PUT:
                     phi = -1
 
-                v =  bawValue(spotPrice, timeToExpiry, strikePrice,
-                              riskFreeRate, dividendRate, self._volatility,
-                              phi)
+                v = bawValue(
+                    spotPrice,
+                    timeToExpiry,
+                    strikePrice,
+                    riskFreeRate,
+                    dividendRate,
+                    self._volatility,
+                    phi,
+                )
 
                 return v
 
             elif self._implementationType == FinModelBlackScholesTypes.CRR_TREE:
 
-                v = crrTreeValAvg(spotPrice, riskFreeRate, dividendRate, 
-                                  self._volatility, self._numStepsPerYear,
-                                  timeToExpiry, optionType.value, 
-                                  strikePrice)['value']
+                v = crrTreeValAvg(
+                    spotPrice,
+                    riskFreeRate,
+                    dividendRate,
+                    self._volatility,
+                    self._numStepsPerYear,
+                    timeToExpiry,
+                    optionType.value,
+                    strikePrice,
+                )["value"]
 
                 return v
 
             else:
-                
+
                 raise FinError("Implementation not available for this product")
 
         else:
-            
+
             raise FinError("Should not be here")
 
-###############################################################################
 
+###############################################################################

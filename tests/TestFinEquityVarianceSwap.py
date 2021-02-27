@@ -5,6 +5,7 @@
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate
@@ -13,14 +14,16 @@ from financepy.products.equity.FinEquityVarianceSwap import FinEquityVarianceSwa
 from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
 
 
 def volSkew(K, atmVol, atmK, skew):
-    v = atmVol + skew * (K-atmK)
+    v = atmVol + skew * (K - atmK)
     return v
+
 
 ###############################################################################
 
@@ -29,7 +32,7 @@ def test_FinEquityVarianceSwap():
 
     startDate = FinDate(2018, 3, 20)
     tenor = "3M"
-    strike = 0.3*0.3
+    strike = 0.3 * 0.3
 
     volSwap = FinEquityVarianceSwap(startDate, tenor, strike)
 
@@ -42,7 +45,7 @@ def test_FinEquityVarianceSwap():
 
     atmVol = 0.20
     atmK = 100.0
-    skew = -0.02/5.0  # defined as dsigma/dK
+    skew = -0.02 / 5.0  # defined as dsigma/dK
     strikes = np.linspace(50.0, 135.0, 18)
     vols = volSkew(strikes, atmVol, atmK, skew)
     volCurve = FinEquityVolCurve(valuationDate, maturityDate, strikes, vols)
@@ -58,14 +61,23 @@ def test_FinEquityVarianceSwap():
 
     testCases.header("LABEL", "VALUE")
 
-    k1 = volSwap.fairStrike(valuationDate, stockPrice, dividendCurve,
-                            volCurve, numCallOptions, numPutOptions,
-                            strikeSpacing, discountCurve, useForward)
+    k1 = volSwap.fairStrike(
+        valuationDate,
+        stockPrice,
+        dividendCurve,
+        volCurve,
+        numCallOptions,
+        numPutOptions,
+        strikeSpacing,
+        discountCurve,
+        useForward,
+    )
 
     testCases.print("REPLICATION VARIANCE:", k1)
 
     k2 = volSwap.fairStrikeApprox(valuationDate, stockPrice, strikes, vols)
     testCases.print("DERMAN SKEW APPROX for K:", k2)
+
 
 ##########################################################################
 

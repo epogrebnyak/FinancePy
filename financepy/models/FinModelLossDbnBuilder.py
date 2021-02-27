@@ -11,9 +11,7 @@ from ..finutils.FinMath import pairGCD
 
 
 @njit(float64[:](int64, float64[:], float64[:]), fastmath=True, cache=True)
-def indepLossDbnHeterogeneousAdjBinomial(numCredits,
-                                         condProbs,
-                                         lossRatio):
+def indepLossDbnHeterogeneousAdjBinomial(numCredits, condProbs, lossRatio):
 
     # Algorithm due to D. O'Kane.
 
@@ -29,15 +27,14 @@ def indepLossDbnHeterogeneousAdjBinomial(numCredits,
 
     if p < 0.5:
         ratio = p / (1.0 - p)
-        indepDbn[0] = (1.0 - p)**numCredits
+        indepDbn[0] = (1.0 - p) ** numCredits
         for i in range(1, numLosses):
             indepDbn[i] = indepDbn[i - 1] * ratio * (numCredits - i + 1.0) / i
     else:
         ratio = (1.0 - p) / p
         indepDbn[numCredits] = p ** numCredits
         for i in range(numCredits - 1, -1, -1):
-            indepDbn[i] = indepDbn[i + 1] * \
-                ratio * (i + 1.0) / (numCredits - i)
+            indepDbn[i] = indepDbn[i + 1] * ratio * (i + 1.0) / (numCredits - i)
 
     ###########################################################################
 
@@ -62,8 +59,10 @@ def indepLossDbnHeterogeneousAdjBinomial(numCredits,
     diffBelow = meanBelow - meanLoss
 
     # DOK - TO DO - SIMPLIFY THIS CODE AS PER JOD PAPER
-    term = diffAbove * diffAbove + \
-        (diffBelow * diffBelow - diffAbove * diffAbove) * diffAbove
+    term = (
+        diffAbove * diffAbove
+        + (diffBelow * diffBelow - diffAbove * diffAbove) * diffAbove
+    )
     numer = vexact - term
     denom = vapprox - term
 
@@ -81,6 +80,7 @@ def indepLossDbnHeterogeneousAdjBinomial(numCredits,
     indepDbn[int(meanAbove)] += epsilonAbove
 
     return indepDbn
+
 
 ###############################################################################
 
@@ -100,13 +100,12 @@ def portfolioGCD(actualLosses):
     portfolioGCD = float(temp / scaling)
     return portfolioGCD
 
+
 ###############################################################################
 
 
 @njit(float64[:](int64, float64[:], float64[:]), fastmath=True, cache=True)
-def indepLossDbnRecursionGCD(numCredits,
-                             condDefaultProbs,
-                             lossUnits):
+def indepLossDbnRecursionGCD(numCredits, condDefaultProbs, lossUnits):
 
     numLossUnits = 1
     for i in range(0, len(lossUnits)):
@@ -127,12 +126,14 @@ def indepLossDbnRecursionGCD(numCredits,
             nextDbn[iLossUnit] = prevDbn[iLossUnit] * (1.0 - p)
 
         for iLossUnit in range(loss, numLossUnits):
-            nextDbn[iLossUnit] = prevDbn[iLossUnit - loss] * \
-                p + prevDbn[iLossUnit] * (1.0 - p)
+            nextDbn[iLossUnit] = prevDbn[iLossUnit - loss] * p + prevDbn[iLossUnit] * (
+                1.0 - p
+            )
 
         for iLossUnit in range(0, numLossUnits):
             prevDbn[iLossUnit] = nextDbn[iLossUnit]
 
     return nextDbn
+
 
 ##########################################################################

@@ -16,30 +16,32 @@ from ..finutils.FinGlobalTypes import FinOptionTypes
 ###############################################################################
 
 
-class FinModelBachelier():
-    ''' Bachelier's Model which prices call and put options in the forward
-    measure assuming the underlying rate follows a normal process. '''
+class FinModelBachelier:
+    """Bachelier's Model which prices call and put options in the forward
+    measure assuming the underlying rate follows a normal process."""
 
     def __init__(self, volatility):
-        ''' Create FinModel black using parameters. '''
+        """ Create FinModel black using parameters. """
         self._volatility = volatility
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              forwardRate,   # Forward rate F
-              strikeRate,    # Strike Rate K
-              timeToExpiry,  # Time to Expiry (years)
-              df,            # Discount Factor to expiry date
-              callOrPut):    # Call or put
-        ''' Price a call or put option using Bachelier's model. '''
+    def value(
+        self,
+        forwardRate,  # Forward rate F
+        strikeRate,  # Strike Rate K
+        timeToExpiry,  # Time to Expiry (years)
+        df,  # Discount Factor to expiry date
+        callOrPut,
+    ):  # Call or put
+        """ Price a call or put option using Bachelier's model. """
 
         f = forwardRate
         t = timeToExpiry
         k = strikeRate
         sqrtT = np.sqrt(t)
         vol = self._volatility
-        d = (f-k) / (vol * sqrtT)
+        d = (f - k) / (vol * sqrtT)
 
         if callOrPut == FinOptionTypes.EUROPEAN_CALL:
             return df * ((f - k) * norm.cdf(d) + vol * sqrtT * norm.pdf(d))
@@ -50,11 +52,12 @@ class FinModelBachelier():
 
         return 999
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("VOLATILITY", self._volatility)
         return s
+
 
 ###############################################################################

@@ -6,6 +6,7 @@ import numpy as np
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.equity.FinEquityBinomialTree import FinEquityBinomialTree
@@ -18,9 +19,11 @@ from financepy.models.FinModelBlackScholes import FinModelBlackScholes
 from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
+
 
 def test_FinBinomialTree():
 
@@ -43,9 +46,8 @@ def test_FinBinomialTree():
     testCases.banner("================== EUROPEAN PUT =======================")
 
     putOption = FinEquityVanillaOption(
-        expiryDate,
-        strikePrice,
-        FinOptionTypes.EUROPEAN_PUT)
+        expiryDate, strikePrice, FinOptionTypes.EUROPEAN_PUT
+    )
     value = putOption.value(valueDate, stockPrice, discountCurve, dividendCurve, model)
     delta = putOption.delta(valueDate, stockPrice, discountCurve, dividendCurve, model)
     gamma = putOption.gamma(valueDate, stockPrice, discountCurve, dividendCurve, model)
@@ -73,7 +75,8 @@ def test_FinBinomialTree():
             expiryDate,
             payoff,
             exercise,
-            params)
+            params,
+        )
         end = time.time()
         duration = end - start
         testCases.print(numSteps, results, duration)
@@ -100,18 +103,17 @@ def test_FinBinomialTree():
             expiryDate,
             payoff,
             exercise,
-            params)
+            params,
+        )
         end = time.time()
         duration = end - start
         testCases.print(numSteps, results, duration)
 
-    testCases.banner(
-        "================== EUROPEAN CALL =======================")
+    testCases.banner("================== EUROPEAN CALL =======================")
 
     callOption = FinEquityVanillaOption(
-        expiryDate,
-        strikePrice,
-        FinOptionTypes.EUROPEAN_CALL)
+        expiryDate, strikePrice, FinOptionTypes.EUROPEAN_CALL
+    )
     value = callOption.value(valueDate, stockPrice, discountCurve, dividendCurve, model)
     delta = callOption.delta(valueDate, stockPrice, discountCurve, dividendCurve, model)
     gamma = callOption.gamma(valueDate, stockPrice, discountCurve, dividendCurve, model)
@@ -139,14 +141,14 @@ def test_FinBinomialTree():
             expiryDate,
             payoff,
             exercise,
-            params)
+            params,
+        )
 
         end = time.time()
         duration = end - start
         testCases.print(numSteps, results, duration)
 
-    testCases.banner(
-        "================== AMERICAN CALL =======================")
+    testCases.banner("================== AMERICAN CALL =======================")
 
     payoff = FinEquityTreePayoffTypes.VANILLA_OPTION
     exercise = FinEquityTreeExerciseTypes.AMERICAN
@@ -168,11 +170,13 @@ def test_FinBinomialTree():
             expiryDate,
             payoff,
             exercise,
-            params)
+            params,
+        )
 
         end = time.time()
         duration = end - start
         testCases.print(numSteps, results, duration)
+
 
 ###############################################################################
 

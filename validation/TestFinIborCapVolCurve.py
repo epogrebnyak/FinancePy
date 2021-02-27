@@ -5,6 +5,7 @@
 import numpy as np
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDayCount import FinDayCountTypes
@@ -12,6 +13,7 @@ from financepy.finutils.FinDate import FinDate
 from financepy.market.volatility.FinIborCapVolCurve import FinIborCapVolCurve
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -33,23 +35,36 @@ def test_FinCapVolCurve():
         capletDt = capletDt.addTenor(capletVolTenor)
         capVolDates.append(capletDt)
 
-    capVolatilities = [0.0, 15.50, 18.25, 17.91, 17.74, 17.27,
-                       16.79, 16.30, 16.01, 15.76, 15.54]
-    capVolatilities = np.array(capVolatilities)/100.0
+    capVolatilities = [
+        0.0,
+        15.50,
+        18.25,
+        17.91,
+        17.74,
+        17.27,
+        16.79,
+        16.30,
+        16.01,
+        15.76,
+        15.54,
+    ]
+    capVolatilities = np.array(capVolatilities) / 100.0
 
     dayCountType = FinDayCountTypes.ACT_ACT_ISDA
-    volCurve = FinIborCapVolCurve(valuationDate,
-                                   capVolDates,
-                                   capVolatilities,
-                                   dayCountType)
+    volCurve = FinIborCapVolCurve(
+        valuationDate, capVolDates, capVolatilities, dayCountType
+    )
 
     testCases.header("DATE", "CAPVOL", "CAPLETVOL")
     for dt in capVolDates:
         capFloorVol = volCurve.capVol(dt)
         capFloorLetVol = volCurve.capletVol(dt)
-        testCases.print("%s" % dt,
-                        "%7.3f" % (capFloorVol*100.0),
-                        "%7.2f" % (capFloorLetVol*100.0))
+        testCases.print(
+            "%s" % dt,
+            "%7.3f" % (capFloorVol * 100.0),
+            "%7.2f" % (capFloorLetVol * 100.0),
+        )
+
 
 ##########################################################################
 

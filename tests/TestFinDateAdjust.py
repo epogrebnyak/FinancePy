@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinDate import FinDate
@@ -13,6 +14,7 @@ from financepy.finutils.FinCalendar import FinBusDayAdjustTypes
 from financepy.finutils.FinCalendar import FinDateGenRuleTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -29,12 +31,9 @@ def test_FinDateAdjust():
     dateGenRuleType = FinDateGenRuleTypes.BACKWARD
 
     testCases.header("NO ADJUSTMENTS", "DATE")
-    schedule = FinSchedule(startDate,
-                           endDate,
-                           freqType,
-                           calendarType,
-                           busDayAdjustType,
-                           dateGenRuleType)
+    schedule = FinSchedule(
+        startDate, endDate, freqType, calendarType, busDayAdjustType, dateGenRuleType
+    )
 
     for dt in schedule._adjustedDates:
         testCases.print("Date:", dt)
@@ -46,12 +45,9 @@ def test_FinDateAdjust():
     busDayAdjustType = FinBusDayAdjustTypes.FOLLOWING
     dateGenRuleType = FinDateGenRuleTypes.BACKWARD
 
-    schedule = FinSchedule(startDate,
-                           endDate,
-                           freqType,
-                           calendarType,
-                           busDayAdjustType,
-                           dateGenRuleType)
+    schedule = FinSchedule(
+        startDate, endDate, freqType, calendarType, busDayAdjustType, dateGenRuleType
+    )
 
     for dt in schedule._adjustedDates:
         testCases.print("Date:", dt)
@@ -63,19 +59,15 @@ def test_FinDateAdjust():
     busDayAdjustType = FinBusDayAdjustTypes.MODIFIED_FOLLOWING
     dateGenRuleType = FinDateGenRuleTypes.BACKWARD
 
-    schedule = FinSchedule(startDate,
-                           endDate,
-                           freqType,
-                           calendarType,
-                           busDayAdjustType,
-                           dateGenRuleType)
+    schedule = FinSchedule(
+        startDate, endDate, freqType, calendarType, busDayAdjustType, dateGenRuleType
+    )
 
     for dt in schedule._adjustedDates:
         testCases.print("Date:", dt)
 
     testCases.banner("")
-    testCases.header("NO WEEKENDS AND US HOLIDAYS AND MODIFIED FOLLOWING",
-                     "DATE")
+    testCases.header("NO WEEKENDS AND US HOLIDAYS AND MODIFIED FOLLOWING", "DATE")
     freqType = FinFrequencyTypes.SEMI_ANNUAL
     calendarType = FinCalendarTypes.UNITED_STATES
     busDayAdjustType = FinBusDayAdjustTypes.MODIFIED_FOLLOWING
@@ -84,15 +76,13 @@ def test_FinDateAdjust():
     startDate = FinDate(4, 7, 2008)
     endDate = FinDate(4, 7, 2011)
 
-    schedule = FinSchedule(startDate,
-                           endDate,
-                           freqType,
-                           calendarType,
-                           busDayAdjustType,
-                           dateGenRuleType)
+    schedule = FinSchedule(
+        startDate, endDate, freqType, calendarType, busDayAdjustType, dateGenRuleType
+    )
 
     for dt in schedule._adjustedDates:
         testCases.print("Date:", dt)
+
 
 ###############################################################################
 

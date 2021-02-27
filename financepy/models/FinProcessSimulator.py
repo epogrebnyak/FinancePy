@@ -23,67 +23,65 @@ class FinProcessTypes(Enum):
     CEV = 5
     JUMP_DIFFUSION = 6
 
+
 ###############################################################################
 
 
-class FinProcessSimulator():
-
+class FinProcessSimulator:
     def __init__(self):
         pass
 
-    def getProcess(
-            self,
-            processType,
-            t,
-            modelParams,
-            numAnnSteps,
-            numPaths,
-            seed):
+    def getProcess(self, processType, t, modelParams, numAnnSteps, numPaths, seed):
 
         if processType == FinProcessTypes.GBM:
             (stockPrice, drift, volatility, scheme) = modelParams
-            paths = getGBMPaths(numPaths, numAnnSteps, t, drift,
-                                stockPrice, volatility, scheme.value, seed)
+            paths = getGBMPaths(
+                numPaths,
+                numAnnSteps,
+                t,
+                drift,
+                stockPrice,
+                volatility,
+                scheme.value,
+                seed,
+            )
             return paths
 
         elif processType == FinProcessTypes.HESTON:
             (stockPrice, drift, v0, kappa, theta, sigma, rho, scheme) = modelParams
-            paths = getHestonPaths(numPaths,
-                                   numAnnSteps,
-                                   t,
-                                   drift,
-                                   stockPrice,
-                                   v0,
-                                   kappa,
-                                   theta,
-                                   sigma,
-                                   rho,
-                                   scheme.value,
-                                   seed)
+            paths = getHestonPaths(
+                numPaths,
+                numAnnSteps,
+                t,
+                drift,
+                stockPrice,
+                v0,
+                kappa,
+                theta,
+                sigma,
+                rho,
+                scheme.value,
+                seed,
+            )
             return paths
 
         elif processType == FinProcessTypes.VASICEK:
             (r0, kappa, theta, sigma, scheme) = modelParams
             paths = getVasicekPaths(
-                numPaths,
-                numAnnSteps,
-                t,
-                r0,
-                kappa,
-                theta,
-                sigma,
-                scheme.value,
-                seed)
+                numPaths, numAnnSteps, t, r0, kappa, theta, sigma, scheme.value, seed
+            )
             return paths
 
         elif processType == FinProcessTypes.CIR:
             (r0, kappa, theta, sigma, scheme) = modelParams
-            paths = getCIRPaths(numPaths, numAnnSteps, t,
-                                r0, kappa, theta, sigma, scheme.value, seed)
+            paths = getCIRPaths(
+                numPaths, numAnnSteps, t, r0, kappa, theta, sigma, scheme.value, seed
+            )
             return paths
 
         else:
             raise FinError("Unknown process" + str(processType))
+
 
 ###############################################################################
 
@@ -93,24 +91,31 @@ class FinHestonNumericalScheme(Enum):
     EULERLOG = 2
     QUADEXP = 3
 
+
 ###############################################################################
 
 
-@njit(float64[:, :](int64, int64, float64, float64, float64, float64, float64,
-                    float64, float64, float64, int64, int64),
-      cache=True, fastmath=True)
-def getHestonPaths(numPaths,
-                   numAnnSteps,
-                   t,
-                   drift,
-                   s0,
-                   v0,
-                   kappa,
-                   theta,
-                   sigma,
-                   rho,
-                   scheme,
-                   seed):
+@njit(
+    float64[:, :](
+        int64,
+        int64,
+        float64,
+        float64,
+        float64,
+        float64,
+        float64,
+        float64,
+        float64,
+        float64,
+        int64,
+        int64,
+    ),
+    cache=True,
+    fastmath=True,
+)
+def getHestonPaths(
+    numPaths, numAnnSteps, t, drift, s0, v0, kappa, theta, sigma, rho, scheme, seed
+):
 
     np.random.seed(seed)
     dt = 1.0 / numAnnSteps
@@ -133,10 +138,14 @@ def getHestonPaths(numPaths,
                 zS = rho * z1 + rhohat * z2
                 vplus = max(v, 0.0)
                 rtvplus = sqrt(vplus)
-                v += kappa * (theta - vplus) * dt + sigma * \
-                    rtvplus * zV + 0.25 * sigma2 * (zV * zV - dt)
-                s += drift * s * dt + rtvplus * s * \
-                    zS + 0.5 * s * vplus * (zV * zV - dt)
+                v += (
+                    kappa * (theta - vplus) * dt
+                    + sigma * rtvplus * zV
+                    + 0.25 * sigma2 * (zV * zV - dt)
+                )
+                s += (
+                    drift * s * dt + rtvplus * s * zS + 0.5 * s * vplus * (zV * zV - dt)
+                )
                 sPaths[iPath, iStep] = s
 
     elif scheme == FinHestonNumericalScheme.EULERLOG.value:
@@ -150,8 +159,11 @@ def getHestonPaths(numPaths,
                 vplus = max(v, 0.0)
                 rtvplus = sqrt(vplus)
                 x += (drift - 0.5 * vplus) * dt + rtvplus * zS
-                v += kappa * (theta - vplus) * dt + sigma * \
-                    rtvplus * zV + sigma2 * (zV * zV - dt) / 4.0
+                v += (
+                    kappa * (theta - vplus) * dt
+                    + sigma * rtvplus * zV
+                    + sigma2 * (zV * zV - dt) / 4.0
+                )
                 sPaths[iPath, iStep] = exp(x)
 
     elif scheme == FinHestonNumericalScheme.QUADEXP.value:
@@ -168,7 +180,7 @@ def getHestonPaths(numPaths,
         A = K2 + 0.5 * K4
         mu = drift
         c1 = sigma2 * Q * (1.0 - Q) / kappa
-        c2 = theta * sigma2 * ((1.0 - Q)**2) / 2.0 / kappa
+        c2 = theta * sigma2 * ((1.0 - Q) ** 2) / 2.0 / kappa
 
         for iPath in range(0, numPaths):
             x = log(s0)
@@ -183,13 +195,12 @@ def getHestonPaths(numPaths,
                 u = np.random.uniform(0.0, 1.0)
 
                 if psi <= psic:
-                    b2 = 2.0 / psi - 1.0 + \
-                        sqrt((2.0 / psi) * (2.0 / psi - 1.0))
+                    b2 = 2.0 / psi - 1.0 + sqrt((2.0 / psi) * (2.0 / psi - 1.0))
                     a = m / (1.0 + b2)
                     b = sqrt(b2)
                     zV = norminvcdf(u)
-                    vnp = a * ((b + zV)**2)
-                    d = (1.0 - 2.0 * A * a)
+                    vnp = a * ((b + zV) ** 2)
+                    d = 1.0 - 2.0 * A * a
                     M = exp((A * b2 * a) / d) / sqrt(d)
                     K0 = -log(M) - (K1 + 0.5 * K3) * vn
                 else:
@@ -204,14 +215,14 @@ def getHestonPaths(numPaths,
                     M = p + beta * (1.0 - p) / (beta - A)
                     K0 = -log(M) - (K1 + 0.5 * K3) * vn
 
-                x += mu * dt + K0 + (K1 * vn + K2 * vnp) + \
-                    sqrt(K3 * vn + K4 * vnp) * zS
+                x += mu * dt + K0 + (K1 * vn + K2 * vnp) + sqrt(K3 * vn + K4 * vnp) * zS
                 sPaths[iPath, iStep] = exp(x)
                 vn = vnp
     else:
         raise FinError("Unknown FinHestonNumericalSchme")
 
     return sPaths
+
 
 ###############################################################################
 
@@ -220,10 +231,15 @@ class FinGBMNumericalScheme(Enum):
     NORMAL = 1
     ANTITHETIC = 2
 
+
 ###############################################################################
 
-@njit(float64[:, :](int64, int64, float64, float64, float64,
-                    float64, int64, int64), cache=True, fastmath=True)
+
+@njit(
+    float64[:, :](int64, int64, float64, float64, float64, float64, int64, int64),
+    cache=True,
+    fastmath=True,
+)
 def getGBMPaths(numPaths, numAnnSteps, t, mu, stockPrice, sigma, scheme, seed):
 
     np.random.seed(seed)
@@ -257,11 +273,12 @@ def getGBMPaths(numPaths, numAnnSteps, t, mu, stockPrice, sigma, scheme, seed):
 
         raise FinError("Unknown FinGBMNumericalScheme")
 
-#    m = np.mean(Sall[:, -1])
-#    v = np.var(Sall[:, -1]/Sall[:, 0])
-#    print("GBM", numPaths, numAnnSteps, t, mu, stockPrice, sigma, scheme, m,v)
+    #    m = np.mean(Sall[:, -1])
+    #    v = np.var(Sall[:, -1]/Sall[:, 0])
+    #    print("GBM", numPaths, numAnnSteps, t, mu, stockPrice, sigma, scheme, m,v)
 
     return Sall
+
 
 ###############################################################################
 
@@ -270,19 +287,18 @@ class FinVasicekNumericalScheme(Enum):
     NORMAL = 1
     ANTITHETIC = 2
 
+
 ###############################################################################
 
-@njit(float64[:, :](int64, int64, float64, float64, float64,
-                    float64, float64, int64, int64), cache=True, fastmath=True)
-def getVasicekPaths(numPaths,
-                    numAnnSteps,
-                    t,
-                    r0,
-                    kappa,
-                    theta,
-                    sigma,
-                    scheme,
-                    seed):
+
+@njit(
+    float64[:, :](
+        int64, int64, float64, float64, float64, float64, float64, int64, int64
+    ),
+    cache=True,
+    fastmath=True,
+)
+def getVasicekPaths(numPaths, numAnnSteps, t, r0, kappa, theta, sigma, scheme, seed):
 
     np.random.seed(seed)
     dt = 1.0 / numAnnSteps
@@ -306,13 +322,12 @@ def getVasicekPaths(numPaths,
             r2 = r0
             z = np.random.normal(0.0, 1.0, size=(numSteps))
             for iStep in range(1, numSteps + 1):
-                r1 = r1 + kappa * (theta - r1) * dt + \
-                    z[iStep - 1] * sigmasqrtdt
-                r2 = r2 + kappa * (theta - r2) * dt - \
-                    z[iStep - 1] * sigmasqrtdt
+                r1 = r1 + kappa * (theta - r1) * dt + z[iStep - 1] * sigmasqrtdt
+                r2 = r2 + kappa * (theta - r2) * dt - z[iStep - 1] * sigmasqrtdt
                 ratePath[iPath, iStep] = r1
                 ratePath[iPath + numPaths, iStep] = r2
     return ratePath
+
 
 ###############################################################################
 
@@ -324,19 +339,18 @@ class FinCIRNumericalScheme(Enum):
     KAHLJACKEL = 4
     EXACT = 5  # SAMPLES EXACT DISTRIBUTION
 
+
 ###############################################################################
 
-@njit(float64[:, :](int64, int64, float64, float64, float64,
-                    float64, float64, int64, int64), cache=True, fastmath=True)
-def getCIRPaths(numPaths,
-                numAnnSteps,
-                t,
-                r0,
-                kappa,
-                theta,
-                sigma,
-                scheme,
-                seed):
+
+@njit(
+    float64[:, :](
+        int64, int64, float64, float64, float64, float64, float64, int64, int64
+    ),
+    cache=True,
+    fastmath=True,
+)
+def getCIRPaths(numPaths, numAnnSteps, t, r0, kappa, theta, sigma, scheme, seed):
 
     np.random.seed(seed)
     dt = 1.0 / numAnnSteps
@@ -352,8 +366,11 @@ def getCIRPaths(numPaths,
             for iStep in range(1, numSteps + 1):
                 rplus = max(r, 0.0)
                 sqrtrplus = sqrt(rplus)
-                r = r + kappa * (theta - rplus) * dt + \
-                    sigmasqrtdt * z[iStep - 1] * sqrtrplus
+                r = (
+                    r
+                    + kappa * (theta - rplus) * dt
+                    + sigmasqrtdt * z[iStep - 1] * sqrtrplus
+                )
                 ratePath[iPath, iStep] = r
 
     elif scheme == FinCIRNumericalScheme.LOGNORMAL.value:
@@ -377,9 +394,12 @@ def getCIRPaths(numPaths,
             z = np.random.normal(0.0, 1.0, size=(numSteps))
             for iStep in range(1, numSteps + 1):
                 sqrtrplus = sqrt(max(r, 0.0))
-                r = r + kappa * (theta - r) * dt + \
-                    z[iStep - 1] * sigmasqrtdt * sqrtrplus
-                r = r + sigma2dt * (z[iStep - 1]**2 - 1.0)
+                r = (
+                    r
+                    + kappa * (theta - r) * dt
+                    + z[iStep - 1] * sigmasqrtdt * sqrtrplus
+                )
+                r = r + sigma2dt * (z[iStep - 1] ** 2 - 1.0)
                 ratePath[iPath, iStep] = r
 
     elif scheme == FinCIRNumericalScheme.KAHLJACKEL.value:
@@ -391,12 +411,14 @@ def getCIRPaths(numPaths,
             for iStep in range(1, numSteps + 1):
                 beta = z[iStep - 1] / sqrtdt
                 sqrtrplus = sqrt(max(r, 0.0))
-                c = 1.0 + (sigma * beta - 2.0 * kappa *
-                           sqrtrplus) * dt / 4.0 / sqrtrplus
-                r = r + (kappa * (bhat - r) + sigma *
-                         beta * sqrtrplus) * c * dt
+                c = (
+                    1.0
+                    + (sigma * beta - 2.0 * kappa * sqrtrplus) * dt / 4.0 / sqrtrplus
+                )
+                r = r + (kappa * (bhat - r) + sigma * beta * sqrtrplus) * c * dt
                 ratePath[iPath, iStep] = r
 
     return ratePath
+
 
 ###############################################################################

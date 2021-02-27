@@ -5,6 +5,7 @@
 # TODO Set up test cases correctly
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinCalendar import FinDateGenRuleTypes
@@ -16,6 +17,7 @@ from financepy.finutils.FinDate import FinDate, setDateFormatType, FinDateFormat
 from financepy.products.bonds.FinBondAnnuity import FinBondAnnuity
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -46,7 +48,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -57,9 +60,9 @@ def test_FinBondAnnuity():
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
 
-#    print("===============================================================")
-#    print("QUARTERLY FREQUENCY")
-#    print("===============================================================")
+    #    print("===============================================================")
+    #    print("QUARTERLY FREQUENCY")
+    #    print("===============================================================")
 
     maturityDate = FinDate(20, 6, 2028)
     coupon = 0.05
@@ -77,7 +80,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -88,9 +92,9 @@ def test_FinBondAnnuity():
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
 
-#    print("==================================================================")
-#    print("MONTHLY FREQUENCY")
-#    print("==================================================================")
+    #    print("==================================================================")
+    #    print("MONTHLY FREQUENCY")
+    #    print("==================================================================")
 
     maturityDate = FinDate(20, 6, 2028)
     coupon = 0.05
@@ -108,7 +112,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -119,9 +124,9 @@ def test_FinBondAnnuity():
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
 
-#    print("==================================================================")
-#    print("FORWARD GEN")
-#    print("==================================================================")
+    #    print("==================================================================")
+    #    print("FORWARD GEN")
+    #    print("==================================================================")
 
     maturityDate = FinDate(20, 6, 2028)
     coupon = 0.05
@@ -139,7 +144,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -150,9 +156,9 @@ def test_FinBondAnnuity():
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
 
-#    print("==================================================================")
-#    print("BACKWARD GEN WITH SHORT END STUB")
-#    print("==================================================================")
+    #    print("==================================================================")
+    #    print("BACKWARD GEN WITH SHORT END STUB")
+    #    print("==================================================================")
 
     maturityDate = FinDate(20, 6, 2028)
     coupon = 0.05
@@ -170,7 +176,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -181,9 +188,9 @@ def test_FinBondAnnuity():
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
 
-#    print("==================================================================")
-#    print("FORWARD GEN WITH LONG END STUB")
-#    print("==================================================================")
+    #    print("==================================================================")
+    #    print("FORWARD GEN WITH LONG END STUB")
+    #    print("==================================================================")
 
     maturityDate = FinDate(20, 6, 2028)
     coupon = 0.05
@@ -201,7 +208,8 @@ def test_FinBondAnnuity():
         busDayAdjustType,
         dateGenRuleType,
         basisType,
-        face)
+        face,
+    )
 
     annuity.calculateFlowDatesPayments(settlementDate)
 
@@ -211,6 +219,7 @@ def test_FinBondAnnuity():
         dt = annuity._flowDates[i]
         flow = annuity._flowAmounts[i]
         testCases.print(dt, flow)
+
 
 ##########################################################################
 

@@ -6,6 +6,7 @@ import os
 import datetime as dt
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
@@ -22,11 +23,12 @@ from financepy.finutils.FinCalendar import FinCalendarTypes
 from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 
-
 ##########################################################################
+
 
 def buildIborCurve(valuationDate):
 
@@ -34,48 +36,25 @@ def buildIborCurve(valuationDate):
     depos = []
     depositRate = 0.050
 
-    depo0 = FinIborDeposit(
-        valuationDate,
-        "1D",
-        depositRate,
-        depoDCCType)
+    depo0 = FinIborDeposit(valuationDate, "1D", depositRate, depoDCCType)
 
     spotDays = 2
     settlementDate = valuationDate.addWeekDays(spotDays)
 
     maturityDate = settlementDate.addMonths(1)
-    depo1 = FinIborDeposit(settlementDate,
-        maturityDate,
-        depositRate,
-        depoDCCType)
+    depo1 = FinIborDeposit(settlementDate, maturityDate, depositRate, depoDCCType)
 
     maturityDate = settlementDate.addMonths(3)
-    depo2 = FinIborDeposit(
-        settlementDate,
-        maturityDate,
-        depositRate,
-        depoDCCType)
+    depo2 = FinIborDeposit(settlementDate, maturityDate, depositRate, depoDCCType)
 
     maturityDate = settlementDate.addMonths(6)
-    depo3 = FinIborDeposit(
-        settlementDate,
-        maturityDate,
-        depositRate,
-        depoDCCType)
+    depo3 = FinIborDeposit(settlementDate, maturityDate, depositRate, depoDCCType)
 
     maturityDate = settlementDate.addMonths(9)
-    depo4 = FinIborDeposit(
-        settlementDate,
-        maturityDate,
-        depositRate,
-        depoDCCType)
+    depo4 = FinIborDeposit(settlementDate, maturityDate, depositRate, depoDCCType)
 
     maturityDate = settlementDate.addMonths(12)
-    depo5 = FinIborDeposit(
-        settlementDate,
-        maturityDate,
-        depositRate,
-        depoDCCType)
+    depo5 = FinIborDeposit(settlementDate, maturityDate, depositRate, depoDCCType)
 
     depos.append(depo0)
     depos.append(depo1)
@@ -98,9 +77,10 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
-    
-#    print(swap1._fixedLeg._paymentDates)
+        fixedDCCType,
+    )
+
+    #    print(swap1._fixedLeg._paymentDates)
 
     swaps.append(swap1)
 
@@ -111,12 +91,12 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap2)
 
-#    print(swap2._fixedLeg._paymentDates)
+    #    print(swap2._fixedLeg._paymentDates)
 
-    
     maturityDate = settlementDate.addMonths(48)
     swap3 = FinIborSwap(
         settlementDate,
@@ -124,10 +104,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap3)
 
-#    print(swap3._fixedLeg._paymentDates)
+    #    print(swap3._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(60)
     swap4 = FinIborSwap(
@@ -136,10 +117,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap4)
 
-#    print(swap4._fixedLeg._paymentDates)
+    #    print(swap4._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(72)
     swap5 = FinIborSwap(
@@ -148,10 +130,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap5)
 
-#    print(swap5._fixedLeg._paymentDates)
+    #    print(swap5._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(84)
     swap6 = FinIborSwap(
@@ -160,10 +143,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap6)
 
-#    print(swap6._fixedLeg._paymentDates)
+    #    print(swap6._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(96)
     swap7 = FinIborSwap(
@@ -172,10 +156,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap7)
 
-#    print(swap7._fixedLeg._paymentDates)
+    #    print(swap7._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(108)
     swap8 = FinIborSwap(
@@ -184,10 +169,11 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap8)
 
-#    print(swap8._fixedLeg._paymentDates)
+    #    print(swap8._fixedLeg._paymentDates)
 
     maturityDate = settlementDate.addMonths(120)
     swap9 = FinIborSwap(
@@ -196,18 +182,17 @@ def buildIborCurve(valuationDate):
         FinSwapTypes.PAY,
         swapRate,
         fixedFreqType,
-        fixedDCCType)
+        fixedDCCType,
+    )
     swaps.append(swap9)
 
-#    print(swap9._fixedLeg._paymentDates)
+    #    print(swap9._fixedLeg._paymentDates)
 
-    liborCurve = FinIborSingleCurve(valuationDate,
-                                    depos,
-                                    fras,
-                                    swaps)
+    liborCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
     if 1 == 0:
         import numpy as np
+
         numSteps = 40
         dt = 10 / numSteps
         times = np.linspace(0.0, 10.0, numSteps + 1)
@@ -221,15 +206,17 @@ def buildIborCurve(valuationDate):
 
     return liborCurve
 
+
 ##########################################################################
 
 
 def test_FinBond():
 
     import pandas as pd
-    path = os.path.join(os.path.dirname(__file__), './data/giltBondPrices.txt')
-    bondDataFrame = pd.read_csv(path, sep='\t')
-    bondDataFrame['mid'] = 0.5*(bondDataFrame['bid'] + bondDataFrame['ask'])
+
+    path = os.path.join(os.path.dirname(__file__), "./data/giltBondPrices.txt")
+    bondDataFrame = pd.read_csv(path, sep="\t")
+    bondDataFrame["mid"] = 0.5 * (bondDataFrame["bid"] + bondDataFrame["ask"])
 
     freqType = FinFrequencyTypes.SEMI_ANNUAL
     settlementDate = FinDate(19, 9, 2012)
@@ -237,28 +224,33 @@ def test_FinBond():
 
     for accrualType in FinDayCountTypes:
 
-        testCases.header("MATURITY", "COUPON", "CLEAN_PRICE", "ACCD_DAYS",
-                         "ACCRUED", "YTM")
+        testCases.header(
+            "MATURITY", "COUPON", "CLEAN_PRICE", "ACCD_DAYS", "ACCRUED", "YTM"
+        )
 
         for _, bond in bondDataFrame.iterrows():
 
-            dateString = bond['maturity']
-            matDatetime = dt.datetime.strptime(dateString, '%d-%b-%y')
+            dateString = bond["maturity"]
+            matDatetime = dt.datetime.strptime(dateString, "%d-%b-%y")
             maturityDt = fromDatetime(matDatetime)
             issueDt = FinDate(maturityDt._d, maturityDt._m, 2000)
 
-            coupon = bond['coupon']/100.0
-            cleanPrice = bond['mid']
-            bond = FinBond(issueDt, maturityDt,
-                           coupon, freqType, accrualType, 100)
+            coupon = bond["coupon"] / 100.0
+            cleanPrice = bond["mid"]
+            bond = FinBond(issueDt, maturityDt, coupon, freqType, accrualType, 100)
 
             ytm = bond.yieldToMaturity(settlementDate, cleanPrice)
             accd = bond._accruedInterest
             accd_days = bond._accruedDays
 
-            testCases.print("%18s" % maturityDt, "%8.4f" % coupon,
-                            "%10.4f" % cleanPrice, "%6.0f" % accd_days,
-                            "%10.4f" % accd, "%8.4f" % ytm)
+            testCases.print(
+                "%18s" % maturityDt,
+                "%8.4f" % coupon,
+                "%10.4f" % cleanPrice,
+                "%6.0f" % accd_days,
+                "%10.4f" % accd,
+                "%8.4f" % ytm,
+            )
 
     ###########################################################################
     #  EXAMPLE FROM http://bondtutor.com/btchp4/topic6/topic6.htm
@@ -271,8 +263,7 @@ def test_FinBond():
     coupon = 0.085
     face = ONE_MILLION
     freqType = FinFrequencyTypes.SEMI_ANNUAL
-    bond = FinBond(issueDate, maturityDate,
-                   coupon, freqType, accrualConvention, face)
+    bond = FinBond(issueDate, maturityDate, coupon, freqType, accrualConvention, face)
 
     testCases.header("FIELD", "VALUE")
     fullPrice = bond.fullPriceFromYTM(settlementDate, y)
@@ -311,9 +302,7 @@ def test_FinBond():
 
     # When the libor curve is the flat bond curve then the ASW is zero by
     # definition
-    flatCurve = FinDiscountCurveFlat(settlementDate,
-                                     ytm,
-                                     FinFrequencyTypes.SEMI_ANNUAL)
+    flatCurve = FinDiscountCurveFlat(settlementDate, ytm, FinFrequencyTypes.SEMI_ANNUAL)
 
     testCases.header("FIELD", "VALUE")
 
@@ -346,10 +335,10 @@ def test_FinBond():
     testCases.print("Above par bond at 120 ASW:", asw * 10000)
     testCases.print("Above par bond at 120 OAS:", oas * 10000)
 
-##########################################################################
-# https://data.bloomberglp.com/bat/sites/3/2017/07/SF-2017_Paul-Fjeldsted.pdf
-# Page 10 TREASURY NOTE SCREENSHOT
-##########################################################################
+    ##########################################################################
+    # https://data.bloomberglp.com/bat/sites/3/2017/07/SF-2017_Paul-Fjeldsted.pdf
+    # Page 10 TREASURY NOTE SCREENSHOT
+    ##########################################################################
 
     testCases.banner("BLOOMBERG US TREASURY EXAMPLE")
     settlementDate = FinDate(21, 7, 2017)
@@ -360,12 +349,7 @@ def test_FinBond():
     accrualType = FinDayCountTypes.ACT_ACT_ICMA
     face = 100.0
 
-    bond = FinBond(issueDate,
-                   maturityDate,
-                   coupon,
-                   freqType,
-                   accrualType,
-                   face)
+    bond = FinBond(issueDate, maturityDate, coupon, freqType, accrualType, face)
 
     testCases.header("FIELD", "VALUE")
     cleanPrice = 99.7808417
@@ -373,16 +357,13 @@ def test_FinBond():
     yld = bond.currentYield(cleanPrice)
     testCases.print("Current Yield = ", yld)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.UK_DMO)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.UK_DMO)
     testCases.print("UK DMO Yield To Maturity = ", ytm)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.US_STREET)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.US_STREET)
     testCases.print("US STREET Yield To Maturity = ", ytm)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.US_TREASURY)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.US_TREASURY)
     testCases.print("US TREASURY Yield To Maturity = ", ytm)
 
     fullPrice = bond.fullPriceFromYTM(settlementDate, ytm)
@@ -409,9 +390,9 @@ def test_FinBond():
     conv = bond.convexityFromYTM(settlementDate, ytm)
     testCases.print("Convexity = ", conv)
 
-##########################################################################
-# Page 11 APPLE NOTE SCREENSHOT
-##########################################################################
+    ##########################################################################
+    # Page 11 APPLE NOTE SCREENSHOT
+    ##########################################################################
 
     testCases.banner("BLOOMBERG APPLE CORP BOND EXAMPLE")
     settlementDate = FinDate(21, 7, 2017)
@@ -422,8 +403,7 @@ def test_FinBond():
     accrualType = FinDayCountTypes.THIRTY_E_360_ISDA
     face = 100.0
 
-    bond = FinBond(issueDate, maturityDate,
-                   coupon, freqType, accrualType, face)
+    bond = FinBond(issueDate, maturityDate, coupon, freqType, accrualType, face)
 
     testCases.header("FIELD", "VALUE")
     cleanPrice = 101.581564
@@ -431,16 +411,13 @@ def test_FinBond():
     yld = bond.currentYield(cleanPrice)
     testCases.print("Current Yield", yld)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.UK_DMO)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.UK_DMO)
     testCases.print("UK DMO Yield To Maturity", ytm)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.US_STREET)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.US_STREET)
     testCases.print("US STREET Yield To Maturity", ytm)
 
-    ytm = bond.yieldToMaturity(settlementDate, cleanPrice,
-                               FinYTMCalcType.US_TREASURY)
+    ytm = bond.yieldToMaturity(settlementDate, cleanPrice, FinYTMCalcType.US_TREASURY)
     testCases.print("US TREASURY Yield To Maturity", ytm)
 
     fullPrice = bond.fullPriceFromYTM(settlementDate, ytm)
@@ -467,6 +444,7 @@ def test_FinBond():
     conv = bond.convexityFromYTM(settlementDate, ytm)
     testCases.print("Convexity", conv)
 
+
 ###############################################################################
 
 
@@ -482,8 +460,7 @@ def test_FinBondExDividend():
     testCases.header("LABEL", "VALUE")
 
     calendarType = FinCalendarTypes.UNITED_KINGDOM
-    bond = FinBond(issueDate, maturityDate, coupon,
-                   freqType, accrualType, face)
+    bond = FinBond(issueDate, maturityDate, coupon, freqType, accrualType, face)
     settlementDate = FinDate(7, 9, 2003)
     accrued = bond.calcAccruedInterest(settlementDate, exDivDays, calendarType)
     testCases.print("SettlementDate:", settlementDate)
@@ -502,16 +479,15 @@ def test_FinBondExDividend():
     exDivDays = 7
 
     calendarType = FinCalendarTypes.UNITED_KINGDOM
-    bond = FinBond(issueDate, maturityDate, coupon,
-                   freqType, accrualType, face)
+    bond = FinBond(issueDate, maturityDate, coupon, freqType, accrualType, face)
 
     settlementDate = FinDate(25, 8, 2010)
 
     for _ in range(0, 13):
         settlementDate = settlementDate.addDays(1)
-        accrued = bond.calcAccruedInterest(
-            settlementDate, exDivDays, calendarType)
+        accrued = bond.calcAccruedInterest(settlementDate, exDivDays, calendarType)
         testCases.print(settlementDate, accrued)
+
 
 ###############################################################################
 

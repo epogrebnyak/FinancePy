@@ -3,15 +3,18 @@
 ##############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinAmount import FinAmount
 from financepy.finutils.FinCurrency import FinCurrencyTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
+
 
 def test_FinAmount():
 
@@ -23,6 +26,7 @@ def test_FinAmount():
     x = FinAmount(101000.232, FinCurrencyTypes.CAD)
 
     testCases.print("Amount", x)
+
 
 ###############################################################################
 

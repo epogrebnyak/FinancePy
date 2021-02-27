@@ -6,12 +6,14 @@ import numpy as np
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.models.FinModelRatesCIR import zeroPrice_MC, zeroPrice
 from financepy.models.FinModelRatesCIR import FinCIRNumericalScheme
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -30,29 +32,16 @@ def test_FinModelRatesCIR():
     seed = 1968
 
     testCases.header(
-        "MATURITY",
-        "TIME",
-        "FORMULA",
-        "EULER",
-        "LOGNORM",
-        "MILSTEIN",
-        "KJ",
-        "EXACT")
+        "MATURITY", "TIME", "FORMULA", "EULER", "LOGNORM", "MILSTEIN", "KJ", "EXACT"
+    )
 
     for t in np.linspace(0, 10, 21):
 
         start = time.time()
         p = zeroPrice(r0, a, b, sigma, t)
         p_MC1 = zeroPrice_MC(
-            r0,
-            a,
-            b,
-            sigma,
-            t,
-            dt,
-            numPaths,
-            seed,
-            FinCIRNumericalScheme.EULER.value)
+            r0, a, b, sigma, t, dt, numPaths, seed, FinCIRNumericalScheme.EULER.value
+        )
         p_MC2 = zeroPrice_MC(
             r0,
             a,
@@ -62,17 +51,11 @@ def test_FinModelRatesCIR():
             dt,
             numPaths,
             seed,
-            FinCIRNumericalScheme.LOGNORMAL.value)
+            FinCIRNumericalScheme.LOGNORMAL.value,
+        )
         p_MC3 = zeroPrice_MC(
-            r0,
-            a,
-            b,
-            sigma,
-            t,
-            dt,
-            numPaths,
-            seed,
-            FinCIRNumericalScheme.MILSTEIN.value)
+            r0, a, b, sigma, t, dt, numPaths, seed, FinCIRNumericalScheme.MILSTEIN.value
+        )
         p_MC4 = zeroPrice_MC(
             r0,
             a,
@@ -82,20 +65,15 @@ def test_FinModelRatesCIR():
             dt,
             numPaths,
             seed,
-            FinCIRNumericalScheme.KAHLJACKEL.value)
+            FinCIRNumericalScheme.KAHLJACKEL.value,
+        )
         p_MC5 = zeroPrice_MC(
-            r0,
-            a,
-            b,
-            sigma,
-            t,
-            dt,
-            numPaths,
-            seed,
-            FinCIRNumericalScheme.EXACT.value)
+            r0, a, b, sigma, t, dt, numPaths, seed, FinCIRNumericalScheme.EXACT.value
+        )
         end = time.time()
         elapsed = end - start
         testCases.print(t, elapsed, p, p_MC1, p_MC2, p_MC3, p_MC4, p_MC5)
+
 
 ###############################################################################
 

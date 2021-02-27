@@ -5,11 +5,13 @@
 import numpy as np
 import time
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinStatistics import mean, stdev, correlation
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -83,6 +85,7 @@ def test_FinStatistics():
     elapsed = end - start
     testCases.header("TIME")
     testCases.print(elapsed)
+
 
 ###############################################################################
 

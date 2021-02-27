@@ -27,6 +27,7 @@ class FinFXRainbowOptionTypes(Enum):
     CALL_ON_NTH = 5  # MAX(NTH(S1,S2,...,SN)-K,0)
     PUT_ON_NTH = 6  # MAX(K-NTH(S1,S2,...,SN),0)
 
+
 ###############################################################################
 
 
@@ -61,47 +62,61 @@ def payoffValue(s, payoffTypeValue, payoffParams):
 
     return payoff
 
+
 ###############################################################################
 
 
-def valueMCFast(t,
-                stockPrices,
-                discountCurve,
-                dividendYields,
-                volatilities,
-                betas,
-                numAssets,
-                payoffType,
-                payoffParams,
-                numPaths=10000,
-                seed=4242):
+def valueMCFast(
+    t,
+    stockPrices,
+    discountCurve,
+    dividendYields,
+    volatilities,
+    betas,
+    numAssets,
+    payoffType,
+    payoffParams,
+    numPaths=10000,
+    seed=4242,
+):
 
     np.random.seed(seed)
     df = discountCurve._df(t)
-    r = -np.log(df)/t
+    r = -np.log(df) / t
     mus = r - dividendYields
 
     model = FinGBMProcess()
 
     numTimeSteps = 2
-    Sall = model.getPathsAssets(numAssets, numPaths, numTimeSteps,
-                                t, mus, stockPrices, volatilities, betas, seed)
+    Sall = model.getPathsAssets(
+        numAssets,
+        numPaths,
+        numTimeSteps,
+        t,
+        mus,
+        stockPrices,
+        volatilities,
+        betas,
+        seed,
+    )
 
     payoff = payoffValue(Sall, payoffType.value, payoffParams)
     payoff = np.mean(payoff)
     v = payoff * np.exp(-r * t)
     return v
 
+
 ###############################################################################
 
 
 class FinRainbowOption(FinEquityOption):
-
-    def __init__(self,
-                 expiryDate: FinDate,
-                 payoffType: FinFXRainbowOptionTypes,
-                 payoffParams: List[float],
-                 numAssets: int):
+    def __init__(
+        self,
+        expiryDate: FinDate,
+        payoffType: FinFXRainbowOptionTypes,
+        payoffParams: List[float],
+        numAssets: int,
+    ):
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -112,35 +127,29 @@ class FinRainbowOption(FinEquityOption):
         self._payoffParams = payoffParams
         self._numAssets = numAssets
 
-###############################################################################
+    ###############################################################################
 
-    def validate(self,
-                 stockPrices,
-                 dividendYields,
-                 volatilities,
-                 betas):
+    def validate(self, stockPrices, dividendYields, volatilities, betas):
 
         if len(stockPrices) != self._numAssets:
             raise FinError(
-                "Stock prices must be a vector of length "
-                + str(self._numAssets))
+                "Stock prices must be a vector of length " + str(self._numAssets)
+            )
 
         if len(dividendYields) != self._numAssets:
             raise FinError(
-                "Dividend yields must be a vector of length "
-                + str(self._numAssets))
+                "Dividend yields must be a vector of length " + str(self._numAssets)
+            )
 
         if len(volatilities) != self._numAssets:
             raise FinError(
-                "Volatilities must be a vector of length "
-                + str(self._numAssets))
+                "Volatilities must be a vector of length " + str(self._numAssets)
+            )
 
         if len(betas) != self._numAssets:
-            raise FinError(
-                "Betas must be a vector of length "
-                + str(self._numAssets))
+            raise FinError("Betas must be a vector of length " + str(self._numAssets))
 
-###############################################################################
+    ###############################################################################
 
     def validatePayoff(self, payoffType, payoffParams, numAssets):
 
@@ -163,27 +172,32 @@ class FinRainbowOption(FinEquityOption):
 
         if len(payoffParams) != numParams:
             raise FinError(
-                "Number of parameters required for " +
-                str(payoffType) +
-                " must be " +
-                str(numParams))
+                "Number of parameters required for "
+                + str(payoffType)
+                + " must be "
+                + str(numParams)
+            )
 
-        if payoffType == FinFXRainbowOptionTypes.CALL_ON_NTH \
-                or payoffType == FinFXRainbowOptionTypes.PUT_ON_NTH:
+        if (
+            payoffType == FinFXRainbowOptionTypes.CALL_ON_NTH
+            or payoffType == FinFXRainbowOptionTypes.PUT_ON_NTH
+        ):
             n = payoffParams[0]
             if n < 1 or n > numAssets:
                 raise FinError("Nth parameter must be 1 to " + str(numAssets))
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              valueDate,
-              expiryDate,
-              stockPrices,
-              discountCurve,
-              dividendYields,
-              volatilities,
-              betas):
+    def value(
+        self,
+        valueDate,
+        expiryDate,
+        stockPrices,
+        discountCurve,
+        dividendYields,
+        volatilities,
+        betas,
+    ):
 
         if self._numAssets != 2:
             raise FinError("Analytical results for two assets only.")
@@ -191,20 +205,17 @@ class FinRainbowOption(FinEquityOption):
         if valueDate > self._expiryDate:
             raise FinError("Value date after expiry date.")
 
-        self.validate(stockPrices,
-                      dividendYields,
-                      volatilities,
-                      betas)
+        self.validate(stockPrices, dividendYields, volatilities, betas)
 
         # Use result by Stulz (1982) given by Haug Page 211
         t = (self._expiryDate - valueDate) / gDaysInYear
 
         df = discountCurve._df(t)
-        r = -np.log(df)/t
+        r = -np.log(df) / t
 
         q1 = dividendYields[0]
         q2 = dividendYields[1]
-        rho = betas[0]**2
+        rho = betas[0] ** 2
         s1 = stockPrices[0]
         s2 = stockPrices[1]
         b1 = r - q1
@@ -222,65 +233,78 @@ class FinRainbowOption(FinEquityOption):
         dq1 = np.exp(-q1 * t)
         dq2 = np.exp(-q2 * t)
         df = np.exp(-r * t)
-        sqrtt= np.sqrt(t)
+        sqrtt = np.sqrt(t)
 
         if self._payoffType == FinFXRainbowOptionTypes.CALL_ON_MAXIMUM:
-            v = s1 * dq1 * M(y1, d, rho1)+s2*dq2*M(y2, -d + v*sqrtt, rho2) \
-                - k * df * (1.0 - M(-y1 + v1*np.sqrt(t), -y2 + v2*sqrtt, rho))
+            v = (
+                s1 * dq1 * M(y1, d, rho1)
+                + s2 * dq2 * M(y2, -d + v * sqrtt, rho2)
+                - k * df * (1.0 - M(-y1 + v1 * np.sqrt(t), -y2 + v2 * sqrtt, rho))
+            )
         elif self._payoffType == FinFXRainbowOptionTypes.CALL_ON_MINIMUM:
-            v = s1*dq1*M(y1, -d, -rho1) + s2 * dq2 * M(y2, d-v*np.sqrt(t), -rho2)\
+            v = (
+                s1 * dq1 * M(y1, -d, -rho1)
+                + s2 * dq2 * M(y2, d - v * np.sqrt(t), -rho2)
                 - k * df * M(y1 - v1 * np.sqrt(t), y2 - v2 * np.sqrt(t), rho)
+            )
         elif self._payoffType == FinFXRainbowOptionTypes.PUT_ON_MAXIMUM:
             cmax1 = s2 * dq2 + s1 * dq1 * N(d) - s2 * dq2 * N(d - v * sqrtt)
-            cmax2 = s1 * dq1 * M(y1, d, rho1) \
-                + s2 * dq2 * M(y2, -d + v * sqrtt, rho2) \
-                - k*df*(1.0 - M(-y1 + v1 * sqrtt, -y2 + v2 * sqrtt, rho))
+            cmax2 = (
+                s1 * dq1 * M(y1, d, rho1)
+                + s2 * dq2 * M(y2, -d + v * sqrtt, rho2)
+                - k * df * (1.0 - M(-y1 + v1 * sqrtt, -y2 + v2 * sqrtt, rho))
+            )
             v = k * df - cmax1 + cmax2
         elif self._payoffType == FinFXRainbowOptionTypes.PUT_ON_MINIMUM:
             cmin1 = s1 * dq1 - s1 * dq1 * N(d) + s2 * dq2 * N(d - v * sqrtt)
-            cmin2 = s1 * dq1 * M(y1, -d, -rho1) + s2 * dq2 * M(y2, d-v * sqrtt
-, -rho2) - k * df * M(y1 - v1 * sqrtt, y2 - v2 * sqrtt, rho)
+            cmin2 = (
+                s1 * dq1 * M(y1, -d, -rho1)
+                + s2 * dq2 * M(y2, d - v * sqrtt, -rho2)
+                - k * df * M(y1 - v1 * sqrtt, y2 - v2 * sqrtt, rho)
+            )
             v = k * df - cmin1 + cmin2
         else:
             raise FinError("Unsupported FX Rainbow option type")
 
         return v
 
-###############################################################################
+    ###############################################################################
 
-    def valueMC(self,
-                valueDate,
-                expiryDate,
-                stockPrices,
-                discountCurve,
-                dividendYields,
-                volatilities,
-                betas,
-                numPaths=10000,
-                seed=4242):
+    def valueMC(
+        self,
+        valueDate,
+        expiryDate,
+        stockPrices,
+        discountCurve,
+        dividendYields,
+        volatilities,
+        betas,
+        numPaths=10000,
+        seed=4242,
+    ):
 
-        self.validate(stockPrices,
-                      dividendYields,
-                      volatilities,
-                      betas)
+        self.validate(stockPrices, dividendYields, volatilities, betas)
 
         if valueDate > expiryDate:
             raise FinError("Value date after expiry date.")
 
         t = (self._expiryDate - valueDate) / gDaysInYear
 
-        v = valueMCFast(t,
-                        stockPrices,
-                        discountCurve,
-                        dividendYields,
-                        volatilities,
-                        betas,
-                        self._numAssets,
-                        self._payoffType,
-                        self._payoffParams,
-                        numPaths,
-                        seed)
+        v = valueMCFast(
+            t,
+            stockPrices,
+            discountCurve,
+            dividendYields,
+            volatilities,
+            betas,
+            self._numAssets,
+            self._payoffType,
+            self._payoffParams,
+            numPaths,
+            seed,
+        )
 
         return v
+
 
 ###############################################################################

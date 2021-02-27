@@ -6,12 +6,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sys
+
 sys.path.append("..")
 
 from financepy.models.FinModelSABR import FinModelSABR
 from financepy.models.FinModelSABRShifted import FinModelSABRShifted
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 PLOT_GRAPHS = False
@@ -47,6 +49,7 @@ def test_FinSABR():
         plt.plot(strikes, vols2)
         plt.title("SABR")
 
+
 ###############################################################################
 
 
@@ -78,6 +81,7 @@ def test_FinShiftedSABRSimple():
         plt.plot(strikes, vols2)
         plt.title("Shifted SIMPLE SABR")
 
+
 ###############################################################################
 
 
@@ -102,6 +106,7 @@ def test_FinShiftedSABR():
         plt.figure()
         plt.plot(strikes, vols)
         plt.title("SHIFTED SABR")
+
 
 ###############################################################################
 

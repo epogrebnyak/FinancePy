@@ -16,16 +16,18 @@ from ...finutils.FinHelperFunctions import labelToString, checkArgumentTypes
 ###############################################################################
 
 
-class FinEquityForward():
-    ''' Contract to buy or sell a stock in future at a price agreed today. '''
+class FinEquityForward:
+    """ Contract to buy or sell a stock in future at a price agreed today. """
 
-    def __init__(self,
-                 expiryDate: FinDate,
-                 forwardPrice: float,  # PRICE OF 1 UNIT OF FOREIGN IN DOM CCY
-                 notional: float,
-                 longShort: FinLongShort = FinLongShort.LONG):
-        ''' Creates a FinEquityForward which allows the owner to buy the stock
-        at a price agreed today. Need to specify if LONG or SHORT.'''
+    def __init__(
+        self,
+        expiryDate: FinDate,
+        forwardPrice: float,  # PRICE OF 1 UNIT OF FOREIGN IN DOM CCY
+        notional: float,
+        longShort: FinLongShort = FinLongShort.LONG,
+    ):
+        """Creates a FinEquityForward which allows the owner to buy the stock
+        at a price agreed today. Need to specify if LONG or SHORT."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -33,16 +35,14 @@ class FinEquityForward():
         self._forwardPrice = forwardPrice
         self._notional = notional
         self._longShort = longShort
-        
-###############################################################################
 
-    def value(self,
-              valueDate,
-              stockPrice,  # Current stock price
-              discountCurve,
-              dividendCurve):
-        ''' Calculate the value of an equity forward contract from the stock 
-        price and discound and dividend curves. '''
+    ###############################################################################
+
+    def value(
+        self, valueDate, stockPrice, discountCurve, dividendCurve  # Current stock price
+    ):
+        """Calculate the value of an equity forward contract from the stock
+        price and discound and dividend curves."""
 
         if type(valueDate) == FinDate:
             t = (self._expiryDate - valueDate) / gDaysInYear
@@ -57,29 +57,26 @@ class FinEquityForward():
 
         t = np.maximum(t, 1e-10)
 
-        fwdStockPrice = self.forward(valueDate,
-                                     stockPrice,
-                                     discountCurve,
-                                     dividendCurve)
+        fwdStockPrice = self.forward(
+            valueDate, stockPrice, discountCurve, dividendCurve
+        )
 
         discountDF = discountCurve._df(t)
 
-        v = (fwdStockPrice - self._forwardPrice)
+        v = fwdStockPrice - self._forwardPrice
         v = v * self._notional * discountDF
-        
+
         if self._longShort == FinLongShort.SHORT:
             v = v * (-1.0)
 
         return v
 
-###############################################################################
+    ###############################################################################
 
-    def forward(self,
-                valueDate,
-                stockPrice,  # Current stock price
-                discountCurve,
-                dividendCurve):
-        ''' Calculate the forward price of the equity forward contract. '''
+    def forward(
+        self, valueDate, stockPrice, discountCurve, dividendCurve  # Current stock price
+    ):
+        """ Calculate the forward price of the equity forward contract. """
 
         if type(valueDate) == FinDate:
             t = (self._expiryDate - valueDate) / gDaysInYear
@@ -100,7 +97,7 @@ class FinEquityForward():
         fwdStockPrice = stockPrice * dividendDF / discountDF
         return fwdStockPrice
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -110,11 +107,11 @@ class FinEquityForward():
         s += labelToString("NOTIONAL", self._notional, "")
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
 
-###############################################################################
 
+###############################################################################

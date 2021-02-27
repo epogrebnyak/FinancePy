@@ -17,8 +17,7 @@ from ..finutils.FinHelperFunctions import labelToString
 ###############################################################################
 
 
-class FinModelRatesVasicek():
-
+class FinModelRatesVasicek:
     def __init__(self, a, b, sigma):
         self._a = a
         self._b = b
@@ -31,6 +30,7 @@ class FinModelRatesVasicek():
         s += labelToString("sigma", self._sigma)
         return s
 
+
 ###############################################################################
 
 
@@ -38,6 +38,7 @@ class FinModelRatesVasicek():
 def meanr(r0, a, b, t):
     mr = r0 * exp(-a * t) + b * (1 - exp(-a * t))
     return mr
+
 
 ###############################################################################
 
@@ -47,16 +48,19 @@ def variancer(a, b, sigma, t):
     vr = sigma * sigma * (1.0 - exp(-2.0 * a * t)) / 2.0 / a
     return vr
 
+
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
 def zeroPrice(r0, a, b, sigma, t):
     B = (1.0 - exp(-a * t)) / a
-    A = exp((b - sigma * sigma / 2.0 / a / a) *
-            (B - t) - B * B * sigma * sigma / 4.0 / a)
+    A = exp(
+        (b - sigma * sigma / 2.0 / a / a) * (B - t) - B * B * sigma * sigma / 4.0 / a
+    )
     zcb = A * exp(-r0 * B)
     return zcb
+
 
 ###############################################################################
 
@@ -83,11 +87,15 @@ def ratePath_MC(r0, a, b, sigma, t, dt, seed):
 
     return ratePath
 
+
 ###############################################################################
 
 
-@njit(float64(float64, float64, float64, float64, float64,
-      float64, int64, int64), fastmath=True, cache=True)
+@njit(
+    float64(float64, float64, float64, float64, float64, float64, int64, int64),
+    fastmath=True,
+    cache=True,
+)
 def zeroPrice_MC(r0, a, b, sigma, t, dt, numPaths, seed):
 
     np.random.seed(seed)
@@ -104,5 +112,6 @@ def zeroPrice_MC(r0, a, b, sigma, t, dt, numPaths, seed):
         zcb += exp(-rsum)
     zcb /= numPaths
     return zcb
+
 
 ###############################################################################

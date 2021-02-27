@@ -19,38 +19,38 @@ interp = FinInterpTypes.FLAT_FWD_RATES.value
 
 @njit(fastmath=True, cache=True)
 def P_Fast(t, T, Rt, delta, pt, ptd, pT, _sigma):
-    ''' Forward discount factor as seen at some time t which may be in the
+    """Forward discount factor as seen at some time t which may be in the
     future for payment at time T where Rt is the delta-period short rate
     seen at time t and pt is the discount factor to time t, ptd is the one
     period discount factor to time t+dt and pT is the discount factor from
-    now until the payment of the 1 dollar of the discount factor. '''
+    now until the payment of the 1 dollar of the discount factor."""
 
-    BtT = (T-t)
+    BtT = T - t
     BtDelta = delta
-    term1 = np.log(pT/pt) - (BtT/BtDelta) * np.log(ptd/pt)
-    term2 = (_sigma**2) * t * BtT * (BtT - BtDelta)/(2.0)
+    term1 = np.log(pT / pt) - (BtT / BtDelta) * np.log(ptd / pt)
+    term2 = (_sigma ** 2) * t * BtT * (BtT - BtDelta) / (2.0)
 
     logAhat = term1 - term2
-    BhattT = (BtT/BtDelta) * delta
+    BhattT = (BtT / BtDelta) * delta
     p = np.exp(logAhat - BhattT * Rt)
     return p
+
 
 ###############################################################################
 
 
-class FinModelRatesHL():
-
+class FinModelRatesHL:
     def __init__(self, sigma):
-        ''' Construct Ho-Lee model using single parameter of volatility. The
+        """Construct Ho-Lee model using single parameter of volatility. The
         dynamical equation is dr = theta(t) dt + sigma * dW. Any no-arbitrage
-        fitting is done within functions below. '''
+        fitting is done within functions below."""
 
         if sigma < 0.0:
             raise FinError("Negative volatility not allowed.")
 
         self._sigma = sigma
 
-###############################################################################
+    ###############################################################################
 
     def zcb(self, rt1, t1, t2, discountCurve):
 
@@ -62,14 +62,12 @@ class FinModelRatesHL():
         z = P_Fast(t1, t2, rt1, delta, pt1, pt1p, pt2, self._sigma)
         return z
 
-###############################################################################
+    ###############################################################################
 
-    def optionOnZCB(self, texp, tmat,
-                    strikePrice, faceAmount,
-                    dfTimes, dfValues):
-        ''' Price an option on a zero coupon bond using analytical solution of
+    def optionOnZCB(self, texp, tmat, strikePrice, faceAmount, dfTimes, dfValues):
+        """Price an option on a zero coupon bond using analytical solution of
         Hull-White model. User provides bond face and option strike and expiry
-        date and maturity date. '''
+        date and maturity date."""
 
         if texp > tmat:
             raise FinError("Option expiry after bond matures.")
@@ -82,22 +80,23 @@ class FinModelRatesHL():
 
         sigma = self._sigma
 
-        sigmap = sigma * (tmat-texp) * np.sqrt(texp)
+        sigmap = sigma * (tmat - texp) * np.sqrt(texp)
 
-        h = np.log((faceAmount*ptmat)/(strikePrice*ptexp))/sigmap+sigmap/2.0
+        h = np.log((faceAmount * ptmat) / (strikePrice * ptexp)) / sigmap + sigmap / 2.0
 
-        callValue = faceAmount * ptmat * N(h) - strikePrice * ptexp * N(h-sigmap)
-        putValue = strikePrice * ptexp * N(-h+sigmap) - faceAmount * ptmat * N(-h)
+        callValue = faceAmount * ptmat * N(h) - strikePrice * ptexp * N(h - sigmap)
+        putValue = strikePrice * ptexp * N(-h + sigmap) - faceAmount * ptmat * N(-h)
 
-        return {'call': callValue, 'put': putValue}
+        return {"call": callValue, "put": putValue}
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Return string with class details. '''
+        """ Return string with class details. """
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("Sigma", self._sigma)
         return s
+
 
 ###############################################################################

@@ -30,6 +30,7 @@ class FinBondModelTypes(Enum):
     HULL_WHITE = 3
     BLACK_KARASINSKI = 4
 
+
 ###############################################################################
 
 
@@ -44,21 +45,23 @@ class FinBondOptionTypes(Enum):
 
 
 class FinBondEmbeddedOption(object):
-    ''' Class for fixed coupon bonds with embedded call or put optionality. '''
+    """ Class for fixed coupon bonds with embedded call or put optionality. """
 
-    def __init__(self,
-                 issueDate: FinDate,
-                 maturityDate: FinDate,  # FinDate
-                 coupon: float,  # Annualised coupon - 0.03 = 3.00%
-                 freqType: FinFrequencyTypes,
-                 accrualType: FinDayCountTypes,
-                 callDates: List[FinDate],
-                 callPrices: List[float],
-                 putDates: List[FinDate],
-                 putPrices: List[float],
-                 faceAmount: float = 100.0):
-        ''' Create a FinBondEmbeddedOption object with a maturity date, coupon
-        and all of the bond inputs. '''
+    def __init__(
+        self,
+        issueDate: FinDate,
+        maturityDate: FinDate,  # FinDate
+        coupon: float,  # Annualised coupon - 0.03 = 3.00%
+        freqType: FinFrequencyTypes,
+        accrualType: FinDayCountTypes,
+        callDates: List[FinDate],
+        callPrices: List[float],
+        putDates: List[FinDate],
+        putPrices: List[float],
+        faceAmount: float = 100.0,
+    ):
+        """Create a FinBondEmbeddedOption object with a maturity date, coupon
+        and all of the bond inputs."""
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -68,12 +71,9 @@ class FinBondEmbeddedOption(object):
         self._freqType = freqType
         self._accrualType = accrualType
 
-        self._bond = FinBond(issueDate,
-                             maturityDate,
-                             coupon,
-                             freqType,
-                             accrualType,
-                             faceAmount)
+        self._bond = FinBond(
+            issueDate, maturityDate, coupon, freqType, accrualType, faceAmount
+        )
 
         # Validate call and put schedules
         for dt in callDates:
@@ -121,18 +121,15 @@ class FinBondEmbeddedOption(object):
         self._faceAmount = faceAmount
         self._bond._calculateFlowDates()
 
-###############################################################################
+    ###############################################################################
 
-    def value(self,
-              settlementDate: FinDate,
-              discountCurve: FinDiscountCurve,
-              model):
-        ''' Value the bond that settles on the specified date that can have
+    def value(self, settlementDate: FinDate, discountCurve: FinDiscountCurve, model):
+        """Value the bond that settles on the specified date that can have
         both embedded call and put options. This is done using the specified
-        model and a discount curve. '''
+        model and a discount curve."""
 
         # Generate bond coupon flow schedule
-        cpn = self._bond._coupon/self._bond._frequency
+        cpn = self._bond._coupon / self._bond._frequency
         cpnTimes = []
         cpnAmounts = []
 
@@ -172,54 +169,74 @@ class FinBondEmbeddedOption(object):
 
         if isinstance(model, FinModelRatesHW):
 
-            ''' We need to build the tree out to the bond maturity date. To be
+            """We need to build the tree out to the bond maturity date. To be
             more precise we only need to go out the the last option date but
-            we can do that refinement at a later date. '''
+            we can do that refinement at a later date."""
 
             model.buildTree(tmat, dfTimes, dfValues)
-            v1 = model.callablePuttableBond_Tree(cpnTimes, cpnAmounts,
-                                                 callTimes, callPrices,
-                                                 putTimes, putPrices,
-                                                 faceAmount)
+            v1 = model.callablePuttableBond_Tree(
+                cpnTimes,
+                cpnAmounts,
+                callTimes,
+                callPrices,
+                putTimes,
+                putPrices,
+                faceAmount,
+            )
             model._numTimeSteps += 1
             model.buildTree(tmat, dfTimes, dfValues)
-            v2 = model.callablePuttableBond_Tree(cpnTimes, cpnAmounts,
-                                                 callTimes, callPrices,
-                                                 putTimes, putPrices,
-                                                 faceAmount)
+            v2 = model.callablePuttableBond_Tree(
+                cpnTimes,
+                cpnAmounts,
+                callTimes,
+                callPrices,
+                putTimes,
+                putPrices,
+                faceAmount,
+            )
             model._numTimeSteps -= 1
 
-            v_bondwithoption = (v1['bondwithoption'] + v2['bondwithoption'])/2
-            v_bondpure = (v1['bondpure'] + v2['bondpure'])/2
+            v_bondwithoption = (v1["bondwithoption"] + v2["bondwithoption"]) / 2
+            v_bondpure = (v1["bondpure"] + v2["bondpure"]) / 2
 
-            return {'bondwithoption': v_bondwithoption, 'bondpure': v_bondpure}
+            return {"bondwithoption": v_bondwithoption, "bondpure": v_bondpure}
 
         elif isinstance(model, FinModelRatesBK):
 
-            ''' Because we not have a closed form bond price we need to build
-            the tree out to the bond maturity which is after option expiry. '''
+            """Because we not have a closed form bond price we need to build
+            the tree out to the bond maturity which is after option expiry."""
 
             model.buildTree(tmat, dfTimes, dfValues)
-            v1 = model.callablePuttableBond_Tree(cpnTimes, cpnAmounts,
-                                                 callTimes, callPrices,
-                                                 putTimes, putPrices,
-                                                 faceAmount)
+            v1 = model.callablePuttableBond_Tree(
+                cpnTimes,
+                cpnAmounts,
+                callTimes,
+                callPrices,
+                putTimes,
+                putPrices,
+                faceAmount,
+            )
             model._numTimeSteps += 1
             model.buildTree(tmat, dfTimes, dfValues)
-            v2 = model.callablePuttableBond_Tree(cpnTimes, cpnAmounts,
-                                                 callTimes, callPrices,
-                                                 putTimes, putPrices,
-                                                 faceAmount)
+            v2 = model.callablePuttableBond_Tree(
+                cpnTimes,
+                cpnAmounts,
+                callTimes,
+                callPrices,
+                putTimes,
+                putPrices,
+                faceAmount,
+            )
             model._numTimeSteps -= 1
 
-            v_bondwithoption = (v1['bondwithoption'] + v2['bondwithoption'])/2
-            v_bondpure = (v1['bondpure'] + v2['bondpure'])/2
+            v_bondwithoption = (v1["bondwithoption"] + v2["bondwithoption"]) / 2
+            v_bondpure = (v1["bondpure"] + v2["bondpure"]) / 2
 
-            return {'bondwithoption': v_bondwithoption, 'bondpure': v_bondpure}
+            return {"bondwithoption": v_bondwithoption, "bondpure": v_bondpure}
         else:
             raise FinError("Unknown model type")
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -240,9 +257,10 @@ class FinBondEmbeddedOption(object):
 
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
         print(self)
+
 
 ###############################################################################

@@ -6,11 +6,13 @@ import numpy as np
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.models.FinModelRatesVasicek import zeroPrice, zeroPrice_MC
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################

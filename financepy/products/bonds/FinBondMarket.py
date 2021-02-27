@@ -2,7 +2,7 @@
 # Copyright (C) 2018, 2019, 2020 Dominic O'Kane
 ##############################################################################
 
-#TODO  Add Japan 
+# TODO  Add Japan
 
 
 from ...finutils.FinFrequency import FinFrequencyTypes
@@ -15,50 +15,52 @@ from enum import Enum
 
 
 class FinBondMarkets(Enum):
-    AUSTRIA = 1,
-    BELGIUM = 2,
-    CYPRUS = 3,
-    ESTONIA = 4,
-    FINLAND = 5,
-    FRANCE = 6,
-    GERMANY = 7,
-    GREECE = 8,
-    IRELAND = 9,
-    ITALY = 10,
-    LATVIA = 11,
-    LITHUANIA = 12,
-    LUXEMBOURG = 13,
-    MALTA = 14,
-    NETHERLANDS = 15,
-    PORTUGAL = 16,
-    SLOVAKIA = 17,
-    SLOVENIA = 18,
-    SPAIN = 19,
-    ESM = 20,
-    EFSF = 21,
-    BULGARIA = 22,
-    CROATIA = 23,
-    CZECH_REPUBLIC = 24,
-    DENMARK = 25,
-    HUNGARY = 26,
-    POLAND = 27,
-    ROMANIA = 28,
-    SWEDEN = 29,
-    JAPAN = 30,
-    SWITZERLAND = 31,
-    UNITED_KINGDOM = 32,
-    UNITED_STATES = 33,
-    AUSTRALIA = 34,
-    NEW_ZEALAND = 35,
-    NORWAY = 36,
+    AUSTRIA = (1,)
+    BELGIUM = (2,)
+    CYPRUS = (3,)
+    ESTONIA = (4,)
+    FINLAND = (5,)
+    FRANCE = (6,)
+    GERMANY = (7,)
+    GREECE = (8,)
+    IRELAND = (9,)
+    ITALY = (10,)
+    LATVIA = (11,)
+    LITHUANIA = (12,)
+    LUXEMBOURG = (13,)
+    MALTA = (14,)
+    NETHERLANDS = (15,)
+    PORTUGAL = (16,)
+    SLOVAKIA = (17,)
+    SLOVENIA = (18,)
+    SPAIN = (19,)
+    ESM = (20,)
+    EFSF = (21,)
+    BULGARIA = (22,)
+    CROATIA = (23,)
+    CZECH_REPUBLIC = (24,)
+    DENMARK = (25,)
+    HUNGARY = (26,)
+    POLAND = (27,)
+    ROMANIA = (28,)
+    SWEDEN = (29,)
+    JAPAN = (30,)
+    SWITZERLAND = (31,)
+    UNITED_KINGDOM = (32,)
+    UNITED_STATES = (33,)
+    AUSTRALIA = (34,)
+    NEW_ZEALAND = (35,)
+    NORWAY = (36,)
     SOUTH_AFRICA = 37
 
+
 ###############################################################################
-    
+
+
 def getTreasuryBondMarketConventions(country):
-    ''' Returns the day count convention for accrued interest, the frequency
+    """Returns the day count convention for accrued interest, the frequency
     and the number of days from trade date to settlement date.
-    This is for Treasury markets. And for secondary bond markets. '''
+    This is for Treasury markets. And for secondary bond markets."""
 
     annual = FinFrequencyTypes.ANNUAL
     semi_annual = FinFrequencyTypes.SEMI_ANNUAL
@@ -66,7 +68,7 @@ def getTreasuryBondMarketConventions(country):
     thirtye360 = FinDayCountTypes.THIRTY_E_360
 
     # TODO: CHECK CONVENTIONS
-    
+
     # RETURNS
     # ACCRUAL CONVENTION
     # COUPON FREQUENCY
@@ -132,7 +134,7 @@ def getTreasuryBondMarketConventions(country):
     elif country == FinBondMarkets.ROMANIA:
         return (act_act, semi_annual, 2, 0, None)
     elif country == FinBondMarkets.SOUTH_AFRICA:
-        return (act_act, annual, 2, 10, FinCalendarTypes.NONE) # CHECK
+        return (act_act, annual, 2, 10, FinCalendarTypes.NONE)  # CHECK
     elif country == FinBondMarkets.SWEDEN:
         return (thirtye360, annual, 2, 0, None)
     elif country == FinBondMarkets.JAPAN:

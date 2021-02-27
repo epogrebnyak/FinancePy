@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import time
 
 import sys
+
 sys.path.append("..")
 
 from financepy.finutils.FinGlobalTypes import FinSwapTypes
@@ -21,6 +22,7 @@ from financepy.products.bonds.FinBond import FinBond
 from financepy.products.bonds.FinBondEmbeddedOption import FinBondEmbeddedOption
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 plotGraphs = False
@@ -37,7 +39,7 @@ def test_FinBondEmbeddedOptionMATLAB():
 
     settlementDate = FinDate(1, 1, 2007)
     valuationDate = settlementDate
-    
+
     ###########################################################################
 
     dcType = FinDayCountTypes.THIRTY_E_360
@@ -53,7 +55,7 @@ def test_FinBondEmbeddedOptionMATLAB():
 
     issueDate = FinDate(1, 1, 2004)
     maturityDate = FinDate(1, 1, 2010)
-    
+
     coupon = 0.0525
     freqType = FinFrequencyTypes.ANNUAL
     accrualType = FinDayCountTypes.ACT_ACT_ICMA
@@ -77,11 +79,17 @@ def test_FinBondEmbeddedOptionMATLAB():
     sigma = 0.01  # basis point volatility
     a = 0.1
 
-    puttableBond = FinBondEmbeddedOption(issueDate,
-                                         maturityDate, coupon,
-                                         freqType, accrualType,
-                                         callDates, callPrices,
-                                         putDates, putPrices)
+    puttableBond = FinBondEmbeddedOption(
+        issueDate,
+        maturityDate,
+        coupon,
+        freqType,
+        accrualType,
+        callDates,
+        callPrices,
+        putDates,
+        putPrices,
+    )
 
     testCases.header("TIME", "NumTimeSteps", "BondWithOption", "BondPure")
 
@@ -93,13 +101,13 @@ def test_FinBondEmbeddedOptionMATLAB():
         v = puttableBond.value(settlementDate, discountCurve, model)
         end = time.time()
         period = end - start
-        testCases.print(period, numTimeSteps, v['bondwithoption'],
-                        v['bondpure'])
-        values.append(v['bondwithoption'])
+        testCases.print(period, numTimeSteps, v["bondwithoption"], v["bondpure"])
+        values.append(v["bondwithoption"])
 
     if plotGraphs:
         plt.figure()
         plt.plot(timeSteps, values)
+
 
 ###############################################################################
 
@@ -117,8 +125,9 @@ def test_FinBondEmbeddedOptionQUANTLIB():
 
     ###########################################################################
 
-    discountCurve = FinDiscountCurveFlat(valuationDate, 0.035,
-                                 FinFrequencyTypes.SEMI_ANNUAL)
+    discountCurve = FinDiscountCurveFlat(
+        valuationDate, 0.035, FinFrequencyTypes.SEMI_ANNUAL
+    )
 
     ###########################################################################
 
@@ -149,11 +158,17 @@ def test_FinBondEmbeddedOptionQUANTLIB():
     sigma = 0.12  # basis point volatility
     a = 0.03
 
-    puttableBond = FinBondEmbeddedOption(issueDate,
-                                         maturityDate, coupon,
-                                         freqType, accrualType,
-                                         callDates, callPrices,
-                                         putDates, putPrices)
+    puttableBond = FinBondEmbeddedOption(
+        issueDate,
+        maturityDate,
+        coupon,
+        freqType,
+        accrualType,
+        callDates,
+        callPrices,
+        putDates,
+        putPrices,
+    )
 
     testCases.header("BOND PRICE", "PRICE")
     v = bond.cleanPriceFromDiscountCurve(settlementDate, discountCurve)
@@ -168,13 +183,14 @@ def test_FinBondEmbeddedOptionQUANTLIB():
         v = puttableBond.value(settlementDate, discountCurve, model)
         end = time.time()
         period = end - start
-        testCases.print(period, numTimeSteps, v['bondwithoption'], v['bondpure'])
-        values.append(v['bondwithoption'])
+        testCases.print(period, numTimeSteps, v["bondwithoption"], v["bondpure"])
+        values.append(v["bondwithoption"])
 
     if plotGraphs:
         plt.figure()
         plt.title("Puttable Bond Price Convergence")
         plt.plot(timeSteps, values)
+
 
 ###############################################################################
 

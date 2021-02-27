@@ -3,6 +3,7 @@
 ##############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from os.path import join, exists, split
@@ -10,6 +11,7 @@ import time
 
 from enum import Enum
 from financepy.finutils.FinError import FinError
+
 
 class FinTestCaseMode(Enum):
     SAVE_TEST_CASES = 1
@@ -29,7 +31,7 @@ verbose = False
 
 globalTestCaseMode = FinTestCaseMode.SAVE_TEST_CASES
 globalTestCaseMode = FinTestCaseMode.ANALYSE_TEST_CASES
-#globalTestCaseMode = FinTestCaseMode.DEBUG_TEST_CASES
+# globalTestCaseMode = FinTestCaseMode.DEBUG_TEST_CASES
 
 tolerance = 1e-8
 
@@ -38,8 +40,8 @@ tolerance = 1e-8
 ###############################################################################
 
 
-class FinTestCases():
-    ''' Test case framework for FinancePy.
+class FinTestCases:
+    """Test case framework for FinancePy.
     - The basic step is that we generate a GOLDEN folder that creates an output
     file for each testcase which is assumed to be correct. This can be done by
     running the test cases Python file with the globalTestCaseMode flag set to
@@ -59,13 +61,13 @@ class FinTestCases():
 
     Note that the header TIME is special as it tells the analysis that the
     value in the corresponding column is a timing and so its value is allowed
-    to change without triggering an error.'''
+    to change without triggering an error."""
 
-###############################################################################
+    ###############################################################################
 
     def __init__(self, moduleName, mode):
-        ''' Create the TestCase given the module name and whether we are in
-        GOLDEN or COMPARE mode. '''
+        """Create the TestCase given the module name and whether we are in
+        GOLDEN or COMPARE mode."""
 
         rootFolder, moduleFilename = split(moduleName)
 
@@ -89,8 +91,8 @@ class FinTestCases():
         self._globalNumWarnings = 0
         self._globalNumErrors = 0
 
-#        print("Root folder:",self._rootFolder)
-#        print("Modulename:",self._moduleName)
+        #        print("Root folder:",self._rootFolder)
+        #        print("Modulename:",self._moduleName)
 
         self._goldenFolder = join(rootFolder, "golden")
         self._differencesFolder = join(rootFolder, "differences")
@@ -109,22 +111,26 @@ class FinTestCases():
             self._foldersExist = False
             return None
 
-        self._goldenFilename = join(self._goldenFolder,
-                                    self._moduleName + "_GOLDEN.testLog")
+        self._goldenFilename = join(
+            self._goldenFolder, self._moduleName + "_GOLDEN.testLog"
+        )
 
-        self._compareFilename = join(self._compareFolder,
-                                     self._moduleName + "_COMPARE.testLog")
+        self._compareFilename = join(
+            self._compareFolder, self._moduleName + "_COMPARE.testLog"
+        )
 
-        self._differencesFilename = join(self._differencesFolder,
-                                         self._moduleName + "_DIFFS.testLog")
+        self._differencesFilename = join(
+            self._differencesFolder, self._moduleName + "_DIFFS.testLog"
+        )
 
         if self._mode == FinTestCaseMode.SAVE_TEST_CASES:
 
             print("GOLDEN Test Case Creation for module:", moduleFilename)
 
             if exists(self._goldenFilename) and self._carefulMode:
-                overwrite = input("File " + self._goldenFilename
-                                  + " exists. Overwrite (Y/N) ?")
+                overwrite = input(
+                    "File " + self._goldenFilename + " exists. Overwrite (Y/N) ?"
+                )
                 if overwrite == "N":
                     print("Not overwriting. Saving test cases failed.")
                     return
@@ -132,36 +138,37 @@ class FinTestCases():
                     print("Overwriting existing file...")
 
             creationTime = time.strftime("%Y%m%d_%H%M%S")
-            f = open(self._goldenFilename, 'w')
+            f = open(self._goldenFilename, "w")
             f.write("File Created on:" + creationTime)
             f.write("\n")
             f.close()
 
         else:
 
-#            print("GENERATING NEW OUTPUT FOR MODULE", moduleFilename,
-#                "FOR COMPARISON.")
+            #            print("GENERATING NEW OUTPUT FOR MODULE", moduleFilename,
+            #                "FOR COMPARISON.")
 
             if exists(self._compareFilename) and self._carefulMode:
-                overwrite = input("File " + self._compareFilename +
-                                  " exists. Overwrite (Y/N) ?")
+                overwrite = input(
+                    "File " + self._compareFilename + " exists. Overwrite (Y/N) ?"
+                )
                 if overwrite == "N":
                     print("Not overwriting. Saving test cases failed.")
                     return
                 elif overwrite == "Y":
                     print("Overwriting existing file...")
 
-#            print("Creating empty file",self._compareFilename)
+            #            print("Creating empty file",self._compareFilename)
             creationTime = time.strftime("%Y%m%d_%H%M%S")
-            f = open(self._compareFilename, 'w')
+            f = open(self._compareFilename, "w")
             f.write("File Created on:" + creationTime)
             f.write("\n")
             f.close()
 
-###############################################################################
+    ###############################################################################
 
     def print(self, *args):
-        ''' Print comma separated output to GOLDEN or COMPARE directory. '''
+        """ Print comma separated output to GOLDEN or COMPARE directory. """
 
         if self._mode == FinTestCaseMode.DEBUG_TEST_CASES:
             print(args)
@@ -176,16 +183,20 @@ class FinTestCases():
         elif len(self._headerFields) != len(args):
             n1 = len(self._headerFields)
             n2 = len(args)
-            raise FinError("ERROR: Number of data columns is " + str(n1)
-                           + " but must equal " + str(n2)
-                           + " to align with headers.")
+            raise FinError(
+                "ERROR: Number of data columns is "
+                + str(n1)
+                + " but must equal "
+                + str(n2)
+                + " to align with headers."
+            )
 
         if self._mode == FinTestCaseMode.SAVE_TEST_CASES:
             filename = self._goldenFilename
         else:
             filename = self._compareFilename
 
-        f = open(filename, 'a')
+        f = open(filename, "a")
         f.write("RESULTS,")
 
         for arg in args:
@@ -198,10 +209,10 @@ class FinTestCases():
         f.write("\n")
         f.close()
 
-###############################################################################
+    ###############################################################################
 
     def banner(self, txt):
-        ''' Print a banner on a line to the GOLDEN or COMPARE directory. '''
+        """ Print a banner on a line to the GOLDEN or COMPARE directory. """
 
         if self._mode == FinTestCaseMode.DEBUG_TEST_CASES:
             print(txt)
@@ -216,7 +227,7 @@ class FinTestCases():
         else:
             filename = self._compareFilename
 
-        f = open(filename, 'a')
+        f = open(filename, "a")
         f.write("BANNER,")
 
         f.write(txt)
@@ -224,10 +235,10 @@ class FinTestCases():
         f.write("\n")
         f.close()
 
-###############################################################################
+    ###############################################################################
 
     def header(self, *args):
-        ''' Print a header on a line to the GOLDEN or COMPARE directory. '''
+        """ Print a header on a line to the GOLDEN or COMPARE directory. """
 
         if self._mode == FinTestCaseMode.DEBUG_TEST_CASES:
             self.printLog(args)
@@ -247,7 +258,7 @@ class FinTestCases():
         else:
             filename = self._compareFilename
 
-        f = open(filename, 'a')
+        f = open(filename, "a")
         f.write("HEADER,")
 
         for arg in args:
@@ -257,10 +268,10 @@ class FinTestCases():
         f.write("\n")
         f.close()
 
-###############################################################################
+    ###############################################################################
 
     def compareRows(self, goldenRow, compareRow, rowNum):
-        ''' Compare the contents of two rows in GOLDEN and COMPARE folders.'''
+        """ Compare the contents of two rows in GOLDEN and COMPARE folders."""
 
         numWarnings = 0
         numErrors = 0
@@ -289,8 +300,11 @@ class FinTestCases():
         numCols = numGoldenFields
 
         if goldenFields[0] != compareFields[0]:
-            self.printLog("ERROR: Mismatch in row types HEADER vs RESULT",
-                     goldenFields[0], compareFields[0])
+            self.printLog(
+                "ERROR: Mismatch in row types HEADER vs RESULT",
+                goldenFields[0],
+                compareFields[0],
+            )
             numErrors += 1
             return (0, numErrors)
 
@@ -317,19 +331,21 @@ class FinTestCases():
 
                 if self._headerFields[colNum] == "TIME":
                     time1 = float(goldenFields[colNum])
-                    
-#                    if isinstance(compareFields[colNum], str):
-#                        self.printLog("Row# ", rowNum,
-#                              " WARNING: The field in the new log is not a time")
-                        
+
+                    #                    if isinstance(compareFields[colNum], str):
+                    #                        self.printLog("Row# ", rowNum,
+                    #                              " WARNING: The field in the new log is not a time")
 
                     time2 = float(compareFields[colNum])
                     change = (time2 / abs(time1 + 1e-10) - 1.0) * 100.0
 
                     if abs(change) > 20.0:
-                        self.printLog("Row# ", rowNum,
-                              " WARNING: Calculation time has changed by %5.2f"
-                              % change, " percent.")
+                        self.printLog(
+                            "Row# ",
+                            rowNum,
+                            " WARNING: Calculation time has changed by %5.2f" % change,
+                            " percent.",
+                        )
 
                     numWarnings += 1
                 else:
@@ -337,11 +353,11 @@ class FinTestCases():
 
         return (numWarnings, numErrors)
 
-###############################################################################
+    ###############################################################################
 
     def compareTestCases(self):
-        ''' Compare output of COMPARE mode to GOLDEN output '''
-        
+        """ Compare output of COMPARE mode to GOLDEN output """
+
         self.startLog()
 
         if self._mode == FinTestCaseMode.SAVE_TEST_CASES:
@@ -352,26 +368,29 @@ class FinTestCases():
             # Do nothing
             return
 
-        self.printLog("EXAMINING CHANGES IN NEW OUTPUT AND GOLDEN FOR Module: " +
-                 self._moduleName)
+        self.printLog(
+            "EXAMINING CHANGES IN NEW OUTPUT AND GOLDEN FOR Module: " + self._moduleName
+        )
 
         totalNumWarnings = 0
         totalNumErrors = 0
 
         # check golden file exists
         if exists(self._goldenFilename) is False:
-            print("No GOLDEN file exists. You need to change the mode to SAVE_TEST_CASES and then rerun.")
+            print(
+                "No GOLDEN file exists. You need to change the mode to SAVE_TEST_CASES and then rerun."
+            )
             return
 
         # open golden file and load it up
-        f = open(self._goldenFilename, 'r')
+        f = open(self._goldenFilename, "r")
         goldenContents = f.readlines()
         f.close()
 
         numGoldenLines = len(goldenContents)
 
         # open golden file and load it up
-        f = open(self._compareFilename, 'r')
+        f = open(self._compareFilename, "r")
         compareContents = f.readlines()
         f.close()
 
@@ -383,7 +402,7 @@ class FinTestCases():
             self.printLog("Number of GOLDEN lines: ", numGoldenLines)
 
         minNumLines = min(numGoldenLines, numCompareLines)
-#        maxNumLines = max(numGoldenLines, numCompareLines)
+        #        maxNumLines = max(numGoldenLines, numCompareLines)
 
         # We start at second row as first row has time stamp
         for rowNum in range(1, minNumLines):
@@ -391,8 +410,7 @@ class FinTestCases():
             goldenRow = goldenContents[rowNum]
             compareRow = compareContents[rowNum]
 
-            numWarnings, numErrors = self.compareRows(
-                goldenRow, compareRow, rowNum)
+            numWarnings, numErrors = self.compareRows(goldenRow, compareRow, rowNum)
 
             if numErrors > 0:
                 self.printLog(
@@ -401,14 +419,16 @@ class FinTestCases():
                     " ERROR - ",
                     numErrors,
                     " DIFFERENCE(S) IN ROW ",
-                    rowNum)
+                    rowNum,
+                )
 
                 if self._headerFields is None:
                     self.printLog("ERROR: Header must be defined")
                     numErrors += 1
                 else:
-                    self.printLog("Row# ", rowNum, " HEADER:  ==>",
-                             self._headerFields[0:-1])
+                    self.printLog(
+                        "Row# ", rowNum, " HEADER:  ==>", self._headerFields[0:-1]
+                    )
 
                 self.printLog("Row# ", rowNum, " GOLDEN : ==>", goldenRow[:-2])
                 self.printLog("Row# ", rowNum, " COMPARE: ==>", compareRow[:-2])
@@ -420,54 +440,66 @@ class FinTestCases():
         if numGoldenLines == minNumLines and numCompareLines > minNumLines:
             self.printLog("ERROR:The COMPARE file is longer than the GOLDEN file")
 
-#            for rowNum in range(minNumLines,maxNumLines):
-#                numWarnings, numErrors = compareContents[rowNum]
-#                print(rowNum,"COMPARE: ==>",compareRow)
+        #            for rowNum in range(minNumLines,maxNumLines):
+        #                numWarnings, numErrors = compareContents[rowNum]
+        #                print(rowNum,"COMPARE: ==>",compareRow)
 
         if numCompareLines == minNumLines and numGoldenLines > minNumLines:
             self.printLog("ERROR:The GOLDEN file is longer than the COMPARE file")
 
-#            for rowNum in range(minNumLines,maxNumLines):
-#                numWarnings, numErrors = compareContents[rowNum]
-#                print(rowNum,"GOLDEN: ==>",goldenRow)
+        #            for rowNum in range(minNumLines,maxNumLines):
+        #                numWarnings, numErrors = compareContents[rowNum]
+        #                print(rowNum,"GOLDEN: ==>",goldenRow)
 
-#        print("Analysis of", self._moduleName, "completed with",
-#              totalNumErrors, "errors and", totalNumWarnings, "warnings.")
+        #        print("Analysis of", self._moduleName, "completed with",
+        #              totalNumErrors, "errors and", totalNumWarnings, "warnings.")
 
-#        print("NUM LINES:", numCompareLines, 
-#              "====>",
-#              "ERRORS:", totalNumErrors, 
-#              "WARNINGS:", totalNumWarnings)
+        #        print("NUM LINES:", numCompareLines,
+        #              "====>",
+        #              "ERRORS:", totalNumErrors,
+        #              "WARNINGS:", totalNumWarnings)
 
-        self.printLog("Analysis of ", self._moduleName, " completed with ",
-                      totalNumErrors, " errors and ", totalNumWarnings,
-                      " warnings.")
+        self.printLog(
+            "Analysis of ",
+            self._moduleName,
+            " completed with ",
+            totalNumErrors,
+            " errors and ",
+            totalNumWarnings,
+            " warnings.",
+        )
 
-        self.printLog("NUM LINES:", numCompareLines,
-                      "====>",
-                      "ERRORS:", totalNumErrors, 
-                      " WARNINGS:", totalNumWarnings)
+        self.printLog(
+            "NUM LINES:",
+            numCompareLines,
+            "====>",
+            "ERRORS:",
+            totalNumErrors,
+            " WARNINGS:",
+            totalNumWarnings,
+        )
 
         self._globalNumErrors = totalNumErrors
         self._globalNumWarnings = totalNumWarnings
 
         return
 
-###############################################################################
+    ###############################################################################
 
     def startLog(self):
-        f = open(self._differencesFilename, 'w')
+        f = open(self._differencesFilename, "w")
         f.close()
 
-###############################################################################
+    ###############################################################################
 
     def printLog(self, *args):
-        f = open(self._differencesFilename, 'a')
+        f = open(self._differencesFilename, "a")
         for arg in args:
             f.write(str(arg) + " ")
 
         f.write("\n")
         f.close()
+
 
 ###############################################################################
 ###############################################################################

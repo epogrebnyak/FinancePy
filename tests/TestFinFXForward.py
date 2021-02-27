@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 from financepy.products.fx.FinFXForward import FinFXForward
@@ -13,6 +14,7 @@ from financepy.products.rates.FinIborDeposit import FinIborDeposit
 from financepy.finutils.FinDate import FinDate
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ##########################################################################
@@ -47,8 +49,14 @@ def test_FinFXForward():
     fras = []
     swaps = []
     depositRate = ccy1InterestRate
-    depo = FinIborDeposit(settlementDate, maturityDate, depositRate,
-                           FinDayCountTypes.ACT_360, notional, calendarType)
+    depo = FinIborDeposit(
+        settlementDate,
+        maturityDate,
+        depositRate,
+        FinDayCountTypes.ACT_360,
+        notional,
+        calendarType,
+    )
     depos.append(depo)
     forDiscountCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
@@ -56,30 +64,36 @@ def test_FinFXForward():
     fras = []
     swaps = []
     depositRate = ccy2InterestRate
-    depo = FinIborDeposit(settlementDate, maturityDate, depositRate,
-                           FinDayCountTypes.ACT_360, notional, calendarType)
+    depo = FinIborDeposit(
+        settlementDate,
+        maturityDate,
+        depositRate,
+        FinDayCountTypes.ACT_360,
+        notional,
+        calendarType,
+    )
     depos.append(depo)
     domDiscountCurve = FinIborSingleCurve(valuationDate, depos, fras, swaps)
 
     notional = 100.0
     notionalCurrency = forName
 
-    fxForward = FinFXForward(expiryDate,
-                             strikeFXRate,
-                             currencyPair,
-                             notional,
-                             notionalCurrency)
+    fxForward = FinFXForward(
+        expiryDate, strikeFXRate, currencyPair, notional, notionalCurrency
+    )
 
     testCases.header("SPOT FX", "FX FWD", "VALUE_BS")
 
-    fwdValue = fxForward.value(valuationDate, spotFXRate,
-                               domDiscountCurve, forDiscountCurve)
+    fwdValue = fxForward.value(
+        valuationDate, spotFXRate, domDiscountCurve, forDiscountCurve
+    )
 
-    fwdFXRate = fxForward.forward(valuationDate, spotFXRate,
-                                  domDiscountCurve,
-                                  forDiscountCurve)
+    fwdFXRate = fxForward.forward(
+        valuationDate, spotFXRate, domDiscountCurve, forDiscountCurve
+    )
 
     testCases.print(spotFXRate, fwdFXRate, fwdValue)
+
 
 ###############################################################################
 

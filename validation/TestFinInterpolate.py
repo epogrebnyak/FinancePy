@@ -7,11 +7,13 @@ import math
 import matplotlib.pyplot as plt
 
 import sys
+
 sys.path.append("..")
 
 from financepy.market.curves.FinInterpolator import FinInterpolator, FinInterpTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 PLOT_GRAPHS = False
@@ -55,9 +57,10 @@ def test_FinInterpolate():
 
         if PLOT_GRAPHS:
             plt.figure(figsize=(12, 10))
-            plt.plot(xValues, yValues, color='r', marker='o')
-            plt.plot(xInterpolateValues, yInterpValues, color='b',
-                     label=str(interpType))
+            plt.plot(xValues, yValues, color="r", marker="o")
+            plt.plot(
+                xInterpolateValues, yInterpValues, color="b", label=str(interpType)
+            )
             plt.legend()
 
     xp = np.array([0.2, 0.4, 0.45, 0.6, 0.82, 0.93, 0.99])
@@ -67,12 +70,13 @@ def test_FinInterpolate():
     testCases.header("LABEL", "TIME")
     interpolator = FinInterpolator(interpType)
     interpolator.fit(xp, yp)
-    
+
     start = time.time()
     for i in range(0, n):
         interpolator.interpolate(0.8)
     end = time.time()
     testCases.print("10000 Interpolations", end - start)
+
 
 ###############################################################################
 

@@ -11,14 +11,10 @@ from ..finutils.FinHelperFunctions import uniformToDefaultTime
 ###############################################################################
 
 
-class FinModelStudentTCopula():
-
-    def defaultTimes(self,
-                     issuerCurves,
-                     correlationMatrix,
-                     degreesOfFreedom,
-                     numTrials,
-                     seed):
+class FinModelStudentTCopula:
+    def defaultTimes(
+        self, issuerCurves, correlationMatrix, degreesOfFreedom, numTrials, seed
+    ):
 
         np.random.seed(seed)
         numCredits = len(issuerCurves)
@@ -44,5 +40,6 @@ class FinModelStudentTCopula():
                 corrTimes[iCredit, iTrial + numTrials] = t2
 
         return corrTimes
+
 
 ###############################################################################

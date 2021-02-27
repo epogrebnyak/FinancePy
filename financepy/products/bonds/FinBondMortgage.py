@@ -22,25 +22,28 @@ class FinBondMortgageTypes(Enum):
     REPAYMENT = 1
     INTEREST_ONLY = 2
 
+
 ###############################################################################
 
 
 class FinBondMortgage(object):
-    ''' A mortgage is a vector of dates and flows generated in order to repay
+    """A mortgage is a vector of dates and flows generated in order to repay
     a fixed amount given a known interest rate. Payments are all the same
     amount but with a varying mixture of interest and repayment of principal.
-    '''
+    """
 
-    def __init__(self,
-                 startDate: FinDate,
-                 endDate: FinDate,
-                 principal: float,
-                 freqType: FinFrequencyTypes = FinFrequencyTypes.MONTHLY,
-                 calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
-                 busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
-                 dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
-                 dayCountConventionType: FinDayCountTypes = FinDayCountTypes.ACT_360):
-        ''' Create the mortgage using start and end dates and principal. '''
+    def __init__(
+        self,
+        startDate: FinDate,
+        endDate: FinDate,
+        principal: float,
+        freqType: FinFrequencyTypes = FinFrequencyTypes.MONTHLY,
+        calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
+        busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
+        dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
+        dayCountConventionType: FinDayCountTypes = FinDayCountTypes.ACT_360,
+    ):
+        """ Create the mortgage using start and end dates and principal. """
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -56,33 +59,32 @@ class FinBondMortgage(object):
         self._dateGenRuleType = dateGenRuleType
         self._dayCountConventionType = dayCountConventionType
 
-        self._schedule = FinSchedule(startDate,
-                                     endDate,
-                                     self._freqType,
-                                     self._calendarType,
-                                     self._busDayAdjustType,
-                                     self._dateGenRuleType)
+        self._schedule = FinSchedule(
+            startDate,
+            endDate,
+            self._freqType,
+            self._calendarType,
+            self._busDayAdjustType,
+            self._dateGenRuleType,
+        )
 
-###############################################################################
+    ###############################################################################
 
-    def repaymentAmount(self,
-                        zeroRate: float):
-        ''' Determine monthly repayment amount based on current zero rate. '''
+    def repaymentAmount(self, zeroRate: float):
+        """ Determine monthly repayment amount based on current zero rate. """
 
         frequency = FinFrequency(self._freqType)
 
         numFlows = len(self._schedule._adjustedDates)
-        p = (1.0 + zeroRate/frequency) ** (numFlows-1)
+        p = (1.0 + zeroRate / frequency) ** (numFlows - 1)
         m = zeroRate * p / (p - 1.0) / frequency
         m = m * self._principal
         return m
 
-###############################################################################
+    ###############################################################################
 
-    def generateFlows(self,
-                      zeroRate: float,
-                      mortgageType: FinBondMortgageTypes):
-        ''' Generate the bond flow amounts. '''
+    def generateFlows(self, zeroRate: float, mortgageType: FinBondMortgageTypes):
+        """ Generate the bond flow amounts. """
 
         self._mortgageType = mortgageType
         self._interestFlows = [0]
@@ -110,7 +112,7 @@ class FinBondMortgage(object):
             self._principalRemaining.append(principal)
             self._totalFlows.append(monthlyFlow)
 
-###############################################################################
+    ###############################################################################
 
     def printLeg(self):
         print("START DATE:", self._startDate)
@@ -123,20 +125,25 @@ class FinBondMortgage(object):
 
         numFlows = len(self._schedule._adjustedDates)
 
-        print("%15s %12s %12s %12s %12s" %
-              ("PAYMENT DATE", "INTEREST", "PRINCIPAL",
-               "OUTSTANDING", "TOTAL"))
+        print(
+            "%15s %12s %12s %12s %12s"
+            % ("PAYMENT DATE", "INTEREST", "PRINCIPAL", "OUTSTANDING", "TOTAL")
+        )
 
         print("")
         for i in range(0, numFlows):
-            print("%15s %12.2f %12.2f %12.2f %12.2f" %
-                  (self._schedule._adjustedDates[i],
-                   self._interestFlows[i],
-                   self._principalFlows[i],
-                   self._principalRemaining[i],
-                   self._totalFlows[i]))
+            print(
+                "%15s %12.2f %12.2f %12.2f %12.2f"
+                % (
+                    self._schedule._adjustedDates[i],
+                    self._interestFlows[i],
+                    self._principalFlows[i],
+                    self._principalRemaining[i],
+                    self._totalFlows[i],
+                )
+            )
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
@@ -149,10 +156,11 @@ class FinBondMortgage(object):
         s += labelToString("DATEGENRULE", self._dateGenRuleType)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

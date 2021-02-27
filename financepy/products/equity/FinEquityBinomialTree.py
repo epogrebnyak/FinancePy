@@ -31,6 +31,7 @@ class FinEquityTreeExerciseTypes(Enum):
     EUROPEAN = 1
     AMERICAN = 2
 
+
 ###############################################################################
 
 
@@ -58,12 +59,14 @@ def _validatePayoff(payoffType, payoffParams):
 
     if len(payoffParams) != numParams:
         raise FinError(
-            "Number of parameters required for " +
-            str(payoffType) +
-            " must be " +
-            str(numParams))
+            "Number of parameters required for "
+            + str(payoffType)
+            + " must be "
+            + str(numParams)
+        )
 
     return None
+
 
 ###############################################################################
 
@@ -78,11 +81,9 @@ def _payoffValue(s, payoffType, payoffParams):
     elif payoffType == FinEquityTreePayoffTypes.DIGITAL_OPTION.value:
         payoff = heaviside(payoffParams[0] * (s - payoffParams[1]))
     elif payoffType == FinEquityTreePayoffTypes.POWER_CONTRACT.value:
-        payoff = payoffParams[0] * (s**payoffParams[1])
+        payoff = payoffParams[0] * (s ** payoffParams[1])
     elif payoffType == FinEquityTreePayoffTypes.POWER_OPTION.value:
-        payoff = max(payoffParams[0] *
-                     ((s**payoffParams[2]) -
-                      payoffParams[1]), 0.0)
+        payoff = max(payoffParams[0] * ((s ** payoffParams[2]) - payoffParams[1]), 0.0)
     elif payoffType == FinEquityTreePayoffTypes.LOG_CONTRACT.value:
         payoff = log(s)
     elif payoffType == FinEquityTreePayoffTypes.LOG_OPTION.value:
@@ -92,24 +93,27 @@ def _payoffValue(s, payoffType, payoffParams):
 
     return payoff
 
+
 ###############################################################################
 
 
 @njit(fastmath=True, cache=True)
-def _valueOnce(stockPrice,
-               r,
-               q,
-               volatility,
-               numSteps,
-               timeToExpiry,
-               payoffType,
-               exerciseType,
-               payoffParams):
+def _valueOnce(
+    stockPrice,
+    r,
+    q,
+    volatility,
+    numSteps,
+    timeToExpiry,
+    payoffType,
+    exerciseType,
+    payoffParams,
+):
 
     if numSteps < 3:
         numSteps = 3
 
-#        validatePayoff(payoffType.value,payoffParams)
+    #        validatePayoff(payoffType.value,payoffParams)
 
     payoffTypeValue = payoffType.value
 
@@ -148,8 +152,7 @@ def _valueOnce(stockPrice,
 
     for iNode in range(0, iTime + 1):
         s = stockValues[index + iNode]
-        optionValues[index +
-                     iNode] = _payoffValue(s, payoffTypeValue, payoffParams)
+        optionValues[index + iNode] = _payoffValue(s, payoffTypeValue, payoffParams)
 
     # begin backward steps from expiry
     for iTime in range(numSteps - 1, -1, -1):
@@ -175,76 +178,81 @@ def _valueOnce(stockPrice,
                 optionValues[index + iNode] = max(exerciseValue, holdValue)
 
     price = optionValues[0]
-    delta = (optionValues[2] - optionValues[1]) / \
-        (stockValues[2] - stockValues[1])
-    deltaUp = (optionValues[5] - optionValues[4]) / \
-        (stockValues[5] - stockValues[4])
-    deltaDn = (optionValues[4] - optionValues[3]) / \
-        (stockValues[4] - stockValues[3])
+    delta = (optionValues[2] - optionValues[1]) / (stockValues[2] - stockValues[1])
+    deltaUp = (optionValues[5] - optionValues[4]) / (stockValues[5] - stockValues[4])
+    deltaDn = (optionValues[4] - optionValues[3]) / (stockValues[4] - stockValues[3])
     gamma = (deltaUp - deltaDn) / (stockValues[2] - stockValues[1])
     theta = (optionValues[4] - optionValues[0]) / (2.0 * dt)
     results = np.array([price, delta, gamma, theta])
     return results
 
+
 ###############################################################################
 
 
-class FinEquityBinomialTree():
-
+class FinEquityBinomialTree:
     def __init__(self):
         pass
-#        self.m_optionValues = np.zeros()
-#        self.m_stockValues = np.zeros()
-#        self.m_upProbabilities = np.zeros()
-#
-#       self.m_numSteps = 10
-#        self.m_numNodes = 10
 
-###############################################################################
+    #        self.m_optionValues = np.zeros()
+    #        self.m_stockValues = np.zeros()
+    #        self.m_upProbabilities = np.zeros()
+    #
+    #       self.m_numSteps = 10
+    #        self.m_numNodes = 10
 
-    def value(self,
-              stockPrice,
-              discountCurve,
-              dividendCurve,
-              volatility,
-              numSteps,
-              valueDate,
-              payoff,
-              expiryDate,
-              payoffType,
-              exerciseType,
-              payoffParams):
+    ###############################################################################
+
+    def value(
+        self,
+        stockPrice,
+        discountCurve,
+        dividendCurve,
+        volatility,
+        numSteps,
+        valueDate,
+        payoff,
+        expiryDate,
+        payoffType,
+        exerciseType,
+        payoffParams,
+    ):
 
         # do some validation
         texp = (expiryDate - valueDate) / gDaysInYear
         r = discountCurve.zeroRate(expiryDate)
 
         dq = dividendCurve.df(expiryDate)
-        q = -np.log(dq)/texp
+        q = -np.log(dq) / texp
 
-        price1 = _valueOnce(stockPrice,
-                            r,
-                            q,
-                            volatility,
-                            numSteps,
-                            texp,
-                            payoffType,
-                            exerciseType,
-                            payoffParams)
+        price1 = _valueOnce(
+            stockPrice,
+            r,
+            q,
+            volatility,
+            numSteps,
+            texp,
+            payoffType,
+            exerciseType,
+            payoffParams,
+        )
 
         # Can I reuse the same tree ?
-        price2 = _valueOnce(stockPrice,
-                            r,
-                            q,
-                            volatility,
-                            numSteps + 1,
-                            texp,
-                            payoffType,
-                            exerciseType,
-                            payoffParams)
+        price2 = _valueOnce(
+            stockPrice,
+            r,
+            q,
+            volatility,
+            numSteps + 1,
+            texp,
+            payoffType,
+            exerciseType,
+            payoffParams,
+        )
 
         price = (price1 + price2) / 2.0
 
         return price
+
 
 ###############################################################################

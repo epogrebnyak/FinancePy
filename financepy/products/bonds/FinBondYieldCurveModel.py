@@ -10,14 +10,14 @@ from ...finutils.FinHelperFunctions import labelToString
 ###############################################################################
 
 
-class FinCurveFitMethod():
+class FinCurveFitMethod:
     pass
+
 
 ###############################################################################
 
 
-class FinCurveFitPolynomial():
-
+class FinCurveFitPolynomial:
     def __init__(self, power=3):
         self._parentType = FinCurveFitMethod
         self._power = power
@@ -37,25 +37,24 @@ class FinCurveFitPolynomial():
         return s
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################
 
 
-class FinCurveFitNelsonSiegel():
-
+class FinCurveFitNelsonSiegel:
     def __init__(self, tau=None, bounds=[(-1, -1, -1, 0.5), (1, 1, 1, 100)]):
         self._parentType = FinCurveFitMethod
         self._beta1 = None
         self._beta2 = None
         self._beta3 = None
         self._tau = tau
-        ''' Fairly permissive bounds. Only tau1 is 1-100 '''
+        """ Fairly permissive bounds. Only tau1 is 1-100 """
         self._bounds = bounds
 
-    def _interpolatedYield(self, t, beta1=None, beta2=None,
-                           beta3=None, tau=None):
+    def _interpolatedYield(self, t, beta1=None, beta2=None, beta3=None, tau=None):
 
         t = np.maximum(t, 1e-10)
 
@@ -87,18 +86,22 @@ class FinCurveFitNelsonSiegel():
         return s
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################
 
 
-class FinCurveFitNelsonSiegelSvensson():
-
-    def __init__(self, tau1=None, tau2=None,
-                 bounds=[(0, -1, -1, -1, 0, 1), (1, 1, 1, 1, 10, 100)]):
-        ''' Create object to store calibration and functional form of NSS
-        parametric fit. '''
+class FinCurveFitNelsonSiegelSvensson:
+    def __init__(
+        self,
+        tau1=None,
+        tau2=None,
+        bounds=[(0, -1, -1, -1, 0, 1), (1, 1, 1, 1, 10, 100)],
+    ):
+        """Create object to store calibration and functional form of NSS
+        parametric fit."""
 
         self._parentType = FinCurveFitMethod
         self._beta1 = None
@@ -108,12 +111,13 @@ class FinCurveFitNelsonSiegelSvensson():
         self._tau1 = tau1
         self._tau2 = tau2
 
-        ''' I impose some bounds to help ensure a sensible result if
-        the user does not provide any bounds. Especially for tau2. '''
+        """ I impose some bounds to help ensure a sensible result if
+        the user does not provide any bounds. Especially for tau2. """
         self._bounds = bounds
 
-    def _interpolatedYield(self, t, beta1=None, beta2=None, beta3=None,
-                           beta4=None, tau1=None, tau2=None):
+    def _interpolatedYield(
+        self, t, beta1=None, beta2=None, beta3=None, beta4=None, tau1=None, tau2=None
+    ):
 
         # Careful if we get a time zero point
         t = np.maximum(t, 1e-10)
@@ -157,14 +161,14 @@ class FinCurveFitNelsonSiegelSvensson():
         return s
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################
 
 
-class FinCurveFitBSpline():
-
+class FinCurveFitBSpline:
     def __init__(self, power=3, knots=[1, 3, 5, 10]):
         self._parentType = FinCurveFitMethod
         self._power = power
@@ -184,7 +188,8 @@ class FinCurveFitBSpline():
         return s
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################

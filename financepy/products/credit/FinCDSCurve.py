@@ -20,8 +20,8 @@ from ...finutils.FinHelperFunctions import labelToString
 
 
 def f(q, *args):
-    ''' Function that returns zero when the survival probability that gives a
-    zero value of the CDS has been determined. '''
+    """Function that returns zero when the survival probability that gives a
+    zero value of the CDS has been determined."""
 
     self = args[0]
     valueDate = args[1]
@@ -30,32 +30,37 @@ def f(q, *args):
     self._values[numPoints - 1] = q
     # This is important - we calibrate a curve that makes the clean PV of the
     # CDS equal to zero and so we select the second element of the value tuple
-    objFn = cds.value(valueDate, self)['clean_pv']
+    objFn = cds.value(valueDate, self)["clean_pv"]
     return objFn
+
 
 ###############################################################################
 
 
-class FinCDSCurve():
-    ''' Generate a survival probability curve implied by the value of CDS
+class FinCDSCurve:
+    """Generate a survival probability curve implied by the value of CDS
     contracts given a Ibor curve and an assumed recovery rate. A scheme for
-    the interpolation of the survival probabilities is also required. '''
+    the interpolation of the survival probabilities is also required."""
 
-    def __init__(self,
-                 valuationDate: FinDate,
-                 cdsContracts: list,
-                 liborCurve,
-                 recoveryRate: float = 0.40,
-                 useCache: bool = False,
-                 interpolationMethod: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES):
-        ''' Construct a credit curve from a sequence of maturity-ordered CDS
+    def __init__(
+        self,
+        valuationDate: FinDate,
+        cdsContracts: list,
+        liborCurve,
+        recoveryRate: float = 0.40,
+        useCache: bool = False,
+        interpolationMethod: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES,
+    ):
+        """Construct a credit curve from a sequence of maturity-ordered CDS
         contracts and a Ibor curve using the same recovery rate and the
-        same interpolation method. '''
+        same interpolation method."""
 
         checkArgumentTypes(getattr(self, _funcName(), None), locals())
 
         if valuationDate != liborCurve._valuationDate:
-            raise FinError("Ibor curve does not have same valuation date as Issuer curve.")
+            raise FinError(
+                "Ibor curve does not have same valuation date as Issuer curve."
+            )
 
         self._valuationDate = valuationDate
         self._cdsContracts = cdsContracts
@@ -74,10 +79,10 @@ class FinCDSCurve():
 
         return
 
-###############################################################################
+    ###############################################################################
 
     def _validate(self, cdsContracts):
-        ''' Ensure that contracts are in increasing maturity. '''
+        """ Ensure that contracts are in increasing maturity. """
 
         if len(cdsContracts) == 0:
             raise FinError("No CDS contracts have been supplied.")
@@ -90,11 +95,11 @@ class FinCDSCurve():
 
             maturityDate = cds._maturityDate
 
-###############################################################################
+    ###############################################################################
 
     def survProb(self, dt):
-        ''' Extract the survival probability to date dt. This function
-        supports vectorisation. '''
+        """Extract the survival probability to date dt. This function
+        supports vectorisation."""
 
         if isinstance(dt, FinDate):
             t = (dt - self._valuationDate) / gDaysInYear
@@ -110,25 +115,23 @@ class FinCDSCurve():
             n = len(t)
             qs = np.zeros(n)
             for i in range(0, n):
-                qs[i] = _uinterpolate(t[i],
-                                      self._times,
-                                      self._values,
-                                      self._interpolationMethod.value)
+                qs[i] = _uinterpolate(
+                    t[i], self._times, self._values, self._interpolationMethod.value
+                )
             return qs
         elif isinstance(t, float):
-            q = _uinterpolate(t,
-                              self._times,
-                              self._values,
-                              self._interpolationMethod.value)
+            q = _uinterpolate(
+                t, self._times, self._values, self._interpolationMethod.value
+            )
             return q
         else:
             raise FinError("Unknown time type")
 
-###############################################################################
+    ###############################################################################
 
     def df(self, dt):
-        ''' Extract the discount factor from the underlying Ibor curve. This
-        function supports vectorisation. '''
+        """Extract the discount factor from the underlying Ibor curve. This
+        function supports vectorisation."""
 
         if isinstance(dt, FinDate):
             t = (dt - self._valuationDate) / gDaysInYear
@@ -139,10 +142,10 @@ class FinCDSCurve():
 
         return self._liborCurve._df(t)
 
-###############################################################################
+    ###############################################################################
 
     def _buildCurve(self):
-        ''' Construct the CDS survival curve from a set of CDS contracts '''
+        """ Construct the CDS survival curve from a set of CDS contracts """
 
         self._validate(self._cdsContracts)
         numTimes = len(self._cdsContracts)
@@ -162,27 +165,28 @@ class FinCDSCurve():
             self._times = np.append(self._times, tmat)
             self._values = np.append(self._values, q)
 
-            optimize.newton(f, x0=q, fprime=None, args=argtuple,
-                            tol=1e-7, maxiter=50, fprime2=None)
+            optimize.newton(
+                f, x0=q, fprime=None, args=argtuple, tol=1e-7, maxiter=50, fprime2=None
+            )
 
-###############################################################################
+    ###############################################################################
 
     def fwd(self, dt):
-        ''' Calculate the instantaneous forward rate at the forward date dt
-        using the numerical derivative. '''
+        """Calculate the instantaneous forward rate at the forward date dt
+        using the numerical derivative."""
 
         t = inputTime(dt, self)
         epsilon = 1e-8
         df1 = self.df(t) * self.survProb(t)
-        df2 = self.df(t+epsilon) * self.survProb(t+epsilon)
-        fwd = np.log(df1/df2)/dt
+        df2 = self.df(t + epsilon) * self.survProb(t + epsilon)
+        fwd = np.log(df1 / df2) / dt
         return fwd
 
-###############################################################################
+    ###############################################################################
 
     def fwdRate(self, date1, date2, dayCountType):
-        ''' Calculate the forward rate according between dates date1 and date2
-        according to the specified day count convention. '''
+        """Calculate the forward rate according between dates date1 and date2
+        according to the specified day count convention."""
 
         if date1 < self._valuationDate:
             raise FinError("Date1 before curve value date.")
@@ -197,13 +201,11 @@ class FinCDSCurve():
         fwd = (df1 / df2 - 1.0) / yearFrac
         return fwd
 
-##############################################################################
+    ##############################################################################
 
-    def zeroRate(self,
-                 dt,
-                 freqType=FinFrequencyTypes.CONTINUOUS):
-        ''' Calculate the zero rate to date dt in the chosen compounding
-        frequency where -1 is continuous is the default. '''
+    def zeroRate(self, dt, freqType=FinFrequencyTypes.CONTINUOUS):
+        """Calculate the zero rate to date dt in the chosen compounding
+        frequency where -1 is continuous is the default."""
 
         t = inputTime(dt, self)
         f = FinFrequency(freqType)
@@ -212,28 +214,29 @@ class FinCDSCurve():
         dfq = df * q
 
         if f == 0:  # Simple interest
-            zeroRate = (1.0/dfq-1.0)/t
+            zeroRate = (1.0 / dfq - 1.0) / t
         if f == -1:  # Continuous
             zeroRate = -np.log(dfq) / t
         else:
-            zeroRate = (dfq**(-1.0/t) - 1) * f
+            zeroRate = (dfq ** (-1.0 / t) - 1) * f
         return zeroRate
 
-##############################################################################
+    ##############################################################################
 
     def __repr__(self):
-        ''' Print out the details of the survival probability curve. '''
-        s = labelToString("OBJECT TYPE", type(self).__name__)    
+        """ Print out the details of the survival probability curve. """
+        s = labelToString("OBJECT TYPE", type(self).__name__)
         header = "TIME,SURVIVAL_PROBABILITY"
         valueTable = [self._times, self._values]
         precision = "10.7f"
         s += tableToString(header, valueTable, precision)
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ##########################################################################

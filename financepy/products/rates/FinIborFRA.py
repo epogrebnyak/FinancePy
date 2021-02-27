@@ -16,7 +16,7 @@ from ...market.curves.FinDiscountCurve import FinDiscountCurve
 
 
 class FinIborFRA(object):
-    ''' Class for managing LIBOR forward rate agreements. A forward rate
+    """Class for managing LIBOR forward rate agreements. A forward rate
     agreement is an agreement to exchange a fixed pre-agreed rate for a
     floating rate linked to LIBOR that is not known until some specified
     future fixing date. The FRA payment occurs on or soon after this date
@@ -26,7 +26,7 @@ class FinIborFRA(object):
     notional amount. This period starts on the settlement date of the
     FRA and ends on the maturity date of the FRA. For example a 1x4 FRA
     relates to a Ibor starting in 1 month for a loan period ending in 4
-    months. Hence it links to 3-month Ibor rate. The amount received by a 
+    months. Hence it links to 3-month Ibor rate. The amount received by a
     payer of fixed rate at settlement is:
 
         acc(1,2) * (Ibor(1,2) - FRA RATE) / (1 + acc(0,1) x Ibor(0,1))
@@ -38,21 +38,23 @@ class FinIborFRA(object):
     If the base date of the curve is before the value date then we
     forward adjust this amount to that value date. For simplicity I have
     assumed that the fixing date and the settlement date are the same date.
-    This should be amended later. 
-    
-    The valuation below incorporates a dual curve approach.
-    '''
+    This should be amended later.
 
-    def __init__(self,
-                 startDate: FinDate,  # The date the FRA starts to accrue
-                 maturityDateOrTenor: (FinDate, str),  # End of the Ibor rate period
-                 fraRate: float,  # The fixed contractual FRA rate
-                 dayCountType: FinDayCountTypes,  # For interest period
-                 notional: float = 100.0,
-                 payFixedRate: bool = True,  # True if the FRA rate is being paid
-                 calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
-                 busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.MODIFIED_FOLLOWING):
-        ''' Create a Forward Rate Agreeement object. '''
+    The valuation below incorporates a dual curve approach.
+    """
+
+    def __init__(
+        self,
+        startDate: FinDate,  # The date the FRA starts to accrue
+        maturityDateOrTenor: (FinDate, str),  # End of the Ibor rate period
+        fraRate: float,  # The fixed contractual FRA rate
+        dayCountType: FinDayCountTypes,  # For interest period
+        notional: float = 100.0,
+        payFixedRate: bool = True,  # True if the FRA rate is being paid
+        calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
+        busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.MODIFIED_FOLLOWING,
+    ):
+        """ Create a Forward Rate Agreeement object. """
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -64,8 +66,7 @@ class FinIborFRA(object):
         else:
             maturityDate = startDate.addTenor(maturityDateOrTenor)
             calendar = FinCalendar(self._calendarType)
-            maturityDate = calendar.adjust(maturityDate,
-                                           self._busDayAdjustType)
+            maturityDate = calendar.adjust(maturityDate, self._busDayAdjustType)
 
         if startDate > maturityDate:
             raise FinError("Settlement date after maturity date")
@@ -79,13 +80,15 @@ class FinIborFRA(object):
 
     ###########################################################################
 
-    def value(self, 
-              valuationDate: FinDate, 
-              discountCurve: FinDiscountCurve,
-              indexCurve: FinDiscountCurve = None):
-        ''' Determine mark to market value of a FRA contract based on the
+    def value(
+        self,
+        valuationDate: FinDate,
+        discountCurve: FinDiscountCurve,
+        indexCurve: FinDiscountCurve = None,
+    ):
+        """Determine mark to market value of a FRA contract based on the
         market FRA rate. We allow the pricing to have a different curve for
-        the Libor index and the discounting of promised cashflows. '''
+        the Libor index and the discounting of promised cashflows."""
 
         if indexCurve is None:
             indexCurve = discountCurve
@@ -113,9 +116,9 @@ class FinIborFRA(object):
     ##########################################################################
 
     def maturityDf(self, indexCurve):
-        ''' Determine the maturity date index discount factor needed to refit
+        """Determine the maturity date index discount factor needed to refit
         the market FRA rate. In a dual-curve world, this is not the discount
-        rate discount factor but the index curve discount factor. '''
+        rate discount factor but the index curve discount factor."""
 
         dc = FinDayCount(self._dayCountType)
         df1 = indexCurve.df(self._startDate)
@@ -126,7 +129,7 @@ class FinIborFRA(object):
     ###########################################################################
 
     def printFlows(self, valuationDate):
-        ''' Determine the value of the Deposit given a Ibor curve. '''
+        """ Determine the value of the Deposit given a Ibor curve. """
 
         flow_settle = self._notional
         dc = FinDayCount(self._dayCountType)
@@ -158,5 +161,6 @@ class FinIborFRA(object):
 
     def _print(self):
         print(self)
+
 
 ###############################################################################

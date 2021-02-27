@@ -5,18 +5,25 @@
 import time
 
 import sys
+
 sys.path.append("..")
 
-from financepy.products.equity.FinEquityFloatLookbackOption import FinEquityFloatLookbackOption
-from financepy.products.equity.FinEquityFixedLookbackOption import FinEquityFixedLookbackOption
+from financepy.products.equity.FinEquityFloatLookbackOption import (
+    FinEquityFloatLookbackOption,
+)
+from financepy.products.equity.FinEquityFixedLookbackOption import (
+    FinEquityFixedLookbackOption,
+)
 from financepy.finutils.FinGlobalTypes import FinOptionTypes
 from financepy.market.curves.FinDiscountCurveFlat import FinDiscountCurveFlat
 from financepy.finutils.FinDate import FinDate
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
+
 
 def test_FinEquityLookBackOption():
     valueDate = FinDate(2015, 1, 1)
@@ -32,17 +39,11 @@ def test_FinEquityLookBackOption():
     discountCurve = FinDiscountCurveFlat(valueDate, interestRate)
     dividendCurve = FinDiscountCurveFlat(valueDate, dividendYield)
 
-###############################################################################
+    ###############################################################################
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "SMIN",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "SMIN", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_CALL
     for stockPrice in stockPriceRange:
@@ -55,7 +56,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMin)
+                stockMin,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -65,7 +67,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMin,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -77,17 +80,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "SMIN",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "SMIN", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_CALL
     for stockPrice in stockPriceRange:
@@ -100,7 +98,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMin)
+                stockMin,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -110,7 +109,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMin,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -122,17 +122,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "SMAX",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "SMAX", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_PUT
     for stockPrice in stockPriceRange:
@@ -145,7 +140,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMax)
+                stockMax,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -155,7 +151,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMax,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -167,17 +164,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "SMAX",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "SMAX", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_PUT
     for stockPrice in stockPriceRange:
@@ -190,7 +182,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMax)
+                stockMax,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -200,7 +193,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMax,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -212,24 +206,18 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
-###############################################################################
-###############################################################################
+    ###############################################################################
+    ###############################################################################
 
     stockPriceRange = range(90, 110, 10)
     numStepsPerYear = 252
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMAX",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMAX", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_CALL
     k = 95.0
@@ -243,7 +231,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMax)
+                stockMax,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -253,7 +242,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMax,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -266,18 +256,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMAX",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMAX", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_CALL
     k = 100.0
@@ -291,7 +275,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMax)
+                stockMax,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -301,7 +286,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMax,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -314,18 +300,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMAX",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMAX", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_CALL
     k = 105.0
@@ -339,7 +319,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMax)
+                stockMax,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -349,7 +330,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMax,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -362,18 +344,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMIN",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMIN", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_PUT
     k = 95.0
@@ -387,7 +363,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMin)
+                stockMin,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -397,7 +374,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMin,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -410,18 +388,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMIN",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMIN", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_PUT
     k = 100.0
@@ -435,7 +407,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMin)
+                stockMin,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -445,7 +418,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMin,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -458,18 +432,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
 
     testCases.header(
-        "NUMPATHS",
-        "OPTION_TYPE",
-        "S",
-        "K",
-        "SMIN",
-        "VALUE",
-        "VALUE_MC",
-        "DIFF",
-        "TIME")
+        "NUMPATHS", "OPTION_TYPE", "S", "K", "SMIN", "VALUE", "VALUE_MC", "DIFF", "TIME"
+    )
 
     optionType = FinOptionTypes.EUROPEAN_PUT
     k = 105.0
@@ -483,7 +451,8 @@ def test_FinEquityLookBackOption():
                 discountCurve,
                 dividendCurve,
                 volatility,
-                stockMin)
+                stockMin,
+            )
             start = time.time()
             valueMC = option.valueMC(
                 valueDate,
@@ -493,7 +462,8 @@ def test_FinEquityLookBackOption():
                 volatility,
                 stockMin,
                 numPaths,
-                numStepsPerYear)
+                numStepsPerYear,
+            )
             end = time.time()
             timeElapsed = round(end - start, 3)
             diff = valueMC - value
@@ -506,9 +476,12 @@ def test_FinEquityLookBackOption():
                 value,
                 valueMC,
                 diff,
-                timeElapsed)
+                timeElapsed,
+            )
+
 
 ###############################################################################
+
 
 def test_example():
 
@@ -532,11 +505,14 @@ def test_example():
 
     testCases.header("VALUE")
     for vol in volatilities:
-        v = lookbackCall.value(valueDate, stockPrice, discountCurve, dividendCurve, vol, stockMinMax)
+        v = lookbackCall.value(
+            valueDate, stockPrice, discountCurve, dividendCurve, vol, stockMinMax
+        )
         testCases.print(v)
+
 
 ###############################################################################
 
 test_example()
-#test_FinEquityLookBackOption()
+# test_FinEquityLookBackOption()
 testCases.compareTestCases()

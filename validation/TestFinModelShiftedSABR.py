@@ -3,6 +3,7 @@
 ###############################################################################
 
 import sys
+
 sys.path.append("..")
 
 import numpy as np
@@ -10,6 +11,7 @@ from financepy.models.FinModelSABRShifted import FinModelSABRShifted
 from financepy.finutils.FinGlobalTypes import FinOptionTypes
 
 from FinTestCases import FinTestCases, globalTestCaseMode
+
 testCases = FinTestCases(__file__, globalTestCaseMode)
 
 ###############################################################################
@@ -26,9 +28,9 @@ def test_ShiftedSABR():
     rho = -0.09
     nu = 0.1
     shift = 0.02
-    
+
     strikeVol = 0.1
-    
+
     f = 0.043
     k = 0.050
     r = 0.03
@@ -36,9 +38,9 @@ def test_ShiftedSABR():
 
     callOptionType = FinOptionTypes.EUROPEAN_CALL
     putOptionType = FinOptionTypes.EUROPEAN_PUT
-    
+
     df = np.exp(-r * texp)
-    
+
     # SABR equivalent to lognormal (Black) model (i.e. beta = 1, rho = 0, nu = 0, shift = 0)
     modelSABR_01 = FinModelSABRShifted(0.0, 1.0, 0.0, 0.0, 0.0)
     modelSABR_01.setAlphaFromBlackVol(strikeVol, f, k, texp)
@@ -64,10 +66,12 @@ def test_ShiftedSABR():
     # Valuation: pure SABR dynamics
     valueCall = modelSABR_02.value(f, k, texp, df, callOptionType)
     valuePut = modelSABR_02.value(f, k, texp, df, putOptionType)
-    assert round((valueCall - valuePut), 12) == round(df*(f - k), 12), \
-        "The method called 'value()' doesn't comply with Call-Put parity"
+    assert round((valueCall - valuePut), 12) == round(
+        df * (f - k), 12
+    ), "The method called 'value()' doesn't comply with Call-Put parity"
 
     # TODO: adding Call-Put parity test for all sensitivities
+
 
 ###############################################################################
 

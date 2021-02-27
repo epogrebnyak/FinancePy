@@ -22,15 +22,17 @@ minZ = -6.0
 # Copula model as well as some approximations
 ###############################################################################
 
-@njit(float64[:](int64, float64[:], float64[:], float64[:], int64),
-      fastmath=True, cache=True)
-def lossDbnRecursionGCD(numCredits,
-                        defaultProbs,
-                        lossUnits,
-                        betaVector,
-                        numIntegrationSteps):
-    ''' Full construction of the loss distribution of a portfolio of credits
-    where losses have been calculate as number of units based on the GCD. '''
+
+@njit(
+    float64[:](int64, float64[:], float64[:], float64[:], int64),
+    fastmath=True,
+    cache=True,
+)
+def lossDbnRecursionGCD(
+    numCredits, defaultProbs, lossUnits, betaVector, numIntegrationSteps
+):
+    """Full construction of the loss distribution of a portfolio of credits
+    where losses have been calculate as number of units based on the GCD."""
 
     if len(defaultProbs) != numCredits:
         raise FinError("Default probability length must equal num credits.")
@@ -63,11 +65,9 @@ def lossDbnRecursionGCD(numCredits,
             argz = (thresholds[iCredit] - beta * z) / denom
             condDefaultProbs[iCredit] = N(argz)
 
-        indepDbn = indepLossDbnRecursionGCD(numCredits,
-                                            condDefaultProbs,
-                                            lossUnits)
+        indepDbn = indepLossDbnRecursionGCD(numCredits, condDefaultProbs, lossUnits)
 
-        gaussWt = np.exp(-(z*z)/2.0)
+        gaussWt = np.exp(-(z * z) / 2.0)
 
         for iLossUnit in range(0, numLossUnits):
             uncondLossDbn[iLossUnit] += indepDbn[iLossUnit] * gaussWt
@@ -79,17 +79,17 @@ def lossDbnRecursionGCD(numCredits,
 
     return uncondLossDbn
 
+
 ###############################################################################
 
-@njit(float64[:](float64[:], float64[:], float64[:], int64),
-      fastmath=True, cache=True)
-def homogeneousBasketLossDbn(survivalProbabilities,
-                             recoveryRates,
-                             betaVector,
-                             numIntegrationSteps):
-    ''' Calculate the loss distribution of a CDS default basket where the
+
+@njit(float64[:](float64[:], float64[:], float64[:], int64), fastmath=True, cache=True)
+def homogeneousBasketLossDbn(
+    survivalProbabilities, recoveryRates, betaVector, numIntegrationSteps
+):
+    """Calculate the loss distribution of a CDS default basket where the
     portfolio is equally weighted and the losses in the portfolio are homo-
-    geneous i.e. the credits have the same recovery rates. '''
+    geneous i.e. the credits have the same recovery rates."""
 
     numCredits = len(survivalProbabilities)
 
@@ -118,29 +118,32 @@ def homogeneousBasketLossDbn(survivalProbabilities,
     for iCredit in range(0, numCredits):
         defaultProbs[iCredit] = 1.0 - survivalProbabilities[iCredit]
 
-    lossDbn = lossDbnRecursionGCD(numCredits,
-                                  defaultProbs,
-                                  lossUnits,
-                                  betaVector,
-                                  numIntegrationSteps)
+    lossDbn = lossDbnRecursionGCD(
+        numCredits, defaultProbs, lossUnits, betaVector, numIntegrationSteps
+    )
 
     return lossDbn
+
 
 ###############################################################################
 
 
-@njit(float64(float64, float64, int64, float64[:], float64[:], float64[:],
-              int64), fastmath=True)
-def trSurvProbRecursion(k1,
-                        k2,
-                        numCredits,
-                        survivalProbabilities,
-                        recoveryRates,
-                        betaVector,
-                        numIntegrationSteps):
-    ''' Get the tranche survival probability of a portfolio of credits in the
+@njit(
+    float64(float64, float64, int64, float64[:], float64[:], float64[:], int64),
+    fastmath=True,
+)
+def trSurvProbRecursion(
+    k1,
+    k2,
+    numCredits,
+    survivalProbabilities,
+    recoveryRates,
+    betaVector,
+    numIntegrationSteps,
+):
+    """Get the tranche survival probability of a portfolio of credits in the
     one-factor GC model using a full recursion calculation of the loss
-    distribution and survival probabilities to some time horizon. '''
+    distribution and survival probabilities to some time horizon."""
 
     if k1 == 0.0 and k2 == 0.0:
         return 0.0
@@ -183,11 +186,9 @@ def trSurvProbRecursion(k1,
     for iCredit in range(0, numCredits):
         defaultProbs[iCredit] = 1.0 - survivalProbabilities[iCredit]
 
-    lossDbn = lossDbnRecursionGCD(numCredits,
-                                  defaultProbs,
-                                  lossUnits,
-                                  betaVector,
-                                  numIntegrationSteps)
+    lossDbn = lossDbnRecursionGCD(
+        numCredits, defaultProbs, lossUnits, betaVector, numIntegrationSteps
+    )
 
     trancheEL = 0.0
     for iLossUnit in range(0, int(numLossUnits)):
@@ -198,6 +199,7 @@ def trSurvProbRecursion(k1,
     q = 1.0 - trancheEL / (k2 - k1)
     return q
 
+
 ###############################################################################
 
 
@@ -207,36 +209,42 @@ def gaussApproxTrancheLoss(k1, k2, mu, sigma):
     if abs(sigma) < 1e-6:
         gaussApproxTrancheLoss = 0.0
         if mu > k1:
-            gaussApproxTrancheLoss += (mu - k1)
+            gaussApproxTrancheLoss += mu - k1
 
         if mu > k2:
-            gaussApproxTrancheLoss += (mu - k2)
+            gaussApproxTrancheLoss += mu - k2
     else:
         d1 = (mu - k1) / sigma
         d2 = (mu - k2) / sigma
 
         gaussApproxTrancheLoss = (mu - k1) * N(d1) - (mu - k2) * N(d2)
-        + sigma * np.exp(-0.5 * d1 * d1) * INVROOT2PI
-        - sigma * np.exp(-0.5 * d2 * d2) * INVROOT2PI
+        +sigma * np.exp(-0.5 * d1 * d1) * INVROOT2PI
+        -sigma * np.exp(-0.5 * d2 * d2) * INVROOT2PI
 
     return gaussApproxTrancheLoss
+
 
 ###############################################################################
 
 
-@njit(float64(float64, float64, int64, float64[:], float64[:], float64[:],
-              int64), fastmath=True, cache=True)
-def trSurvProbGaussian(k1,
-                       k2,
-                       numCredits,
-                       survivalProbabilities,
-                       recoveryRates,
-                       betaVector,
-                       numIntegrationSteps):
-    ''' Get the approximated tranche survival probability of a portfolio
+@njit(
+    float64(float64, float64, int64, float64[:], float64[:], float64[:], int64),
+    fastmath=True,
+    cache=True,
+)
+def trSurvProbGaussian(
+    k1,
+    k2,
+    numCredits,
+    survivalProbabilities,
+    recoveryRates,
+    betaVector,
+    numIntegrationSteps,
+):
+    """Get the approximated tranche survival probability of a portfolio
     of credits in the one-factor GC model using a Gaussian fit of the
     conditional loss distribution and survival probabilities to some time
-    horizon. Note that the losses in this fit are allowed to be negative. '''
+    horizon. Note that the losses in this fit are allowed to be negative."""
 
     if k1 == 0.0 and k2 == 0.0:
         return 0.0
@@ -272,11 +280,11 @@ def trSurvProbGaussian(k1,
             argz = (thresholds[iCredit] - beta * z) / denom
             condprob = N(argz)
             mu += condprob * losses[iCredit]
-            var += (losses[iCredit]**2) * condprob * (1.0 - condprob)
+            var += (losses[iCredit] ** 2) * condprob * (1.0 - condprob)
 
         sigma = np.sqrt(var)
         el = gaussApproxTrancheLoss(k1, k2, mu, sigma)
-        gaussWt = np.exp(-(z**2) / 2.0)
+        gaussWt = np.exp(-(z ** 2) / 2.0)
 
         v += el * gaussWt
         z += dz
@@ -285,17 +293,20 @@ def trSurvProbGaussian(k1,
     q = 1.0 - v / (k2 - k1)
     return q
 
+
 ###############################################################################
 
-@njit(float64[:](int64, float64[:], float64[:], float64[:], int64),
-      fastmath=True, cache=True)
-def lossDbnHeterogeneousAdjBinomial(numCredits,
-                                    defaultProbs,
-                                    lossRatio,
-                                    betaVector,
-                                    numIntegrationSteps):
-    ''' Get the portfolio loss distribution using the adjusted binomial
-    approximation to the conditional loss distribution. '''
+
+@njit(
+    float64[:](int64, float64[:], float64[:], float64[:], int64),
+    fastmath=True,
+    cache=True,
+)
+def lossDbnHeterogeneousAdjBinomial(
+    numCredits, defaultProbs, lossRatio, betaVector, numIntegrationSteps
+):
+    """Get the portfolio loss distribution using the adjusted binomial
+    approximation to the conditional loss distribution."""
 
     numLossUnits = numCredits + 1
     condDefaultProbs = np.zeros(numCredits)
@@ -317,11 +328,11 @@ def lossDbnHeterogeneousAdjBinomial(numCredits,
             argz = (thresholds[iCredit] - beta * z) / denom
             condDefaultProbs[iCredit] = N(argz)
 
-        indepDbn = indepLossDbnHeterogeneousAdjBinomial(numCredits,
-                                                        condDefaultProbs,
-                                                        lossRatio)
+        indepDbn = indepLossDbnHeterogeneousAdjBinomial(
+            numCredits, condDefaultProbs, lossRatio
+        )
 
-        gaussWt = np.exp(-(z**2) / 2.0)
+        gaussWt = np.exp(-(z ** 2) / 2.0)
 
         for iLossUnit in range(0, numLossUnits):
             uncondLossDbn[iLossUnit] += indepDbn[iLossUnit] * gaussWt
@@ -333,22 +344,28 @@ def lossDbnHeterogeneousAdjBinomial(numCredits,
 
     return uncondLossDbn
 
+
 ###############################################################################
 
 
-@njit(float64(float64, float64, int64, float64[:], float64[:], float64[:],
-              int64), fastmath=True, cache=True)
-def trSurvProbAdjBinomial(k1,
-                          k2,
-                          numCredits,
-                          survivalProbabilities,
-                          recoveryRates,
-                          betaVector,
-                          numIntegrationSteps):
-    ''' Get the approximated tranche survival probability of a portfolio of
+@njit(
+    float64(float64, float64, int64, float64[:], float64[:], float64[:], int64),
+    fastmath=True,
+    cache=True,
+)
+def trSurvProbAdjBinomial(
+    k1,
+    k2,
+    numCredits,
+    survivalProbabilities,
+    recoveryRates,
+    betaVector,
+    numIntegrationSteps,
+):
+    """Get the approximated tranche survival probability of a portfolio of
     credits in the one-factor GC model using the adjusted binomial fit of the
     conditional loss distribution and survival probabilities to some time
-    horizon. This approach is both fast and highly accurate. '''
+    horizon. This approach is both fast and highly accurate."""
 
     if k1 == 0.0 and k2 == 0.0:
         return 0.0
@@ -362,21 +379,18 @@ def trSurvProbAdjBinomial(k1,
 
     totalLoss = 0.0
     for iCredit in range(0, numCredits):
-        totalLoss += (1.0 - recoveryRates[iCredit])
+        totalLoss += 1.0 - recoveryRates[iCredit]
     totalLoss /= numCredits
 
     avgLoss = totalLoss / numCredits
 
     lossRatio = np.zeros(numCredits)
     for iCredit in range(0, numCredits):
-        lossRatio[iCredit] = (
-            1.0 - recoveryRates[iCredit]) / numCredits / avgLoss
+        lossRatio[iCredit] = (1.0 - recoveryRates[iCredit]) / numCredits / avgLoss
 
-    lossDbn = lossDbnHeterogeneousAdjBinomial(numCredits,
-                                              defaultProbs,
-                                              lossRatio,
-                                              betaVector,
-                                              numIntegrationSteps)
+    lossDbn = lossDbnHeterogeneousAdjBinomial(
+        numCredits, defaultProbs, lossRatio, betaVector, numIntegrationSteps
+    )
     trancheEL = 0.0
     numLossUnits = numCredits + 1
     for iLossUnit in range(0, numLossUnits):
@@ -386,5 +400,6 @@ def trSurvProbAdjBinomial(k1,
 
     q = 1.0 - trancheEL / (k2 - k1)
     return q
+
 
 ###############################################################################

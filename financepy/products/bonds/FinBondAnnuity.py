@@ -17,20 +17,22 @@ from ...market.curves.FinDiscountCurve import FinDiscountCurve
 
 
 class FinBondAnnuity(object):
-    ''' An annuity is a vector of dates and flows generated according to ISDA
+    """An annuity is a vector of dates and flows generated according to ISDA
     standard rules which starts on the next date after the start date
     (effective date) and runs up to an end date with no principal repayment.
-    Dates are then adjusted according to a specified calendar. '''
+    Dates are then adjusted according to a specified calendar."""
 
-    def __init__(self,
-                 maturityDate: FinDate,
-                 coupon: float,
-                 freqType: FinFrequencyTypes,
-                 calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
-                 busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
-                 dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
-                 dayCountConventionType: FinDayCountTypes = FinDayCountTypes.ACT_360,
-                 face: float = 100.0):
+    def __init__(
+        self,
+        maturityDate: FinDate,
+        coupon: float,
+        freqType: FinFrequencyTypes,
+        calendarType: FinCalendarTypes = FinCalendarTypes.WEEKEND,
+        busDayAdjustType: FinBusDayAdjustTypes = FinBusDayAdjustTypes.FOLLOWING,
+        dateGenRuleType: FinDateGenRuleTypes = FinDateGenRuleTypes.BACKWARD,
+        dayCountConventionType: FinDayCountTypes = FinDayCountTypes.ACT_360,
+        face: float = 100.0,
+    ):
 
         checkArgumentTypes(self.__init__, locals())
 
@@ -54,27 +56,26 @@ class FinBondAnnuity(object):
         self._accruedDays = 0.0
         self._alpha = 0.0
 
-###############################################################################
+    ###############################################################################
 
-    def cleanPriceFromDiscountCurve(self,
-                                    settlementDate: FinDate,
-                                    discountCurve: FinDiscountCurve):
-        ''' Calculate the bond price using some discount curve to present-value
-        the bond's cashflows. '''
+    def cleanPriceFromDiscountCurve(
+        self, settlementDate: FinDate, discountCurve: FinDiscountCurve
+    ):
+        """Calculate the bond price using some discount curve to present-value
+        the bond's cashflows."""
 
-        fullPrice = self.fullPriceFromDiscountCurve(settlementDate,
-                                                    discountCurve)
+        fullPrice = self.fullPriceFromDiscountCurve(settlementDate, discountCurve)
         accrued = self._accruedInterest * self._par / self._face
         cleanPrice = fullPrice - accrued
         return cleanPrice
 
-###############################################################################
+    ###############################################################################
 
-    def fullPriceFromDiscountCurve(self,
-                                   settlementDate: FinDate,
-                                   discountCurve: FinDiscountCurve):
-        ''' Calculate the bond price using some discount curve to present-value
-        the bond's cashflows. '''
+    def fullPriceFromDiscountCurve(
+        self, settlementDate: FinDate, discountCurve: FinDiscountCurve
+    ):
+        """Calculate the bond price using some discount curve to present-value
+        the bond's cashflows."""
 
         self.calculateFlowDatesPayments(settlementDate)
         pv = 0.0
@@ -89,10 +90,9 @@ class FinBondAnnuity(object):
 
         return pv * self._par / self._face
 
-###############################################################################
+    ###############################################################################
 
-    def calculateFlowDatesPayments(self,
-                                   settlementDate: FinDate):
+    def calculateFlowDatesPayments(self, settlementDate: FinDate):
 
         # No need to generate flows if settlement date has not changed
         if settlementDate == self._settlementDate:
@@ -106,12 +106,14 @@ class FinBondAnnuity(object):
         busDayRuleType = FinBusDayAdjustTypes.NONE
         dateGenRuleType = FinDateGenRuleTypes.BACKWARD
 
-        self._flowDates = FinSchedule(settlementDate,
-                                      self._maturityDate,
-                                      self._freqType,
-                                      calendarType,
-                                      busDayRuleType,
-                                      dateGenRuleType)._generate()
+        self._flowDates = FinSchedule(
+            settlementDate,
+            self._maturityDate,
+            self._freqType,
+            calendarType,
+            busDayRuleType,
+            dateGenRuleType,
+        )._generate()
 
         self._pcd = self._flowDates[0]
         self._ncd = self._flowDates[1]
@@ -128,12 +130,11 @@ class FinBondAnnuity(object):
             self._flowAmounts.append(flow)
             prevDt = nextDt
 
-###############################################################################
+    ###############################################################################
 
-    def calcAccruedInterest(self,
-                            settlementDate: FinDate):
-        ''' Calculate the amount of coupon that has accrued between the
-        previous coupon date and the settlement date. '''
+    def calcAccruedInterest(self, settlementDate: FinDate):
+        """Calculate the amount of coupon that has accrued between the
+        previous coupon date and the settlement date."""
 
         if settlementDate != self._settlementDate:
             self.calculateFlowDatesPayments(settlementDate)
@@ -143,10 +144,9 @@ class FinBondAnnuity(object):
 
         dc = FinDayCount(self._dayCountConventionType)
 
-        (accFactor, num, _) = dc.yearFrac(self._pcd,
-                                          settlementDate,
-                                          self._ncd, 
-                                          self._frequency)
+        (accFactor, num, _) = dc.yearFrac(
+            self._pcd, settlementDate, self._ncd, self._frequency
+        )
 
         self._alpha = 1.0 - accFactor * self._frequency
 
@@ -154,12 +154,11 @@ class FinBondAnnuity(object):
         self._accruedDays = num
         return self._accruedInterest
 
-###############################################################################
+    ###############################################################################
 
-    def printFlows(self,
-                   settlementDate: FinDate):
-        ''' Print a list of the unadjusted coupon payment dates used in
-        analytic calculations for the bond. '''
+    def printFlows(self, settlementDate: FinDate):
+        """Print a list of the unadjusted coupon payment dates used in
+        analytic calculations for the bond."""
 
         self.calculateFlowDatesPayments(settlementDate)
 
@@ -169,11 +168,11 @@ class FinBondAnnuity(object):
             flow = self._flowAmounts[i]
             print(dt, ",", flow)
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Print a list of the unadjusted coupon payment dates used in
-        analytic calculations for the bond. '''
+        """Print a list of the unadjusted coupon payment dates used in
+        analytic calculations for the bond."""
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("MATURITY DATE", self._maturityDate)
@@ -184,10 +183,10 @@ class FinBondAnnuity(object):
 
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
 
 

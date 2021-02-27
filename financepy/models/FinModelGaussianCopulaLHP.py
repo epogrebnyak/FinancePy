@@ -15,16 +15,11 @@ from ..finutils.FinError import FinError
 
 
 @njit(fastmath=True, cache=True)
-def trSurvProbLHP(k1,
-                  k2,
-                  numCredits,
-                  survivalProbabilities,
-                  recoveryRates,
-                  beta):
-    ''' Get the approximated tranche survival probability of a portfolio of
+def trSurvProbLHP(k1, k2, numCredits, survivalProbabilities, recoveryRates, beta):
+    """Get the approximated tranche survival probability of a portfolio of
     credits in the one-factor GC model using the large portfolio limit which
     assumes a homogenous portfolio with an infinite number of credits. This
-    approach is very fast but not so as accurate as the adjusted binomial. '''
+    approach is very fast but not so as accurate as the adjusted binomial."""
 
     if k1 == 0.0 and k2 == 0.0:
         return 0.0
@@ -35,7 +30,7 @@ def trSurvProbLHP(k1,
     p = 0.0
     portfolioEL = 0.0
     for iCredit in range(0, numCredits):
-        pd = (1.0 - survivalProbabilities[iCredit])
+        pd = 1.0 - survivalProbabilities[iCredit]
         p += pd
         portfolioEL += pd * (1.0 - recoveryRates[iCredit])
 
@@ -51,6 +46,7 @@ def trSurvProbLHP(k1,
     value = 1.0 - (elk2 - elk1) / (k2 - k1)
     return value
 
+
 ###############################################################################
 
 
@@ -61,7 +57,7 @@ def portfolioCDF_LHP(k, numCredits, qvector, recoveryRates, beta, numPoints):
     portfolioEL = 0.0
 
     for j in range(0, numCredits):
-        p += (1.0 - qvector[j])
+        p += 1.0 - qvector[j]
         portfolioEL += (1.0 - recoveryRates[j]) * (1 - qvector[j])
 
     p = p / numCredits
@@ -85,6 +81,7 @@ def portfolioCDF_LHP(k, numCredits, qvector, recoveryRates, beta, numPoints):
     arga = k / (1.0 - recovery)
     a = 1.0 / beta * (c - np.sqrt(1.0 - beta * beta) * norminvcdf(arga))
     return N(-a)
+
 
 ###############################################################################
 
@@ -113,6 +110,7 @@ def expMinLK(k, p, r, n, beta):
     a = 1.0 / beta * (c - np.sqrt(1.0 - beta * beta) * norminvcdf(arga))
     el1 = (1.0 - r) * M(c, -a, -beta) + k * N(a)
     return el1
+
 
 ###############################################################################
 
@@ -148,6 +146,7 @@ def LHPDensity(k, p, r, beta):
 
     return rho
 
+
 ###############################################################################
 
 
@@ -172,14 +171,18 @@ def LHPAnalyticalDensityBaseCorr(k, p, r, beta, dbeta_dk):
     a = 1.0 / beta * (c - root1minusBetaSqd * norminvcdf(arga))
 
     da_dk = -c / beta / beta * dbeta_dk
-    da_dk = da_dk + (1.0 / root1minusBetaSqd + root1minusBetaSqd /
-                     beta / beta) * dbeta_dk * norminvcdf(arga)
-    da_dk = da_dk - np.sqrt(1.0 - beta * beta) / beta / \
-        normpdf(norminvcdf(k / (1.0 - r))) / (1.0 - r)
+    da_dk = da_dk + (
+        1.0 / root1minusBetaSqd + root1minusBetaSqd / beta / beta
+    ) * dbeta_dk * norminvcdf(arga)
+    da_dk = da_dk - np.sqrt(1.0 - beta * beta) / beta / normpdf(
+        norminvcdf(k / (1.0 - r))
+    ) / (1.0 - r)
 
     rho = -normpdf(a) * da_dk
 
     return rho
+
+
 ###############################################################################
 
 
@@ -201,11 +204,16 @@ def LHPAnalyticalDensity(k, p, r, beta):
     c = norminvcdf(p)
     arga = k / (1.0 - r)
     a = 1.0 / beta * (c - np.sqrt(1.0 - beta * beta) * norminvcdf(arga))
-    da_dk = -np.sqrt(1.0 - beta * beta) / beta / \
-        normpdf(norminvcdf(k / (1.0 - r))) / (1.0 - r)
+    da_dk = (
+        -np.sqrt(1.0 - beta * beta)
+        / beta
+        / normpdf(norminvcdf(k / (1.0 - r)))
+        / (1.0 - r)
+    )
     rho = -normpdf(a) * da_dk
 
     return rho
+
 
 ###############################################################################
 
@@ -236,6 +244,7 @@ def ExpMinLK(k, p, r, n, beta):
 
     return el
 
+
 ###############################################################################
 
 
@@ -246,5 +255,6 @@ def probLGreaterThanK(K, P, R, beta):
     a = (1.0 / beta) * (c - np.sqrt(1.0 - beta * beta) * normpdf(arga))
     prob = 1.0 - N(a)
     return prob
+
 
 ###############################################################################

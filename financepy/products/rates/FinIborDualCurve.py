@@ -25,7 +25,7 @@ swaptol = 1e-10
 
 
 def _f(df, *args):
-    ''' Root search objective function for swaps '''
+    """ Root search objective function for swaps """
     discountCurve = args[0]
     indexCurve = args[1]
     valueDate = args[2]
@@ -34,19 +34,20 @@ def _f(df, *args):
     numPoints = len(indexCurve._times)
     indexCurve._dfs[numPoints - 1] = df
 
-    # For curves that need a fit function, we fit it now 
-    indexCurve._interpolator.fit(indexCurve._times, indexCurve._dfs)     
+    # For curves that need a fit function, we fit it now
+    indexCurve._interpolator.fit(indexCurve._times, indexCurve._dfs)
     v_swap = swap.value(valueDate, discountCurve, indexCurve, None)
 
     notional = swap._fixedLeg._notional
     v_swap /= notional
     return v_swap
 
+
 ###############################################################################
 
 
 def _g(df, *args):
-    ''' Root search objective function for swaps '''
+    """ Root search objective function for swaps """
 
     discountCurve = args[0]
     curve = args[1]
@@ -55,31 +56,34 @@ def _g(df, *args):
     numPoints = len(curve._times)
     curve._dfs[numPoints - 1] = df
 
-    # For curves that need a fit function, we fit it now 
-    curve._interpolator.fit(curve._times, curve._dfs)     
+    # For curves that need a fit function, we fit it now
+    curve._interpolator.fit(curve._times, curve._dfs)
     v_fra = fra.value(valueDate, discountCurve, curve)
     v_fra /= fra._notional
     return v_fra
+
 
 ###############################################################################
 
 
 class FinIborDualCurve(FinDiscountCurve):
-    ''' Constructs an index curve as implied by the prices of Ibor
+    """Constructs an index curve as implied by the prices of Ibor
     deposits, FRAs and IRS. Discounting is assumed to be at a discount rate
-    that is an input and usually derived from OIS rates. '''
+    that is an input and usually derived from OIS rates."""
 
-###############################################################################
+    ###############################################################################
 
-    def __init__(self,
-                 valuationDate: FinDate,
-                 discountCurve: FinDiscountCurve,
-                 iborDeposits: list,
-                 iborFRAs: list,
-                 iborSwaps: list,
-                 interpType: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES,
-                 checkRefit: bool = False):  # Set to True to test it works
-        ''' Create an instance of a FinIbor curve given a valuation date and
+    def __init__(
+        self,
+        valuationDate: FinDate,
+        discountCurve: FinDiscountCurve,
+        iborDeposits: list,
+        iborFRAs: list,
+        iborSwaps: list,
+        interpType: FinInterpTypes = FinInterpTypes.FLAT_FWD_RATES,
+        checkRefit: bool = False,
+    ):  # Set to True to test it works
+        """Create an instance of a FinIbor curve given a valuation date and
         a set of ibor deposits, ibor FRAs and iborSwaps. Some of these may
         be left None and the algorithm will just use what is provided. An
         interpolation method has also to be provided. The default is to use a
@@ -87,7 +91,7 @@ class FinIborDualCurve(FinDiscountCurve):
         flat forwards between these coupon dates.
 
         The curve will assign a discount factor of 1.0 to the valuation date.
-        '''
+        """
 
         checkArgumentTypes(getattr(self, _funcName(), None), locals())
 
@@ -98,20 +102,17 @@ class FinIborDualCurve(FinDiscountCurve):
         self._checkRefit = checkRefit
         self._buildCurve()
 
-###############################################################################
+    ###############################################################################
 
     def _buildCurve(self):
-        ''' Build curve based on interpolation. '''
+        """ Build curve based on interpolation. """
 
         self._buildCurveUsing1DSolver()
 
-###############################################################################
+    ###############################################################################
 
-    def _validateInputs(self,
-                        iborDeposits,
-                        iborFRAs,
-                        iborSwaps):
-        ''' Validate the inputs for each of the Ibor products. '''
+    def _validateInputs(self, iborDeposits, iborFRAs, iborSwaps):
+        """ Validate the inputs for each of the Ibor products. """
 
         numDepos = len(iborDeposits)
         numFRAs = len(iborFRAs)
@@ -157,7 +158,7 @@ class FinIborDualCurve(FinDiscountCurve):
                     raise FinError("Deposits must be in increasing maturity")
                 prevDt = nextDt
 
-        # REMOVED THIS AS WE WANT TO ANCHOR CURVE AT VALUATION DATE 
+        # REMOVED THIS AS WE WANT TO ANCHOR CURVE AT VALUATION DATE
         # USE A SYNTHETIC DEPOSIT TO BRIDGE GAP FROM VALUE DATE TO SETTLEMENT DATE
         # Ensure that valuation date is on or after first deposit start date
         # if numDepos > 1:
@@ -254,7 +255,7 @@ class FinIborDualCurve(FinDiscountCurve):
 
         # If both depos and swaps start after T, we need a rate to get them to
         # the first deposit. So we create a synthetic deposit rate contract.
-        
+
         if swapStartDate > self._valuationDate:
 
             if numDepos == 0:
@@ -276,13 +277,13 @@ class FinIborDualCurve(FinDiscountCurve):
         self._usedSwaps = iborSwaps
         self._dayCountType = None
 
-###############################################################################
+    ###############################################################################
 
     def _buildCurveUsing1DSolver(self):
-        ''' Construct the discount curve using a bootstrap approach. This is
+        """Construct the discount curve using a bootstrap approach. This is
         the non-linear slower method that allows the user to choose a number
         of interpolation approaches between the swap rates and other rates. It
-        involves the use of a solver. '''
+        involves the use of a solver."""
 
         self._interpolator = FinInterpolator(self._interpType)
 
@@ -324,9 +325,15 @@ class FinIborDualCurve(FinDiscountCurve):
                 self._times = np.append(self._times, tmat)
                 self._dfs = np.append(self._dfs, dfMat)
                 argtuple = (self._discountCurve, self, self._valuationDate, fra)
-                dfMat = optimize.newton(_g, x0=dfMat, fprime=None,
-                                        args=argtuple, tol=swaptol,
-                                        maxiter=50, fprime2=None)
+                dfMat = optimize.newton(
+                    _g,
+                    x0=dfMat,
+                    fprime=None,
+                    args=argtuple,
+                    tol=swaptol,
+                    maxiter=50,
+                    fprime2=None,
+                )
 
         for swap in self._usedSwaps:
             # I use the lastPaymentDate in case a date has been adjusted fwd
@@ -339,14 +346,21 @@ class FinIborDualCurve(FinDiscountCurve):
 
             argtuple = (self._discountCurve, self, self._valuationDate, swap)
 
-            dfMat = optimize.newton(_f, x0=dfMat, fprime=None, args=argtuple,
-                                    tol=swaptol, maxiter=50, fprime2=None,
-                                    full_output=False)
+            dfMat = optimize.newton(
+                _f,
+                x0=dfMat,
+                fprime=None,
+                args=argtuple,
+                tol=swaptol,
+                maxiter=50,
+                fprime2=None,
+                full_output=False,
+            )
 
         if self._checkRefit is True:
             self._checkRefits(1e-10, swaptol, 1e-5)
 
-###############################################################################
+    ###############################################################################
 
     # def _buildCurveLinearSwapRateInterpolation(self):
     #     ''' Construct the discount curve using a bootstrap approach. This is
@@ -489,10 +503,10 @@ class FinIborDualCurve(FinDiscountCurve):
     #     if self._checkRefit is True:
     #         self._checkRefits(1e-10, swaptol, 1e-5)
 
-###############################################################################
+    ###############################################################################
 
     def _checkRefits(self, depoTol, fraTol, swapTol):
-        ''' Ensure that the Ibor curve refits the calibration instruments. '''
+        """ Ensure that the Ibor curve refits the calibration instruments. """
         for depo in self._usedDeposits:
             v = depo.value(self._valuationDate, self) / depo._notional
             if abs(v - 1.0) > depoTol:
@@ -500,28 +514,33 @@ class FinIborDualCurve(FinDiscountCurve):
                 raise FinError("Deposit not repriced.")
 
         for fra in self._usedFRAs:
-            v = fra.value(self._valuationDate, 
-                          self._discountCurve, self) / fra._notional
+            v = (
+                fra.value(self._valuationDate, self._discountCurve, self)
+                / fra._notional
+            )
             if abs(v) > fraTol:
                 print("Value", v)
                 raise FinError("FRA not repriced.")
 
         for swap in self._usedSwaps:
             # We value it as of the start date of the swap
-            v = swap.value(swap._effectiveDate, self._discountCurve, 
-                           self, None)
+            v = swap.value(swap._effectiveDate, self._discountCurve, self, None)
             v = v / swap._fixedLeg._notional
             if abs(v) > swapTol:
-                print("Swap with maturity " + str(swap._maturityDate)
-                      + " Not Repriced. Has Value", v)
+                print(
+                    "Swap with maturity "
+                    + str(swap._maturityDate)
+                    + " Not Repriced. Has Value",
+                    v,
+                )
                 swap.printFixedLegPV()
                 swap.printFloatLegPV()
                 raise FinError("Swap not repriced.")
 
-###############################################################################
+    ###############################################################################
 
     def __repr__(self):
-        ''' Print out the details of the Ibor curve. '''
+        """ Print out the details of the Ibor curve. """
 
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("VALUATION DATE", self._valuationDate)
@@ -544,14 +563,14 @@ class FinIborDualCurve(FinDiscountCurve):
         s += labelToString("GRID TIMES", "GRID DFS")
 
         for i in range(0, numPoints):
-            s += labelToString("% 10.6f" % self._times[i],
-                               "%12.10f" % self._dfs[i])
+            s += labelToString("% 10.6f" % self._times[i], "%12.10f" % self._dfs[i])
         return s
 
-###############################################################################
+    ###############################################################################
 
     def _print(self):
-        ''' Simple print function for backward compatibility. '''
+        """ Simple print function for backward compatibility. """
         print(self)
+
 
 ###############################################################################
