@@ -71,8 +71,8 @@ from dataclasses import dataclass
 from financepy.models.FinModelBlackScholesAnalytical import black_scholes_call
 
 
-def time_to_expiry(valuation_date: FinDate, expiry_date: FinDate):
-    return (expiry_date - valuation_date) / gDaysInYear
+def years_between(start: FinDate, end: FinDate):
+    return (end - start) / gDaysInYear
 
 
 @dataclass
@@ -81,7 +81,7 @@ class EuropeanCall:
     strike_price: float
 
     def time_to_expiry(self, valuation_date: FinDate) -> float:
-        return time_to_expiry(valuation_date, self.expiry_date)
+        return years_between(start=valuation_date, end=self.expiry_date)
 
     def intrinsic_value(
         self,
