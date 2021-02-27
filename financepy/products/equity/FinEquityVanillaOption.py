@@ -36,7 +36,6 @@ from ...models.FinModelBlackScholesMC import _valueMC_NUMBA_PARALLEL
 
 from ...finutils.FinMath import N
 
-###############################################################################
 
 @njit(fastmath=True, cache=True)
 def _f(v, args):
@@ -53,8 +52,6 @@ def _f(v, args):
     objFn = objFn - price
     return objFn
 
-###############################################################################
-
 
 def _fvega(v, *args):
 
@@ -68,7 +65,38 @@ def _fvega(v, *args):
     fprime = bsVega(s0, texp, k, r, q, v, self._optionType.value)
     return fprime
 
-###############################################################################
+from dataclasses import dataclass
+
+from financepy.models.FinModelBlackScholesAnalytical import black_scholes_call
+
+def time_to_expiry(valuation_date: FinDate, expiry_date: FinDate):
+    return (expiry_date - valuation_date) / gDaysInYear
+
+
+@dataclass
+class EuropeanCall:
+    expiry_date: FinDate
+    strike_price: float
+
+    def time_to_expiry(self, valuation_date: FinDate) -> float:
+        return time_to_expiry(valuation_date, self.expiry_date)
+
+    def intrinsic_value(self,
+        valuation_date: FinDate,
+        stock_price: float,
+        discount_curve: FinDiscountCurve,
+        dividend_curve: FinDiscountCurve) -> float:
+        """Equity Vanilla Option valuation using Black-Scholes model."""
+        t = protect(self.time_to_expiry(valuation_date))
+        df = discount_curve.df(self.expiry_date)
+        r = -np.log(df)/t
+        dq = dividend_curve.df(self.expiry_date)
+        q = -np.log(dq)/t
+        return black_scholes_call(s=stock_price, 
+        t=t, 
+        k=self.strike_price, 
+        r=r,
+        q=q)
 
 
 class FinEquityVanillaOption():
@@ -76,6 +104,9 @@ class FinEquityVanillaOption():
     For American calls and puts see the FinEquityAmericanOption class. '''
 
     def __init__(self,
+                 # EP: these type signatures not correct - they indicate a arg shoud be a type
+                 #     can use Optional from typing module
+                 #     or there is a reason for tuple? numba? 
                  expiryDate: (FinDate, list),
                  strikePrice: (float, np.ndarray),
                  optionType: (FinOptionTypes, list),
@@ -83,19 +114,21 @@ class FinEquityVanillaOption():
         ''' Create the Equity Vanilla option object by specifying the expiry
         date, the option strike, the option type and the number of options. '''
 
+        # EP: looks tricky - what is it?
         checkArgumentTypes(self.__init__, locals())
 
+        # EP: this is very antipattern, can use just use two different classes instead
         if optionType != FinOptionTypes.EUROPEAN_CALL and \
            optionType != FinOptionTypes.EUROPEAN_PUT:
             raise FinError("Unknown Option Type" + str(optionType))
 
+        # if using a dataclass, 
         self._expiryDate = expiryDate
         self._strikePrice = strikePrice
-        self._optionType = optionType
-        self._numOptions = numOptions
+        self._optionType = optionType # this goes away if using two classes
+        self._numOptions = numOptions # do we have to value many options?  
+        # EP: what is texp?
         self._texp = None
-
-###############################################################################
 
     def intrinsic(self,
                   valueDate: (FinDate, list),
@@ -128,7 +161,6 @@ class FinEquityVanillaOption():
         intrinsicValue = intrinsicValue * self._numOptions
         return intrinsicValue
 
-###############################################################################
 
     def value(self,
               valueDate: (FinDate, list),
@@ -174,7 +206,6 @@ class FinEquityVanillaOption():
         value = value * self._numOptions
         return value
 
-###############################################################################
 
     def delta(self,
               valueDate: FinDate,
@@ -184,6 +215,7 @@ class FinEquityVanillaOption():
               model):
         ''' Calculate the analytical delta of a European vanilla option. '''
 
+        # EP: this repeats itself 7 times in code, need to do something about it 
         if type(valueDate) == FinDate:
             texp = (self._expiryDate - valueDate) / gDaysInYear
         else:
@@ -218,7 +250,6 @@ class FinEquityVanillaOption():
 
         return delta
 
-###############################################################################
 
     def gamma(self,
               valueDate: FinDate,
@@ -261,8 +292,6 @@ class FinEquityVanillaOption():
 
         return gamma
 
-###############################################################################
-
     def vega(self,
              valueDate: FinDate,
              stockPrice: float,
@@ -302,8 +331,6 @@ class FinEquityVanillaOption():
             raise FinError("Unknown Model Type")
 
         return vega
-
-###############################################################################
 
     def theta(self,
               valueDate: FinDate,
@@ -345,8 +372,6 @@ class FinEquityVanillaOption():
 
         return theta
 
-###############################################################################
-
     def rho(self,
             valueDate: FinDate,
             stockPrice: float,
@@ -387,7 +412,6 @@ class FinEquityVanillaOption():
 
         return rho
 
-###############################################################################
 
     def impliedVolatility(self,
                           valueDate: FinDate,
@@ -418,7 +442,6 @@ class FinEquityVanillaOption():
         
         return sigma
 
-###############################################################################
 
     def valueMC_NUMPY_ONLY(self,
                            valueDate: FinDate,
@@ -453,8 +476,6 @@ class FinEquityVanillaOption():
 
         return v
 
-###############################################################################
-
     def valueMC_NUMBA_ONLY(self,
                            valueDate: FinDate,
                            stockPrice: float,
@@ -487,8 +508,6 @@ class FinEquityVanillaOption():
                            useSobol)
 
         return v
-
-###############################################################################
 
     def valueMC_NUMBA_PARALLEL(self,
                            valueDate: FinDate,
@@ -525,7 +544,6 @@ class FinEquityVanillaOption():
 
         return v
 
-###############################################################################
 
     def valueMC_NUMPY_NUMBA(self,
                       valueDate: FinDate,
@@ -560,7 +578,6 @@ class FinEquityVanillaOption():
 
         return v
 
-###############################################################################
 
     def valueMC_NONUMBA_NONUMPY(self,
                       valueDate: FinDate,
@@ -595,7 +612,6 @@ class FinEquityVanillaOption():
 
         return v
 
-###############################################################################
 
     def valueMC(self,
                 valueDate: FinDate,
@@ -632,8 +648,7 @@ class FinEquityVanillaOption():
 
         return v
 
-###############################################################################
-
+    # EP: this can be avoided with dataclass
     def __repr__(self):
         s = labelToString("OBJECT TYPE", type(self).__name__)
         s += labelToString("EXPIRY DATE", self._expiryDate)
@@ -642,10 +657,7 @@ class FinEquityVanillaOption():
         s += labelToString("NUMBER", self._numOptions, "")
         return s
 
-###############################################################################
-
+    # EP maybe can drop?
     def _print(self):
         ''' Simple print function for backward compatibility. '''
         print(self)
-
-###############################################################################

@@ -16,6 +16,27 @@ from ..finutils.FinSolvers1D import bisection, newton, newton_secant
 # Analytical Black Scholes model implementation and approximations
 ###############################################################################
 
+def protect(x):
+    """Use very small positive number instead of zero."""
+    return np.maximum(x, gSmall)
+
+def black_scholes(s, t, k, r, q, v, phi):
+    k = protect(k)
+    t = protect(t)
+    v = protect(v)
+    vsqrtT = v * np.sqrt(t)
+    ss = s * np.exp(-q*t)
+    kk = k * np.exp(-r*t)
+    d1 = np.log(ss/kk) / vsqrtT + vsqrtT / 2.0
+    d2 = d1 - vsqrtT
+    return phi * ss * NVect(phi*d1) - phi * kk * NVect(phi*d2)    
+ 
+def black_scholes_call(s, t, k, r, q, v):
+    return black_scholes(s, t, k, r, q, v, phi = 1)
+ 
+def black_scholes_put(s, t, k, r, q, v):
+    return black_scholes(s, t, k, r, q, v, phi = -1)
+
 @vectorize([float64(float64, float64, float64, float64, float64, float64, 
                     int64)], fastmath=True, cache=True)
 def bsValue(s, t, k, r, q, v, optionTypeValue):
