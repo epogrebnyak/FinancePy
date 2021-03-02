@@ -3,7 +3,7 @@
 ##############################################################################
 
 import datetime
-from .FinError import FinError
+from financepy.finutils.FinError import FinError
 from numba import njit, boolean, int64
 import numpy as np
 
@@ -144,31 +144,30 @@ def num_days(year: int, month: int) -> int:
         return num_days_in_month(month)
 
 
-def make_datelist(start_year, end_year) -> List[int]:
-    result = []
+def make_datelist(start_year, end_year):
     day_counter = 0
     for year in range(start_year, end_year+1):
         for month in range(1, 12+1):
             max_days = num_days(year, month)
             # actual days in month
             for day in range(1, max_days+1):
-                result.append(day_counter)
+                yield (year, month, day), day_counter
                 day_counter += 1
-            # the tail of days between end of month and 31    
-            for day in range(max_days+1, 31+1):
-                result.append(NONE)
-    return result            
+
+
+
+
 
 DATE_LIST = make_datelist(1900, 2100)                    
-DATE_DICT_CONTINIOUS = (i, x) for i, x in enumerate(DATE_LIST) if x != NONE)
+DATE_DICT_CONTINIOUS = {(i, x) for i, x in enumerate(DATE_LIST) if x != NONE}
 
 
-def next_index(ix, step=+1, datelist):
+def next_index(ix, step, datelist):
     k = ix + step
     if datelist[k] != NONE:
         return k
     else:
-        return next_index(k, step, datelist§)     
+        return next_index(k, step, datelist)     
 
 
 def calculateList():
