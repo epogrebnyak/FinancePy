@@ -109,6 +109,66 @@ def parse_date(dateStr, dateFormat):
 gDateCounterList = None
 gStartYear = 1900
 gEndYear = 2100
+NONE = -999
+
+from typing import List
+# the date maps to global index
+# the global 
+
+def days_from_1900(day, month, year) -> int:
+    ix = date_index_gross(day, month, year)
+    return DATELIST[ix]
+
+def is_leap(year: int) -> bool:
+    return (year % 4 == 0) and (year % 100 != 0) or (year % 400 == 0)
+
+def date_index_gross(day, month, year) -> int:
+    return 31 * 12 * (year-START_YEAR) + (month-1) * 31 + (day-1)
+
+def restore_date(ix: int) -> Tuple[int, int, int]:
+    return 1
+
+def num_days_in_month(month: int) -> int:
+    return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month-1]
+
+def days_in_february(year):
+    if year == 1900 or is_leap(year):
+        return 29 # 1900 considered leap for Excel compatibility
+    else:
+        return 28
+
+def num_days(year: int, month: int) -> int:
+    if month == 2:
+        return num_days_in_february(year)
+    else:
+        return num_days_in_month(month)
+
+
+def make_datelist(start_year, end_year) -> List[int]:
+    result = []
+    day_counter = 0
+    for year in range(start_year, end_year+1):
+        for month in range(1, 12+1):
+            max_days = num_days(year, month)
+            # actual days in month
+            for day in range(1, max_days+1):
+                result.append(day_counter)
+                day_counter += 1
+            # the tail of days between end of month and 31    
+            for day in range(max_days+1, 31+1):
+                result.append(NONE)
+    return result            
+
+DATE_LIST = make_datelist(1900, 2100)                    
+DATE_DICT_CONTINIOUS = (i, x) for i, x in enumerate(DATE_LIST) if x != NONE)
+
+
+def next_index(ix, step=+1, datelist):
+    k = ix + step
+    if datelist[k] != NONE:
+        return k
+    else:
+        return next_index(k, step, datelist§)     
 
 
 def calculateList():
@@ -197,6 +257,52 @@ def weekDay(dayCount):
 
 
 ###############################################################################
+
+START_YEAR = 1900
+END_YEAR = 2100
+
+
+def is_day(x: int) -> bool:
+    return 1 <= x <= 31
+
+def is_month(x: int) -> bool:
+    return 1 <= x <= 12
+
+def is_month(x: int) -> bool:
+    return START_YEAR <= x <= END_YEAR
+
+def validate_year(x: int):
+    if not is_year(x):
+        raise ValueError(f"Year not valid {x}")
+
+def validate_month(x: int):
+    if not is_month(x):
+        raise ValueError(f"Month not valid: {x}")
+    
+def validate_day(x: int):
+    if not is_day(x):
+        raise ValueError(f"Day not valid: {x}")
+
+from dataclasses import dataclass
+
+@dataclass
+class Date:
+    day: int
+    month: int
+    year: int
+    hh: int = 0 
+    mm: int = 0
+    ss: int = 0
+
+    def __post_init__(self):
+        validate_year(self.year) 
+        validate_month(self.month)
+        validate_day(self.day)
+
+    def excel_date(self):
+        return days_from_1900(self.day, self.month, self.year)    
+
+
 
 
 class FinDate:
