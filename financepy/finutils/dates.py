@@ -82,7 +82,9 @@ class Date:
         return week_day(self.to_excel())
 
     def add_days(self, n_days):
-        return Date(*from_excel_date(self.to_excel() + n_days))
+        xl_date = self.to_excel() + n_days
+        year, month, day = from_excel_date(xl_date)
+        return Date(year, month, day)
 
 
 # convert to tests
