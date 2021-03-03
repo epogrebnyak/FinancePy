@@ -55,12 +55,17 @@ def from_excel_date(xl_date: int) -> Tuple[int, int, int]:
     """Convert Excel representation back to (year, month, day)"""
     return REVERSE_DICT[xl_date]
 
-
 # convert to tests
 assert to_excel_date(1900, 1, 5) == 5
 assert to_excel_date(2020, 3, 1) == 43891
 assert from_excel_date(5) == (1900, 1, 5)
 assert from_excel_date(43891) == (2020, 3, 1)
+
+
+def is_allowed_date(year, month, day):
+    return (year, month, day) in EXCEL_INTEGERS_DICT.keys()
+
+assert not is_allowed_date(1812, 1, 1)
 
 
 @dataclass(order=True)
